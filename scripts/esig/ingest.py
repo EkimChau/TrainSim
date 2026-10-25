@@ -196,6 +196,49 @@ def extract_artifacts(conn: sqlite3.Connection, doc_id: str, ch: int,
                               proto.group(2), anchor))
     return count
 
+
+def extract_semantic_catalog(conn: sqlite3.Connection, doc_id: str, ch: int) -> int:
+    """Stage ALL detected protocol definitions and mode/procedure headings as candidates.
+
+    The full raw variable/packet/message clause is retained, including length
+    and conditional-field text, but it is NOT a validated binary schema.
+    """
+    count = 0
+    rows = conn.execute("SELECT id,clause_no,source_text FROM clause WHERE document_id=?",
+                        (doc_id,)).fetchall()
+    for cid,no,body in rows:
+        heading = body.splitlines()[0].strip() if body else ""
+        kind, official, number = None, None, None
+        if ch == 7 and no.startswith("7.5.") and re.fullmatch(r"[A-Z][A-Z0-9_]+",heading):
+            kind, official = "variable",heading
+        elif ch == 7 and no.startswith("7.4."):
+            match = re.search(r"Packet Number\\s+(\\d+)",heading,re.I)
+            if match:
+                kind,number,official = "packet",int(match.group(1)),heading
+        elif ch == 8 and (no.startswith("8.6.") or no.startswith("8.7.")):
+            match = re.search(r"Message\\s+(\\d+)",heading,re.I)
+            if match:
+                kind,number,official = "radio_message",int(match.group(1)),heading
+        if kind:
+            conn.execute(
+                "INSERT OR IGNORE INTO protocol_element(id,document_id,clause_id,element_kind,"
+                "official_name,element_no,raw_definition,review_state) VALUES(?,?,?,?,?,?,?,?)",
+                (f"{cid}:structured",doc_id,cid,kind,official,number,body,"extracted_unverified"))
+            count += 1
+        # Named semantic concepts do not become executable transitions or
+        # procedures until their complete rules and dependencies are reviewed.
+        if ch in (4,5):
+            bits=no.split(".")
+            if len(bits)==3 and ((ch==4 and bits[:2]==["4","4"] and 3<=int(bits[2])<=21)
+                                 or (ch==5 and bits[0]=="5" and int(bits[1])>=4)):
+                term=heading.strip()
+                if term:
+                    conn.execute("INSERT OR IGNORE INTO terminology VALUES(?,?,?,?,?,?,?)",
+                                 (f"{doc_id}:{no}",term,None,
+                                  "etcs_mode" if ch==4 else "etcs_procedure",body[:400],cid,
+                                  "draft"))
+    return count
+
 def ingest(manifest: dict, source_dir: Path, db: Path, report: Path,
            schema: Path, allow_modified: bool = False) -> dict:
     for executable in ("pdftotext","pdfinfo"):
@@ -225,7 +268,7 @@ def ingest(manifest: dict, source_dir: Path, db: Path, report: Path,
     report.parent.mkdir(parents=True,exist_ok=True)
     tmp = tempfile.NamedTemporaryFile(prefix="esig-",suffix=".sqlite",dir=str(db.parent),delete=False)
     tmp.close()
-    totals={"pages":0,"clause_candidates":0,"classification_rows":0,"artifact_candidates":0}
+    totals={"pages":0,"clause_candidates":0,"classification_rows":0,"artifact_candidates":0,"protocol_candidates":0}
     try:
         with sqlite3.connect(tmp.name) as con:
             con.execute("PRAGMA foreign_keys=ON")
@@ -246,6 +289,7 @@ def ingest(manifest: dict, source_dir: Path, db: Path, report: Path,
                 else:
                     totals["classification_rows"] += extract_classification(con,doc,pages,warnings)
                 totals["artifact_candidates"] += extract_artifacts(con,doc,ch,pages)
+                totals["protocol_candidates"] += extract_semantic_catalog(con,doc,ch)
             con.execute("INSERT INTO ingestion_audit(imported_utc,manifest_sha256,page_count,"
                         "clause_candidates,classification_rows,artifact_candidates,warnings_json)"
                         " VALUES(?,?,?,?,?,?,?)",
