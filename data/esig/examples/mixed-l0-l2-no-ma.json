@@ -1,0 +1,82 @@
+{
+  "id": "DEMO-L0-L2-NO-MA",
+  "disclaimer": "Synthetic derived scenario; not an official SUBSET-076 test case and not railway-safe validation",
+  "standards": {
+    "document_issue": "SUBSET-026:4.0.0",
+    "source_clauses": [
+      "5.10.3.2.1",
+      "5.10.3.2.2",
+      "5.10.3.2.3"
+    ],
+    "source_confidence": "interpretation_needs_review"
+  },
+  "ga": {
+    "id": "DEMO-MIXED-L0-L2",
+    "basis": "synthetic",
+    "nodes": [
+      {
+        "id": "A"
+      },
+      {
+        "id": "B"
+      },
+      {
+        "id": "C"
+      }
+    ],
+    "edges": [
+      {
+        "id": "A-B",
+        "from": "A",
+        "to": "B",
+        "distance_m": 1000,
+        "level": "0"
+      },
+      {
+        "id": "B-C",
+        "from": "B",
+        "to": "C",
+        "distance_m": 1500,
+        "level": "2",
+        "rbc_id": "RBC-1"
+      }
+    ],
+    "levelTransitions": [
+      {
+        "node_id": "B",
+        "from_level": "0",
+        "to_level": "2",
+        "announcement_balise_group": "BG-DEMO"
+      }
+    ]
+  },
+  "sa": {
+    "initial": {
+      "train_id": "TRAIN-1",
+      "etcs_level": "0",
+      "etcs_mode": "UN",
+      "rbc_session": "connected",
+      "valid_level_2_ma": false,
+      "level_2_track_description_received": false
+    },
+    "stimuli": [
+      {
+        "at_ms": 0,
+        "type": "approach_level_transition"
+      },
+      {
+        "at_ms": 7500,
+        "type": "cross_level_transition_border",
+        "position": "B"
+      }
+    ],
+    "assertions": [
+      {
+        "source_rule_id": "ESIG-DEMO-L0-L2-ENTRY",
+        "description": "Trip at boundary without required Level 2 MA/track description",
+        "expected_event": "train_trip",
+        "expected_mode": "TR"
+      }
+    ]
+  }
+}
