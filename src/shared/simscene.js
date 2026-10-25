@@ -11,8 +11,9 @@ export function longestSegment(segments){
  * A scene with one train following an ingested OSM route relation.
  * The path is the route's real way-node geometry from the TrainSim database.
  */
-export function createRouteScene(route,{speedMetersPerTick=10,color='#ffd400'}={}){
+export function createRouteScene(route,{speedMetersPerTick=10,color='#ffd400',engine={}}={}){
   const path=longestSegment(route?.segments).map(([lng,lat])=>({lat,lng}));
   if(path.length<2)throw new RangeError('Route has no continuous path in the database');
-  return {id:`route:${route.id}`,trains:[new Train({id:`T-${route.ref||route.id}`,name:route.name||`Route ${route.id}`,path,color,speedMetersPerTick})]};
+  return {id:`route:${route.id}`,trains:[new Train({id:engine.id||`T-${route.ref||route.id}`,name:route.name||`Route ${route.id}`,path,color,
+    speedMetersPerTick,skin:engine.skin??'3a',carriages:engine.carriages??3})]};
 }

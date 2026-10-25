@@ -5,8 +5,10 @@ export function coordinate(point){
 }
 
 export class Train{
-  constructor({id,name,path,speed=0,color,hasCollisionRisk=false,speedMetersPerTick=null}){
-    if(!id||!Array.isArray(path)||path.length<1||!Number.isFinite(speed)||speed<0)throw new TypeError('Invalid train');
-    Object.assign(this,{id,name,path:path.map(coordinate),speed,color,hasCollisionRisk,speedMetersPerTick,segment:0,progress:0,alert:false,position:coordinate(path[0])});
+  constructor({id,name,path,speed=0,color,hasCollisionRisk=false,speedMetersPerTick=null,skin='3a',carriages=3}){
+    if(!id||!Array.isArray(path)||path.length<1||!Number.isFinite(speed)||speed<0||
+      !['3a','3b'].includes(skin)||![3,6].includes(carriages))throw new TypeError('Invalid train');
+    Object.assign(this,{id,name,path:path.map(coordinate),speed,color,hasCollisionRisk,speedMetersPerTick,skin,carriages,
+      segment:0,progress:0,alert:false,position:coordinate(path[0])});
   }
 }

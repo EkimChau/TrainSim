@@ -1,9 +1,11 @@
-import {PathLayer,ScatterplotLayer,TextLayer,PolygonLayer} from '@deck.gl/layers';
+import {IconLayer,PathLayer,ScatterplotLayer,TextLayer,PolygonLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {api,el,fmt,store,toast} from '../api.js';
 import {createBasemap,rasterLayer,SEQ_VIEW} from './basemap.js';
 import {STYLES,STATION_COLOUR,hex,legend,poiColour,signalColour,trackColour,trackDash,trackWidth,SIGNAL_LEGEND} from './styles.js';
 import {Simulation} from './sim.js';
+import {trainFormation} from '../../shared/formation.js';
+import {trainIcon} from './train-icons.js';
 
 const $=id=>document.getElementById(id);
 const dash=new PathStyleExtension({dash:true});
@@ -133,8 +135,9 @@ export class MapView{
       filled:false,stroked:true,getLineColor:[255,0,128],lineWidthUnits:'pixels',getLineWidth:3}));
     const trains=this.sim.trains();
     if(trains.length)layers.push(
-      new ScatterplotLayer({id:'trains',data:trains,getPosition:t=>[t.position.lng,t.position.lat],getRadius:9,radiusUnits:'pixels',
-        getFillColor:[255,212,0],stroked:true,getLineColor:[0,0,0],lineWidthUnits:'pixels',getLineWidth:2,updateTriggers:{getPosition:this.sim.tick}}),
+      new IconLayer({id:'trains',data:trains.flatMap(t=>trainFormation(t,z)),getIcon:t=>trainIcon(t.skin),
+        getPosition:t=>t.position,getAngle:t=>t.angle,getSize:6,sizeUnits:'pixels',sizeScale:1,autoPacking:true,pickable:true,autoHighlight:true,
+        updateTriggers:{getPosition:this.sim.tick,getAngle:this.sim.tick}}),
       new TextLayer({id:'train-labels',data:trains,getPosition:t=>[t.position.lng,t.position.lat],getText:t=>t.id,getSize:11,sizeUnits:'pixels',
         getPixelOffset:[0,-18],fontFamily:FONT,outlineWidth:3,outlineColor:[255,255,255],fontSettings:{sdf:true},updateTriggers:{getPosition:this.sim.tick}}));
     this.map.setLayers(layers);

@@ -106,6 +106,12 @@ test('map API serves the ingested world by viewport and logs as api calls',t=>{
   const routes=map.routes();
   assert.equal(routes.find(r=>r.id===8001).status,'ok');
   assert.equal(map.route(8001).segments.length,1);
+  const engines=map.engines();
+  assert.equal(engines.length,6);
+  assert.ok(engines.every(engine=>engine.carriages===3));
+  assert.deepEqual(engines.map(engine=>engine.skin),['3a','3b','3a','3b','3a','3b']);
+  map.ensureTrainFleet();
+  assert.equal(map.engines().length,6,'fleet migration is safe to run more than once');
   assert.ok(log.list({source:'api'}).length>5);
 });
 

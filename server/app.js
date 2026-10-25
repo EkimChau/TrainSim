@@ -18,6 +18,7 @@ export function createApp(options={}){
   log.seed(path.join(root,'db/trainsim/saved-queries.json'));
   const store=new DbConsole(root,log);
   const map=new MapApi(store,root,options.worldDb);
+  if(map.available())map.ensureTrainFleet();
   const config={mapsApiKey:options.mapsApiKey??process.env.GOOGLE_MAPS_API_KEY??'',mapId:options.mapId??process.env.GOOGLE_MAPS_MAP_ID??''};
 
   const app=express();
@@ -67,6 +68,7 @@ export function createApp(options={}){
   m.get('/search',use(req=>({results:map.search(req.query.q)})));
   m.get('/routes',use(()=>({routes:map.routes()})));
   m.get('/routes/:id',use(req=>map.route(req.params.id)));
+  m.get('/engines',use(()=>({engines:map.engines()})));
   app.use('/api/map',m);
 
   app.use('/api',(_req,res)=>res.status(404).json({error:'Not found'}));

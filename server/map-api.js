@@ -44,6 +44,26 @@ export class MapApi{
   q(sql,args=[],opts={}){return this.c.run(this.id,sql,args,{source:'api',maxRows:50000,...opts}).rows;}
   withDb(fn){const db=this.c.open(this.id);try{return fn((sql,args=[])=>this.q(sql,args,{db}));}finally{db.close();}}
 
+  /** Add the QR fleet catalog to databases created before it was introduced. */
+  ensureTrainFleet(){
+    const db=this.c.open(this.id);
+    try{
+      db.exec(`CREATE TABLE IF NOT EXISTS rail_emu_train (
+        train_id TEXT PRIMARY KEY,
+        engine_type TEXT NOT NULL DEFAULT 'QR EMU',
+        skin TEXT NOT NULL CHECK (skin IN ('3a', '3b')),
+        carriage_count INTEGER NOT NULL DEFAULT 3 CHECK (carriage_count IN (3, 6))
+      )`);
+      const insert=db.prepare('INSERT OR IGNORE INTO rail_emu_train(train_id, engine_type, skin, carriage_count) VALUES(?, ?, ?, 3)');
+      for(let i=1;i<=6;i++)insert.run(`QR-EMU-${String(i).padStart(2,'0')}`,'QR EMU',i%2?'3a':'3b');
+    }finally{db.close();}
+  }
+
+  engines(){
+    return this.withDb(q=>q(`SELECT train_id AS id, engine_type AS type, skin, carriage_count AS carriages
+      FROM rail_emu_train ORDER BY train_id`));
+  }
+
   status(){
     if(!this.available())return {available:false,database:this.id};
     return this.withDb(q=>{
