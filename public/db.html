@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TrainSim · Database Console</title>
+  <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/db.css">
+  <link rel="stylesheet" href="/assets/db-admin.css">
+  <script type="module" src="/assets/db-admin.js"></script>
+</head><body class="db-page">
+  <div class="db-shell">
+    <header class="db-header">
+      <div><div class="eyebrow">TRAIN SIM / LOCAL TOOLS</div><h1>Database explorer</h1></div>
+      <nav class="global-nav" aria-label="Global navigation"><a href="/">Simulator</a><a href="/db.html" aria-current="page">Databases</a></nav>
+    </header>
+    <div class="db-notice">Live SQLite data · local access only · edits execute immediately · no login or app-level permissions. ETCS source rows remain unverified staging data.</div>
+    <div class="db-layout">
+      <aside class="db-side">
+        <label for="db-picker">Database</label><select id="db-picker"></select>
+        <div class="db-section-heading"><b>Tables & views</b><button id="db-refresh" class="secondary">Refresh</button></div>
+        <div id="table-list" class="table-list"></div>
+      </aside>
+      <main class="db-main">
+        <div class="db-toolbar"><h2 id="table-title">Select a table</h2><div><button id="db-add" disabled>Add row</button><button id="db-delete" class="danger" disabled>Delete selected</button></div></div>
+        <div id="table-grid"></div>
+        <div class="db-pager"><button id="page-prev" class="secondary">Previous</button><span id="page-count">Page 1</span><button id="page-next" class="secondary">Next</button><span id="db-table-status"></span></div>
+        <div class="db-insert"><label for="new-row-json">New row (JSON object; supply required fields; primary keys must be unique)</label><textarea id="new-row-json" spellcheck="false" rows="3" placeholder='{"id":"unique-id", "name":"Example"}'></textarea><p>Database primary keys, unique constraints, and duplicate-row triggers reject duplicates. NULL can be entered through JSON.</p></div>
+        <section class="db-query">
+          <div class="db-toolbar"><h2>SQL query editor</h2><button id="sql-play">▶ Play</button></div>
+          <div id="sql-editor" aria-label="SQL query editor"></div>
+          <div class="db-query-tools"><label for="saved-queries">Saved calls · latest first</label><select id="saved-queries"></select><input id="query-name" aria-label="Saved query name" placeholder="Unique query name"><button id="save-query-name" class="secondary">Rename</button></div>
+          <p id="sql-status" role="status">Select a saved query or write a statement and press Play. Every console query is recorded automatically, counted and sorted by its most recent call.</p>
+          <div id="sql-results"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body></html>

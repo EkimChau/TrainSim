@@ -114,3 +114,38 @@ straight into the live `SimRun` as verified rules. See
 [ESIG ingestion, schema, provenance and GA/SA](docs/esig-ingestion.md),
 [application-level catalogue](data/esig/catalog/application-levels.json), and
 [architecture contract](docs/architecture.md).
+
+
+## Local database console
+
+The built-in `/db.html` admin page is local-only: it uses OSS Tabulator
+for the editable grid, CodeMirror 6 for the SQLite query editor, and Node's
+built-in `node:sqlite` driver (Node 22.5+; experimental on Node 22).
+Run `npm install && npm run build && npm start`, then open
+`http://127.0.0.1:3000/db.html` or click **Databases** in the top-right header.
+
+The console discovers SQLite files under the local project, displays tables
+and views, provides live table CRUD, and runs one SQL statement per Play.
+Table browsing is paged at 100 rows; query results are capped at 500 rows.
+Each statement executed through the console is saved uniquely per
+`(database, exact SQL text)`, with an incrementing call count, last-call
+timestamp, and optional name. Most recent calls appear first. The history
+file is ignored by Git at `data/local/db-queries.json`. SQL parameters
+are not stored in that history. Other apps, Python ingestion, and SQLite
+connections outside the console are **not** instrumented.
+
+As requested, no app roles or GIS sign-in are required. The REST API
+checks the incoming socket address and rejects non-loopback clients.
+Do **not** expose the application with a reverse proxy or tunnel, since a
+proxy on localhost could bypass that check. Back up source evidence before
+editing: statements change the real local SQLite file immediately.
+Existing PRIMARY KEY/UNIQUE constraints and automatically installed
+insert triggers prevent identical row payloads (even with changed ID
+values) for normal SQLite tables. Database-specific natural/business keys
+are still needed to detect semantic duplicates that have different
+non-ID column values. External writers and schema changes outside the
+console are not covered.
+
+`npm run preview` does not provide the live DB service; use
+`npm start`. Run `node --test tests/db-console.test.js` to verify
+discovery, live CRUD, duplicate protection and query-history counters.
