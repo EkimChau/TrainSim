@@ -5,6 +5,7 @@ import path from 'node:path';
 import {createAuth} from './auth.js';
 import {SCENES} from '../src/shared/simscene.js';
 import {SEED_REGION} from '../src/shared/seed-world.js';
+import {regionStatus} from './region-status.js';
 
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
 export function createApp(options={}) {
@@ -13,7 +14,7 @@ export function createApp(options={}) {
   app.use(express.json({limit:'16kb'}));
   app.use((req,res,next)=>{res.set('X-Content-Type-Options','nosniff');res.set('Referrer-Policy','strict-origin-when-cross-origin');next();});
   app.get('/api/health',(_req,res)=>res.json({ok:true,app:'TrainSim',mode:'prototype'}));
-  app.get('/api/config',(_req,res)=>res.json({mapsApiKey:config.mapsApiKey,gisClientId:config.gisClientId,region:SEED_REGION,scenes:SCENES,source:'synthetic-seed'}));
+  app.get('/api/config',(_req,res)=>res.json({mapsApiKey:config.mapsApiKey,gisClientId:config.gisClientId,region:SEED_REGION,scenes:SCENES,...regionStatus(ROOT)}));
   app.get('/api/region/world', (_req,res)=>{
     const file=path.join(ROOT,'data/current/world.json');
     if(!fs.existsSync(file))return res.status(404).json({error:'No ingested OSM snapshot. Use scripts/ingest_osm.py. Synthetic demo remains available.'});
