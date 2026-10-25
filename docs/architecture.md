@@ -39,3 +39,35 @@ src/shared/ (no DOM or Maps imports)
 ## Acceptance gates
 
 Prototype: working compile/play/stop with seed, passing pure-model tests and visible warnings. Next milestone: real ORM ingestion plus reproducibility, no claims of compliance. Production or engineering use requires separate specification, safety assurance and rule verification; unit tests of this mock are insufficient.
+
+## ESIG source registry and conformance boundary
+
+ESIG is a separate source-evidence subsystem under `db/esig/`,
+`scripts/esig/`, `data/esig/catalog/` and `data/esig/examples/`.
+It ingests **all** SUBSET-026 v4.0.0 chapters 1–9 into local, generated SQLite,
+using SHA-pinned documents and all-page text retention. Chapter 9 classification
+rows are extracted as unverified candidates. Figures, tables, equations, legends,
+protocol layouts and clause boundaries must be reconciled against the originals.
+No ingested clause is automatically executable or verified.
+
+```text
+Original official PDFs -> immutable source_page / extracted clause / classification_row
+                        -> reviewed rule evidence + applicability + exception graph
+                        -> SimSpec compile to a GA network configuration
+                        -> SimScene initial state/stimuli + SA assertions
+                        -> SimRun deterministic transitions / typed interfaces
+                        -> SimStates trace and verdicts
+```
+
+Keep `etcsLevel` (0 / NTC / 1 / 2), `etcsMode`, `etcsSystemVersion`
+and `srsIssue` separate. ETCS Level 4 does not exist in SUBSET-026 4.0.0;
+Level 3's Chapter 2 section is intentionally deleted. Do not interpret
+Baseline 4 as an application level. `SimAdaptor` never owns safety decisions.
+Interlocking/TMS belong to separate specifications and component contracts;
+SUBSET-026 alone does not define the whole railway operational system.
+
+Promotion beyond illustrative simulation requires: source-clause/page lineage,
+Chapter 9 classification verification, chapter 6 exception handling, explicit
+version/mode/level applicability, protocol and braking model validation,
+and separately sourced acceptance tests (e.g. the SUBSET-076 family).
+Details and commands: [ESIG ingestion](esig-ingestion.md).

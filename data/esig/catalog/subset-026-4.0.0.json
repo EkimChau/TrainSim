@@ -1,0 +1,63 @@
+{
+  "set": "ERA/UNISIG ERTMS/ETCS System Requirements Specification",
+  "issue": "4.0.0",
+  "baseline": "Baseline 4 Release 1",
+  "publication_date": "2023-07-05",
+  "meaning": "SRS issue 4.0.0 is not ETCS Level 4; application levels defined in chapter 2 are 0, NTC, 1, 2 (3 intentionally deleted).",
+  "volumes": [
+    {
+      "chapter": 1,
+      "filename": "SUBSET-026-1 v400.pdf",
+      "pages": 9,
+      "sha256": "144dffcc6ddf14a1fdb36ff69fbd6de925ce08e88627c2010af61d6aa55050f1"
+    },
+    {
+      "chapter": 2,
+      "filename": "SUBSET-026-2 v400.pdf",
+      "pages": 25,
+      "sha256": "a49d263c4ee65823bb2b1ad17c6863c453d8335b3494f4ae8206c195641a5b7a"
+    },
+    {
+      "chapter": 3,
+      "filename": "SUBSET-026-3 v400.pdf",
+      "pages": 252,
+      "sha256": "59b39f048be614961947410f4ea290f8e73dd363e72ce776aa5406fc6b0d2afe"
+    },
+    {
+      "chapter": 4,
+      "filename": "SUBSET-026-4 v400.pdf",
+      "pages": 93,
+      "sha256": "46fa9841c243ebfe51d41ca871349972f437c07a389715ed67fb9348638ae2c9"
+    },
+    {
+      "chapter": 5,
+      "filename": "SUBSET-026-5 v400.pdf",
+      "pages": 112,
+      "sha256": "17234f3721666c4790b4e18e6f0aab1d3948d323dfac0729bb4aa52e2668be8e"
+    },
+    {
+      "chapter": 6,
+      "filename": "SUBSET-026-6 v400.pdf",
+      "pages": 82,
+      "sha256": "6f65df7a35abb260a00639a4f3f6f91142a0a6fd80eda9333f523502155aeed7"
+    },
+    {
+      "chapter": 7,
+      "filename": "SUBSET-026-7 v400.pdf",
+      "pages": 91,
+      "sha256": "3bfcbc7c5ed72eabfa379eaf5541b0dc8c5172949b879951b2701e2bb0109d8a"
+    },
+    {
+      "chapter": 8,
+      "filename": "SUBSET-026-8 v400.pdf",
+      "pages": 36,
+      "sha256": "a09d3afe8f4f95902d65f4b6261e5260a7b0ac29042f5f0130e061d140c0fc2d"
+    },
+    {
+      "chapter": 9,
+      "filename": "SUBSET-026-9 v400.pdf",
+      "pages": 148,
+      "sha256": "294a527e87ee8b476367a9471308fdf6ddfc88f275d3f696855047ed17352c25"
+    }
+  ]
+}

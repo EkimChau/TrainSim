@@ -1,0 +1,34 @@
+name: ESIG ingestion staging checks
+
+on:
+  push:
+    paths:
+      - 'scripts/esig/**'
+      - 'db/esig/**'
+      - 'data/esig/catalog/**'
+      - 'data/esig/examples/**'
+      - 'tests/test_esig_ingest.py'
+      - '.github/workflows/esig.yml'
+  pull_request:
+    paths:
+      - 'scripts/esig/**'
+      - 'db/esig/**'
+      - 'data/esig/catalog/**'
+      - 'data/esig/examples/**'
+      - 'tests/test_esig_ingest.py'
+      - '.github/workflows/esig.yml'
+
+jobs:
+  staging-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile ESIG tooling
+        run: python3 -m compileall -q scripts/esig/ tests/test_esig_ingest.py
+      - name: Run hermetic ingestion contract tests
+        run: python3 -m unittest discover -s tests -p 'test_esig_ingest.py' -v
+      - name: Note actual source-PDF verification boundary
+        run: echo "Full 848-page extraction requires the nine SHA-pinned original PDFs, intentionally not committed."

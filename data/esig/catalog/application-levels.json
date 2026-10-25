@@ -1,0 +1,43 @@
+{
+  "standard": "SUBSET-026",
+  "issue": "4.0.0",
+  "distinction": "Baseline 4 is an SRS release, not ETCS application Level 4",
+  "defined_application_levels": [
+    {
+      "id": "0",
+      "name": "Level 0",
+      "source": "2.6.3",
+      "status": "defined"
+    },
+    {
+      "id": "NTC",
+      "name": "National Train Control (Level NTC)",
+      "source": "2.6.4",
+      "status": "defined"
+    },
+    {
+      "id": "1",
+      "name": "Level 1",
+      "source": "2.6.5",
+      "status": "defined"
+    },
+    {
+      "id": "2",
+      "name": "Level 2",
+      "source": "2.6.6",
+      "status": "defined"
+    }
+  ],
+  "not_supported_as_new_level": [
+    {
+      "id": "3",
+      "source": "2.6.7",
+      "status": "intentionally_deleted"
+    },
+    {
+      "id": "4",
+      "status": "not_defined_in_SUBSET-026_v4.0.0"
+    }
+  ],
+  "simulation_contract": "Model level, mode, system version and document baseline as independent values. Parse the entire specification regardless of a scenario's selected application level."
+}

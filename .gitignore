@@ -9,3 +9,9 @@ coverage/
 data/current/
 __pycache__/
 *.pyc
+
+# ESIG source PDFs and generated evidence DB / audit artefacts (local only)
+data/esig/sources/
+data/esig/esig.sqlite
+data/esig/esig.sqlite-*
+data/esig/reports/
