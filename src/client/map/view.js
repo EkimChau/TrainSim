@@ -1,7 +1,7 @@
 import {IconLayer,PathLayer,ScatterplotLayer,TextLayer,PolygonLayer} from '@deck.gl/layers';
 import {PathStyleExtension} from '@deck.gl/extensions';
 import {api,el,fmt,store,toast} from '../api.js';
-import {createBasemap,rasterLayer,SEQ_VIEW} from './basemap.js';
+import {BASEMAP_TYPES,createBasemap,rasterLayer,SEQ_VIEW} from './basemap.js';
 import {STYLES,STATION_COLOUR,hex,legend,poiColour,signalColour,trackColour,trackDash,trackWidth,SIGNAL_LEGEND} from './styles.js';
 import {Simulation} from './sim.js';
 import {TimeSimulation} from './time-sim.js';
@@ -66,7 +66,15 @@ export class MapView{
       onClick:info=>this.click(info),
       getTooltip:({object,layer})=>object&&tooltip(layer?.id,object),
     });
-    $('basemap-field').hidden=this.map.kind!=='google';
+    const basemap=$('basemap');
+    const googleAvailable=this.map.kind==='google';
+    for(const option of basemap.options)option.disabled=!googleAvailable&&option.value!=='osm';
+    $('basemap-hint').hidden=googleAvailable;
+    const savedBasemap=store.get('basemap','osm');
+    this.basemapType=googleAvailable&&BASEMAP_TYPES.includes(savedBasemap)?savedBasemap:'osm';
+    basemap.value=this.basemapType;
+    basemap.title=googleAvailable?'Choose the map background':'Google base maps require a GOOGLE_MAPS_API_KEY';
+    this.map.setType(this.basemapType);
     this.status=await api('/map/status').catch(()=>({available:false}));
     if(!this.status.available){
       const b=$('map-banner');b.hidden=false;
@@ -107,7 +115,17 @@ export class MapView{
         store.set('mapLayers',this.visible);this.render();
       });
     }
-    $('basemap').addEventListener('change',e=>this.map?.setType(e.target.value));
+    $('basemap').addEventListener('change',e=>{
+      const type=e.target.value;
+      try{
+        this.map?.setType(type);
+        this.basemapType=type;
+        store.set('basemap',type);
+      }catch(error){
+        $('basemap').value=this.basemapType;
+        toast(error.message,'error');
+      }
+    });
     $('inspector-close').addEventListener('click',()=>{this.selected=null;$('inspector').hidden=true;this.render();});
     $('train-detail-close').addEventListener('click',()=>this.clearTrainFocus());
     document.addEventListener('keydown',e=>{if(e.key==='Escape')this.clearTrainFocus();});
@@ -205,23 +223,12 @@ export class MapView{
       const scale=Math.max(2,Math.min(10,2+(8-z)*1.5));
       const lollipops=clusterTrains(trains,z,Math.max(72,36*scale)).map(t=>{
         const iconScale=t.id===this.focusedTrainId?scale*1.25:scale;
-        const markerRadius=48*iconScale/5*(t.carriages/3);
-        const metersPerPixel=40075016.686*Math.cos(t.position.lat*Math.PI/180)/(256*2**z);
         return {...t,path:[destination(t.position,t.bearing+180,10000),destination(t.position,t.bearing,10000)],
-          segment:0,progress:0.5,iconScale,markerRadius,
-          stemStart:destination(t.position,180,metersPerPixel*markerRadius),
-          stemEnd:destination(t.position,180,metersPerPixel*(markerRadius+20)),
-          labelOffset:markerRadius+26};
+          segment:0,progress:0.5,iconScale};
       });
       const labels=lollipops.filter(t=>t.clusterCount===1&&(scale>=4||z>=12));
       const clusters=lollipops.filter(t=>t.clusterCount>1);
       layers.push(
-        new PathLayer({id:'time-train-stems',data:lollipops,getPath:t=>[
-          [t.stemStart.lng,t.stemStart.lat],[t.stemEnd.lng,t.stemEnd.lat],
-        ],getColor:[255,129,0,210],getWidth:2,widthUnits:'pixels',capRounded:true}),
-        new ScatterplotLayer({id:'time-train-balloons',data:lollipops,getPosition:t=>[t.position.lng,t.position.lat],
-          getRadius:t=>t.markerRadius,radiusUnits:'pixels',getFillColor:[255,255,255,235],stroked:true,
-          getLineColor:[255,129,0,240],lineWidthUnits:'pixels',getLineWidth:3,pickable:true}),
         new IconLayer({id:'time-trains',data:lollipops.flatMap(t=>trainFormation(t,z,t.iconScale)
           .map(icon=>({...icon,clusterCount:t.clusterCount,clusterPosition:t.position}))),
           getIcon:t=>trainIcon(t.skin),getPosition:t=>t.position,getAngle:t=>trainIconAngle(t.angle,this.sim.axisOffset),
@@ -229,13 +236,13 @@ export class MapView{
           updateTriggers:{getPosition:this.timeSim.value,getAngle:`${this.timeSim.value}:${this.sim.axisOffset}`,getSize:this.focusedTrainId}}),
         new TextLayer({id:'time-train-labels',data:labels,getPosition:t=>[t.position.lng,t.position.lat],
           getText:t=>t.engineId,getSize:Math.max(12,Math.min(16,12+(scale-2)*0.5)),sizeUnits:'pixels',
-          getPixelOffset:t=>[0,t.labelOffset],fontFamily:FONT,fontWeight:700,outlineWidth:3,
+          getPixelOffset:[0,-18],fontFamily:FONT,fontWeight:700,outlineWidth:3,
           outlineColor:[255,255,255],fontSettings:{sdf:true},pickable:true,
           updateTriggers:{getPosition:this.timeSim.value,getText:this.timeSim.value}}),
         new TextLayer({id:'time-train-cluster-counts',data:clusters,getPosition:t=>[t.position.lng,t.position.lat],
           getText:t=>String(t.clusterCount),getSize:12,sizeUnits:'pixels',getPixelOffset:[23,-23],
-          getColor:[25,25,25],fontFamily:FONT,fontWeight:700,background:true,getBackgroundColor:[255,255,255,245],
-          backgroundPadding:[3,2],pickable:true,updateTriggers:{getPosition:this.timeSim.value}}));
+          getColor:[25,25,25],fontFamily:FONT,fontWeight:700,pickable:true,
+          updateTriggers:{getPosition:this.timeSim.value}}));
     }
     this.map.setLayers(layers);
     this.renderTrainDetails(trains.find(t=>t.id===this.focusedTrainId));
@@ -289,7 +296,7 @@ export class MapView{
 
   click(info){
     const o=info?.object,id=info?.layer?.id;
-    if(['trains','time-trains','time-train-balloons','time-train-labels'].includes(id)&&o){
+    if(['trains','time-trains','time-train-labels'].includes(id)&&o){
       if(o.clusterCount>1){
         const center=o.clusterPosition??o.position;
         const [lon,lat]=Array.isArray(center)?center:[center.lng,center.lat];

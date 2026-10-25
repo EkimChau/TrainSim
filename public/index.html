@@ -59,12 +59,14 @@
         <label class="field" id="basemap-field">
           <span>Base map</span>
           <select id="basemap">
-            <option value="roadmap">Map</option>
+            <option value="osm">OpenStreetMap (current)</option>
+            <option value="roadmap">Google Map</option>
             <option value="satellite">Satellite</option>
             <option value="hybrid">Hybrid</option>
             <option value="terrain">Terrain</option>
           </select>
         </label>
+        <small id="basemap-hint" class="basemap-hint" hidden>Google base maps require a GOOGLE_MAPS_API_KEY.</small>
       </div>
 
       <div class="legend panel" id="legend" aria-label="Legend"></div>
@@ -90,8 +92,10 @@
             <button id="time-play" class="primary">▶ Play</button>
             <button id="time-pause" hidden>Ⅱ Pause</button>
             <button id="time-stop">■ Stop</button>
-            <label class="time-speed">Speed
-              <select id="time-speed" aria-label="Calendar simulation speed"></select>
+            <label class="time-speed">
+              <span>Speed</span>
+              <input id="time-speed" type="range" min="1" max="3600" step="1" value="1" aria-label="Calendar simulation speed">
+              <output id="time-speed-value">Real time · 1×</output>
             </label>
           </div>
           <input id="time-slider" class="time-slider" type="range" aria-label="Simulation date and time">

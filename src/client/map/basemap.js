@@ -7,6 +7,8 @@ import {TileLayer} from '@deck.gl/geo-layers';
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 
 export const SEQ_VIEW={latitude:-27.32,longitude:152.98,zoom:10};
+export const BASEMAP_TYPES=Object.freeze(['osm','roadmap','satellite','hybrid','terrain']);
+const GOOGLE_MAP_TYPES=new Set(BASEMAP_TYPES.filter(type=>type!=='osm'));
 
 export function rasterLayer(id,url,{opacity=1,maxZoom=19,visible=true}={}){
   return new TileLayer({
@@ -60,6 +62,9 @@ async function googleBasemap(container,{mapsApiKey,mapId},{onView,onClick,getToo
   });
   const overlay=new GoogleMapsOverlay({interleaved:!!mapId,layers:[],onClick,getTooltip,pickingRadius:6});
   overlay.setMap(map);
+  const osmBase=rasterLayer('osm-base','https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19});
+  let baseType='osm',overlayLayers=[];
+  const applyLayers=()=>overlay.setProps({layers:[...(baseType==='osm'?[osmBase]:[]),...overlayLayers]});
   const view=()=>{
     const b=map.getBounds();if(!b)return null;
     const sw=b.getSouthWest(),ne=b.getNorthEast(),c=map.getCenter();
@@ -68,10 +73,15 @@ async function googleBasemap(container,{mapsApiKey,mapId},{onView,onClick,getToo
   map.addListener('idle',()=>{const v=view();if(v)onView(v);});
   return {
     kind:'google',view,
-    setLayers:layers=>overlay.setProps({layers}),
+    setLayers:layers=>{overlayLayers=layers;applyLayers();},
     fit:([w,s,e,n])=>map.fitBounds({west:w,south:s,east:e,north:n},40),
     flyTo:(lat,lon,zoom)=>{map.panTo({lat,lng:lon});if(zoom)map.setZoom(zoom);},
-    setType:t=>map.setMapTypeId(t),
+    setType:type=>{
+      if(type!=='osm'&&!GOOGLE_MAP_TYPES.has(type))throw new Error(`Unsupported base map: ${type}`);
+      baseType=type;
+      map.setMapTypeId(type==='osm'?'roadmap':type);
+      applyLayers();
+    },
   };
 }
 
@@ -104,6 +114,8 @@ function osmBasemap(container,{onView,onClick,getTooltip,initial}){
       go({longitude,latitude,zoom:Math.min(zoom,17)});
     },
     flyTo:(lat,lon,zoom)=>go({latitude:lat,longitude:lon,...(zoom?{zoom:zoom-1}:{})}),
-    setType:()=>{},
+    setType:type=>{
+      if(type!=='osm')throw new Error('Google base maps require a GOOGLE_MAPS_API_KEY');
+    },
   };
 }
