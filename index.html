@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brisbane SimScene & ORM Visualizer</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { display: flex; height: 100vh; width: 100vw; overflow: hidden; background: #1a1a1a; color: #e0e0e0; }
+        
+        /* Control Panel Sidebar */
+        #control-panel {
+            width: 380px;
+            background: #252526;
+            border-right: 1px solid #3c3c3c;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.5);
+        }
+        
+        .panel-header {
+            padding: 16px;
+            background: #1e1e1e;
+            border-bottom: 1px solid #3c3c3c;
+        }
+        .panel-header h1 { font-size: 18px; color: #fff; font-weight: 600; }
+        .panel-header p { font-size: 12px; color: #858585; margin-top: 4px; }
+
+        .scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .section {
+            background: #2d2d2d;
+            border-radius: 6px;
+            padding: 14px;
+            margin-bottom: 16px;
+            border: 1px solid #3e3e3e;
+        }
+        .section h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #007acc; margin-bottom: 12px; font-weight: 700; }
+
+        /* Layer toggles */
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .toggle-item:last-child { margin-bottom: 0; }
+        .toggle-item label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .color-indicator { width: 12px; height: 4px; border-radius: 2px; display: inline-block; }
+
+        /* Custom select and buttons */
+        select, button {
+            width: 100%;
+            background: #3c3c3c;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-top: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+        select:focus { border-color: #007acc; }
+        button {
+            background: #007acc;
+            border: none;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        button:hover { background: #0062a3; }
+        button.stop-btn { background: #d32f2f; }
+        button.stop-btn:hover { background: #b71c1c; }
+
+        /* Log / Readout monitor */
+        #telemetry-log {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 4px;
+            height: 140px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 11px;
+            padding: 8px;
+            overflow-y: auto;
+            color: #4af626;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        /* Map Canvas */
+        #map-container { flex: 1; position: relative; }
+        #map { width: 100%; height: 100%; }
+
+        /* Floating status card */
+        #sim-status-overlay {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(30,30,30,0.85);
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px);
+            pointer-events: none;
+            z-index: 5;
+            font-size: 13px;
+        }
+        .status-badge {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #858585;
+            margin-right: 6px;
+        }
+        .status-active .status-badge { background: #4af626; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CONTROL SIDEBAR -->
+    <div id="control-panel">
+        <div class="panel-header">
+            <h1>Brisbane SimScene Engine</h1>
+            <p>Google Maps + OpenRailwayMap Asset Digital Twin</p>
+        </div>
+
+        <div class="scroll-container">
+            <!-- 1. ORM LAYER CONFIGURATION -->
+            <div class="section">
+                <h2>ORM Overlay Framework</h2>
+                <div class="toggle-item">
+                    <label><input type="checkbox" id="layer-tracks" checked> Main Infrastructure Tracks</label>
+                    <span class="color-indicator" style="background: #ff5555;"></span>
+                </div>
+                <div class="toggle-item">
+                    <label><input type="checkbox" id="layer-signals" checked> UNISIG Signals / ETCS Balises</label>
+                    <span class="color-indicator" style="background: #55ff55;"></span>
+                </div>
+                <div class="toggle-item">
+                    <label><input type="checkbox" id="layer-stations" checked> Passenger Stations</label>
+                    <span class="color-indicator" style="background: #5555ff;"></span>
+                </div>
+            </div>
+
+            <!-- 2. SIMSCENE ENVIRONMENT SELECTION -->
+            <div class="section">
+                <h2>SimScene Profile Selection</h2>
+                <label style="font-size:12px; color:#aaa;">Select Target Operational Environment Scenario:</label>
+                <select id="scenario-selector">
+                    <option value="bne-morning-peak">Brisbane Central Morning Peak (UNISIG L2)</option>
+                    <option value="gold-coast-express">Gold Coast to Roma St Express Intercity</option>
+                    <option value="ipswich-maintenance">Ipswich Corridor Block Event (Delay Tracking)</option>
+                </select>
+            </div>
+
+            <!-- 3. SIMSPEC / INTERLOCKING DESIGN COMPILE -->
+            <div class="section">
+                <h2>SimSpec Layout Compiler</h2>
+                <p style="font-size:11px; color:#aaa; line-height:1.4; margin-bottom:8px;">
+                    Parses static ORM node/way geometries and automatically generates regulatory safety instrumentation placements matching UNISIG standards.
+                </p>
+                <button id="btn-compile">Compile Infrastructure Model</button>
+            </div>
+
+            <!-- 4. SIMRUN RUNTIME CONTROLLER -->
+            <div class="section">
+                <h2>SimRun Orchestration</h2>
+                <button id="btn-play-sim" disabled style="background:#28a745;">▶ Run Active Scenario</button>
+                <button id="btn-stop-sim" class="stop-btn" style="display:none;">■ Terminate Loop</button>
+                
+                <div style="margin-top:12px;">
+                    <label style="font-size:12px; color:#aaa;">Real-time Telemetry & Safety Exceptions:</label>
+                    <div id="telemetry-log">[System Status: Awaiting Infrastructure Compilation...]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN MAP CANVAS CONTAINER -->
+    <div id="map-container">
+        <div id="sim-status-overlay">
+            <span class="status-badge"></span> <span id="status-text">SimRun Status: Idle</span>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <!-- INJECT SIMULATION LAYER CODE ENGINE DIRECTLY -->
+    <script src="sim_engine.js"></script>
+    
+    <!-- GOOGLE MAPS BOOTSTRAP MODULE LOADER -->
+    <!-- REPLACE YOUR_API_KEY WITH YOUR SPECIFIC RUNTIME KEY TO ACTIVATE THE MAP CANVAS NATIVELY -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHqFVtcaL-aisQZOkq38Icsea9l8xtE54&callback=initApplication"></script>
+
+</body>
+</html>
