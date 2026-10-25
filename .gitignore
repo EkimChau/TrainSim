@@ -15,3 +15,6 @@ data/esig/sources/
 data/esig/esig.sqlite
 data/esig/esig.sqlite-*
 data/esig/reports/
+
+# Local console history (never committed)
+data/local/
