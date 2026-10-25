@@ -61,6 +61,21 @@ CREATE TABLE IF NOT EXISTS coverage (
   PRIMARY KEY (run_id, metric)
 );
 
+-- ---------------------------------------------------------------- QR EMU fleet
+CREATE TABLE IF NOT EXISTS rail_emu_train (
+  train_id       TEXT PRIMARY KEY,
+  engine_type    TEXT NOT NULL DEFAULT 'QR EMU',
+  skin           TEXT NOT NULL CHECK (skin IN ('3a', '3b')),
+  carriage_count INTEGER NOT NULL DEFAULT 3 CHECK (carriage_count IN (3, 6))
+);
+INSERT OR IGNORE INTO rail_emu_train(train_id, engine_type, skin, carriage_count) VALUES
+  ('QR-EMU-01', 'QR EMU', '3a', 3),
+  ('QR-EMU-02', 'QR EMU', '3b', 3),
+  ('QR-EMU-03', 'QR EMU', '3a', 3),
+  ('QR-EMU-04', 'QR EMU', '3b', 3),
+  ('QR-EMU-05', 'QR EMU', '3a', 3),
+  ('QR-EMU-06', 'QR EMU', '3b', 3);
+
 -- ---------------------------------------------------------------- scope (docs/stations.xlsx)
 CREATE TABLE IF NOT EXISTS scope_line (
   line_id       INTEGER PRIMARY KEY,
