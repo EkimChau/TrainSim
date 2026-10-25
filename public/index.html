@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TrainSim · Brisbane Prototype</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/assets/app.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <header class="brand"><div class="eyebrow">TRAIN SIM / PROTOTYPE 01</div><h1>Railway digital twin</h1><p>Brisbane · synthetic seed geometry</p></header>
+    <div class="panel-scroll">
+      <section class="section"><div class="section-head"><h2>01 · SimWorld</h2><span class="pill">SEED</span></div><p>Overlay visibility</p>
+        <label class="switch"><span><i class="swatch red"></i>Track corridors</span><input type="checkbox" id="layer-tracks" checked></label>
+        <label class="switch"><span><i class="swatch blue"></i>Passenger stations</span><input type="checkbox" id="layer-stations" checked></label>
+        <label class="switch"><span><i class="swatch green"></i>Virtual balises</span><input type="checkbox" id="layer-signals" checked></label>
+      </section>
+      <section class="section"><div class="section-head"><h2>02 · SimScene</h2></div><label class="field-label" for="scenario-selector">Operational scenario</label><select id="scenario-selector"></select></section>
+      <section class="section"><div class="section-head"><h2>03 · SimSpec</h2></div><p>Compile synthetic track segments into illustrative trackside devices.</p><button id="btn-compile" class="secondary">Compile layout</button></section>
+      <section class="section"><div class="section-head"><h2>04 · SimRun</h2></div><div class="button-row"><button id="btn-play-sim" disabled>▶ Run scenario</button><button id="btn-stop-sim" class="danger" hidden>■ Stop simulation</button></div></section>
+      <section class="section log-section"><div class="section-head"><h2>Telemetry</h2><span class="pill">LIVE</span></div><div id="telemetry-log" role="log" aria-live="off"></div></section>
+    </div>
+    <footer class="sidebar-footer"><div id="auth-area">Loading sign-in…</div><span>Prototype only · Not for railway operations</span></footer>
+  </aside>
+  <main class="workspace"><div class="topbar"><div><b>SimAdaptor</b><span id="map-provider">Loading canvas…</span></div><span class="mode-label">DEMO DATA / NOT GEOSPATIAL TRUTH</span></div>
+    <div id="map" aria-label="Railway map canvas"></div><div id="sim-status-overlay"><span class="status-dot"></span><span id="status-text">Initializing</span></div>
+    <div class="footnote">Illustrative track geometry · Synthetic balise placement · No actual ETCS, RBC, or interlocking validation</div>
+  </main>
+</body>
+</html>

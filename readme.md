@@ -1,54 +1,72 @@
-## The Presentation Canvas (The View)
+# TrainSim · Prototype 01
 
-- Google Maps Engine: You want to use Google Maps as your main web canvas layer for global navigation, panning, and zooming.
-- OpenRailwayMap (**ORM**) Overlay: You want to ingest and extract vector track configurations (Ways), station nodes, and signaling data from **ORM**/OpenStreetMap and overlay them directly on top of the Google Maps canvas with **WGS84** coordinate precision.
-- Dynamic UI Controls: The interface must feature modular toggle switches to instantly turn individual **ORM** layers (Tracks, Signals, Stations) on and off.
+Modular Node.js/Express + Bun-powered browser prototype based on the original three-file Brisbane SimScene seed. It follows the component ownership defined in the original TrainSim README. **This is an illustrative demo, not a railway engineering or safety system.**
 
-## The Logic & Engineering Stack (The Data Model)
+## Quick start
 
-- SimSpec (The Layout Compiler): An infrastructure compiler based on international **UNISIG** and **ETCS** Level 2 engineering specifications. It takes raw, simplified track pathways from **ORM** and programmatically injects missing microscopic trackside instruments—specifically physical Eurobalises (virtual beacons) and interlocking block boundaries—in the correct engineering places.
-- SimScene (The Scenario Specification): A standardized configuration profile that defines specific operational test scenarios. This file details global environment rules, timetables, active train fleets, route allocations, and artificial incidents (like a vehicle breakdown or a doors-stuck event).
-- SimRun (The Execution Engine): A deterministic runtime engine that executes the selected scenario. It computes real-time vehicle kinematics, movement authority updates from a virtual Radio Block Centre (**RBC**), **ETCS** braking curves, and schedule performance to actively catch infrastructure conflicts, delays, and safety bubble violations.
+Prerequisites: Node.js **22+**, [Bun](https://bun.sh/docs/installation), npm. From the project root:
 
-## Current Project State
+```bash
+cp .env.example .env
+npm install
+npm run build
+npm start
+# open http://127.0.0.1:3000
+```
 
-- You have a packaged, self-contained prototype application (brisbane_simscene_app.zip) implementing this architectural framework locally.
-- You are currently reviewing the deployment practicalities, including verifying the cost-free boundaries of hooking the code up to the Google Maps Platform **API** key grid.
+With **no credentials**, the complete Compile → Run → Stop workflow works on an embedded **SVG schematic canvas**, with all three original scenarios, layer toggles and telemetry. It needs no Google account, Google Maps billing, or network APIs after installation.
 
------
+For a **dependency-free local preview** (no npm install/Bun required), run `npm run preview` or `node scripts/preview.mjs`. It serves the **same modular frontend** through native browser ES modules and a minimal Node HTTP preview server, but **does not provide Express or working GIS sign-in**. Use the normal start above to validate Express/auth integration.
 
-Project component boundaries and role
+`./run.sh` is the one-command Express path (auto-installs dependencies when Bun is available). `./run.sh --preview` launches only the UI preview.
 
-- Gmap - serves as the canvas, use its apis to interact with overlays and sims layer hook ins
-    - SimAdaptor - mappings and apis to call **GMAP** for all supported methods.
+`npm run dev` builds once and starts a Node watch server. For frontend edits, rerun `npm run build` (or run `bun build ./src/client/main.js --target browser --format esm --outfile ./public/assets/app.js --watch` in another terminal).
 
-{ train sim pure code }
-- SimAdaptor (everything to Gmap, push or pull data)
+`npm test` runs dependency-free pure simulation tests. `npm run check` runs both tests and bundling.
 
-- SimSpec
-    - App, all configurations, api etc, and **ORM** scoped to (brisbane and surrounds - limit of the sim world)
-    - Laws - sub set of Rules (engine rules) following 
-    - Railway Laws, **ETCSL** 0, 1, 2; **ESIG** (needs relational datatable)
+## Optional Google integrations
 
-- BaseModels - (Base model Types/classes) Base component model for all **SIM** component items and properties, base class require properties to be configured to conform with laws/rules/component types up of rules laws and region (deployed specs).  It represents real life components, unconfigured.
-    - the world model
-    - train model
-    - signalling model (balise groups, rbc towers, shunting) - all base classes, recognised by Sim, each implementation creates a new instance of balise: adds the deployed location and configs for the deployd location in the sim.
+Maps rendering and Google sign-in are **separate Google products and credentials**:
 
-- SimWorld - Wholey owned by train sim, mirrored verbatim off **ORM**, for the defined region, this is the **SIMS** operating map, and lists all component sites, takes BaseModels configs them to match SimWorld.
-    - Track - knows the tracks, stations, tunnels, bends (sim track model)
-    - Trackside - knows the signalling requirements and locations of balise, towers, shunts (sim signals)
-    - Train - (the motor) onboard Model programmed behaviours, eg: RBC told to emergency stop
-    - ETG - schedules
-    - Command
-        - Rail control center, all motor locations
-        - Plays schedules
-        - Knows where all trains are
-        - plays scenario
-    - Play scenario, based on the world apply the scenario and watch
-    - SimStates - returns all World model values at runtime, what is train x position and spee, why did it not slow down (catch bug in model rules missing, law not implemented)
+- `GOOGLE_MAPS_API_KEY`: browser Maps JavaScript API key. Enable Maps JavaScript API and configure key restrictions for the authorized web referrers (`http://localhost:3000/*` and/or `http://127.0.0.1:3000/*` locally). Google Maps Platform billing rules may apply. **The key is necessarily delivered to the browser.** Restrict application/referrers and API scope; set quotas/alerts. A failed Maps load falls back to the SVG canvas.
+- `GIS_CLIENT_ID`: Google Identity Services **Web OAuth client ID**, with local JavaScript origins configured in Google Cloud (for example `http://127.0.0.1:3000`). Set `SESSION_SECRET` to a random 32+ character secret (e.g. `openssl rand -hex 32`). The backend verifies Google's ID token audience/signature before setting a signed HttpOnly SameSite cookie. `POST /api/auth/google` is available only with GIS configured. This is **sign-in**, not authorization to production data.
+- Production: serve via HTTPS, set `COOKIE_SECURE=1`, configure HTTPS proxy/origin carefully, use a stronger production session/CSRF policy and access control, and enforce deployment policy. This prototype stores only public identity fields in a signed (not encrypted) cookie; never store access tokens or secrets in this cookie.
 
-- SimRunModel - combination of scenario and simworld simulations, applies the sim
-- Sim overlay - The actually live simulation layer - watch models interact following tms system rules, and schedules
+**Security note:** The original seed HTML contained an embedded Maps API key. That seed key is **not copied** into this platform. Restrict/rotate it in Google Cloud if not already done. `.env` is gitignored.
 
-Prototype steps 1 - Build a express/node.js env html boiler plate for resuable js bun packing, and gis auth 2 - rebase seed code, and refactor onto new dev platform, with component separation
+## Architecture / file map
+
+| Responsibility (per original README) | Location / current implementation |
+|---|---|
+| Node/Express app & GIS authentication | `server/app.js`, `server/auth.js`, `server/index.js` |
+| Browser build and HTML shell | `src/client/main.js`, `public/index.html`, `public/style.css`, `npm run build` |
+| SimAdaptor: map-only drawing contracts | `src/client/adapters/google.js` / `svg.js` |
+| BaseModels: unconfigured types | `src/shared/models.js` |
+| SimWorld: TrainSim-owned track/station model | `src/shared/simworld.js`; mock data in `seed-world.js` |
+| SimSpec: trackside instrumentation compiler | `src/shared/simspec.js` — placeholder midpoint heuristic |
+| SimScene: scenario definitions | `src/shared/simscene.js` |
+| SimRun: deterministic step engine | `src/shared/simrun.js` |
+| SimStates / live overlay | `SimRun.step()` state + `main.js` UI loop; persistence not yet implemented |
+
+## Prototype scope & roadmap
+
+**Implemented:** 4 synthetic tracks, 6 synthetic stations, 10 illustrative virtual balises, 3 seed scenes, fixed 300ms stepping, schematic/Google Maps adaptors, layer toggles, telemetry, health/config endpoints, optional verified GIS sign-in and protected route.
+
+**Not implemented:** real OpenRailwayMap/OSM ingestion and provenance, exact track topology, railway-law/regulation tables, verified UNISIG/ETCS L0/L1/L2 instrumentation rules, RBC movement authorities, engineering braking curves, interlocking, safety proofs, accurate kinematics, schedule control, persistence, authorization roles, offline map tiles. Do not confuse warnings in this demo with real ETCS enforcement.
+
+**Next stages:** Add versioned WGS84/OSM ingest constrained to the Brisbane region; immutable source/provenance and validation; configured BaseModels from authoritative specifications; reproducible SimScene schema; deterministic SimStates export and replay; rule traceability and tests; then role/access controls and secure deployment before any production-style use.
+
+See [architecture contract](docs/architecture.md) for module ownership, provenance and future assurance requirements.
+
+## API
+
+| Route | Purpose |
+|---|---|
+| `GET /api/health` | Process health |
+| `GET /api/config` | Browser-safe config incl. maps key and GIS client ID |
+| `GET /api/auth/me` | Current signed-in identity or null |
+| `POST /api/auth/google` | Verify Google credential and issue signed session cookie (when configured) |
+| `POST /api/auth/logout` | Delete cookie |
+| `GET /api/private/ping` | Authenticated-only example (401 when anonymous) |
+
+Simulation remains client-side and deliberately pure; the backend does not pretend to be an authoritative simulation service.
