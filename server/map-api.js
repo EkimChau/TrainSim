@@ -261,10 +261,14 @@ export class MapApi{
         const next=scheduledStops.find(s=>s.arrival_seconds>=trip.service_seconds);
         const engine=engines.get(trip.train_id);
         if(!engine)throw new Error(`QR EMU profile ${trip.train_id} is missing`);
+        const firstStop=scheduledStops[0],lastStop=scheduledStops.at(-1);
+        const serviceName=trip.route_long_name||trip.route_short_name||trip.route_id;
         return [{id:`${trip.trip_id}@${trip.service_date}`,tripId:trip.trip_id,routeId:trip.route_id,route:trip.route_long_name||trip.route_short_name||trip.route_id,
-          engineId:engine.id,skin:engine.skin,carriages:engine.carriages,position,bearing,
+          serviceDate:trip.service_date,serviceName,engineId:engine.id,skin:engine.skin,carriages:engine.carriages,position,bearing,
           nextStop:next?.name??null,destination:trip.headsign||trip.route_long_name||'Destination unavailable',
-          startSeconds:trip.start_seconds,endSeconds:trip.end_seconds}];
+          startStation:firstStop.name??firstStop.stop_id,endStation:lastStop.name??lastStop.stop_id,
+          startSeconds:firstStop.departure_seconds??firstStop.arrival_seconds,
+          endSeconds:lastStop.arrival_seconds??lastStop.departure_seconds}];
       });
       return {date,time:seconds,holidays,trains};
     });

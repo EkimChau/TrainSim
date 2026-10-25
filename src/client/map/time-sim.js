@@ -3,6 +3,18 @@ import {api,toast} from '../api.js';
 const $=id=>document.getElementById(id);
 const ZONE='Australia/Brisbane';
 const MAX_SPEED=3600;
+const SERVICE_TIME=new Intl.DateTimeFormat('en-AU',{timeZone:'UTC',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+
+export function formatServiceTime(serviceDate,seconds){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(serviceDate)||!Number.isInteger(seconds)||seconds<0)
+    throw new TypeError('Invalid GTFS service time');
+  const dayOffset=Math.floor(seconds/86400);
+  const date=new Date(`${serviceDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate()+dayOffset);
+  date.setUTCHours(Math.floor(seconds%86400/3600),Math.floor(seconds%3600/60));
+  const time=SERVICE_TIME.format(date);
+  return dayOffset?`${time} (+${dayOffset}d)`:time;
+}
 
 function brisbaneNow(){
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-AU',{
