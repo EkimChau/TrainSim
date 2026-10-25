@@ -12,6 +12,11 @@ http.createServer(async(req,res)=>{
   if(req.method!=='GET'){res.writeHead(405).end();return;}
   const name=new URL(req.url,'http://local').pathname;
   if(name==='/assets/app.js'){res.writeHead(302,{Location:'/src/client/main.js'}).end();return;}
+  if(name==='/api/region/world'||name==='/api/region/manifest'){
+    const f=path.join(root,`data/current/${name.endsWith('world')?'world':'manifest'}.json`);
+    try{const body=await readFile(f);res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'}).end(body);}catch{res.writeHead(404,{'Content-Type':'application/json'}).end('{}');}
+    return;
+  }
   if(name==='/api/config'){res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({mapsApiKey:'',gisClientId:''}));return;}
   if(name==='/api/auth/me'){res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({enabled:false,user:null}));return;}
   if(name==='/api/health'){res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({ok:true,mode:'offline-preview'}));return;}

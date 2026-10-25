@@ -70,3 +70,16 @@ See [architecture contract](docs/architecture.md) for module ownership, provenan
 | `GET /api/private/ping` | Authenticated-only example (401 when anonymous) |
 
 Simulation remains client-side and deliberately pure; the backend does not pretend to be an authoritative simulation service.
+
+## Stage 2: Real OSM railway world (regional dataset)
+
+**New workflow:** preserve the historical 2012 TransLink diagram in `data/reference/`, keep the complete manual station/line catalog separate from GIS truth, and import real OpenStreetMap/OpenRailwayMap-style railway objects as raw OSM data. See [regional ingestion and data lineage](docs/real-railway-ingestion.md).
+
+```bash
+python3 scripts/ingest_osm.py --download  # public Overpass network access required
+# Or import an existing raw Overpass JSON response:
+python3 scripts/ingest_osm.py --osm-json ./your-osm-export.json
+./run.sh                              # Google Maps when a valid API key is configured
+```
+
+On successful ingestion, the UI replaces *synthetic* tracks/stations with OSM WGS84 ways, railway stations and mapped OSM signal nodes. Diagram service paths are visualized with a train only if the complete stop sequence can be resolved through connected OSM way nodes. Unmatched stops and disconnected routes remain unresolved, not faked. Original simulation tests still run without network access or downloaded data. The 2012 schematic is not precise track geometry, and OpenStreetMap infrastructure is **not** a validated railway operational/safety model.

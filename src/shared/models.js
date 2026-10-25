@@ -16,8 +16,8 @@ export class Balise {
   constructor({id,trackId,position,provenance='synthetic-demo'}) {this.id=id; this.trackId=trackId; this.position=coordinate(position);this.provenance=provenance;}
 }
 export class Train {
-  constructor({id,name,path,speed,color,hasCollisionRisk=false}) {
+  constructor({id,name,path,speed,color,hasCollisionRisk=false,speedMetersPerTick=null}) {
     if (!id || !Array.isArray(path) || path.length<1 || !Number.isFinite(speed) || speed<0) throw new TypeError('Invalid train');
-    Object.assign(this,{id,name,path:path.map(coordinate),speed,color,hasCollisionRisk,segment:0,progress:0,alert:false,position:coordinate(path[0])});
+    Object.assign(this,{id,name,path:path.map(coordinate),speed,color,hasCollisionRisk,speedMetersPerTick,segment:0,progress:0,alert:false,position:coordinate(path[0])});
   }
 }
