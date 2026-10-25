@@ -212,11 +212,11 @@ def extract_semantic_catalog(conn: sqlite3.Connection, doc_id: str, ch: int) -> 
         if ch == 7 and no.startswith("7.5.") and re.fullmatch(r"[A-Z][A-Z0-9_]+",heading):
             kind, official = "variable",heading
         elif ch == 7 and no.startswith("7.4."):
-            match = re.search(r"Packet Number\\s+(\\d+)",heading,re.I)
+            match = re.search(r"Packet Number\s+(\d+)",heading,re.I)
             if match:
                 kind,number,official = "packet",int(match.group(1)),heading
         elif ch == 8 and (no.startswith("8.6.") or no.startswith("8.7.")):
-            match = re.search(r"Message\\s+(\\d+)",heading,re.I)
+            match = re.search(r"Message\s+(\d+)",heading,re.I)
             if match:
                 kind,number,official = "radio_message",int(match.group(1)),heading
         if kind:
