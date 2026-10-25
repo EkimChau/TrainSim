@@ -81,7 +81,7 @@ def extract_clauses(conn: sqlite3.Connection, doc_id: str, ch: int,
             continue
         for line in text.splitlines():
             m = CLAUSE.match(line)
-            valid = (m and m.group(1).split(".")[0] == str(ch)
+            valid = (m and not HEADER.match(line) and m.group(1).split(".")[0] == str(ch)
                      and "...." not in m.group(2) and not re.search(r"\.{4,}\s*\d+$", line))
             if valid:
                 flush()
