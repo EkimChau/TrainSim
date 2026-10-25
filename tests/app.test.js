@@ -121,6 +121,47 @@ test('helpers: bbox parsing and line simplification',()=>{
   assert.equal(simplify([[0,0],[1,0.0000001],[2,0]],0.001).length,2);
 });
 
+test('calendar API extrapolates weekly GTFS service and applies holiday/exception rules',t=>{
+  const {root,store}=project(t,{world:true});
+  const db=new DatabaseSync(path.join(root,'data/trainsim.sqlite'));
+  db.exec(`INSERT INTO translink_feed VALUES(1,'test','2026-10-25T00:00:00Z','abc','20261024','20261223','test');
+    INSERT INTO translink_route VALUES('rail-route','T1','Central - North',NULL,2,NULL,NULL,NULL);
+    INSERT INTO translink_service VALUES('sunday',0,0,0,0,0,0,1,'20261024','20261223');
+    INSERT INTO translink_stop VALUES('central',NULL,'Central',-27.47,153.02,NULL,NULL);
+    INSERT INTO translink_stop VALUES('mid',NULL,'Mid',-27.46,153.02,NULL,NULL);
+    INSERT INTO translink_stop VALUES('north',NULL,'North',-27.45,153.02,NULL,NULL);
+    INSERT INTO translink_trip VALUES('trip-1','rail-route','sunday','North',0,'shape-1','QR-EMU-01');
+    INSERT INTO translink_stop_time VALUES('trip-1',1,'central',25200,25200);
+    INSERT INTO translink_stop_time VALUES('trip-1',2,'mid',26400,27600);
+    INSERT INTO translink_stop_time VALUES('trip-1',3,'north',28800,28800);
+    INSERT INTO translink_shape_point VALUES('shape-1',1,-27.47,153.02);
+    INSERT INTO translink_shape_point VALUES('shape-1',2,-27.46,153.02);
+    INSERT INTO translink_shape_point VALUES('shape-1',3,-27.45,153.02);
+    INSERT INTO sim_public_holiday VALUES('2026-10-05','King''s Birthday','Queensland','full-day',NULL,NULL,'test');`);
+  db.close();
+  const map=new MapApi(store,root);
+  assert.equal(map.calendarStatus().available,true);
+  const holiday=map.calendar({date:'2026-10-05',time:'27000'});
+  assert.equal(holiday.holidays[0].name,"King's Birthday");
+  assert.equal(holiday.trains.length,1);
+  assert.equal(holiday.trains[0].engineId,'QR-EMU-01');
+  assert.equal(holiday.trains[0].nextStop,'North');
+  assert.ok(Math.abs(holiday.trains[0].position.lat+27.46)<0.00001,
+    'trains remain at a scheduled intermediate stop during dwell time');
+  assert.ok(holiday.trains[0].bearing<1||holiday.trains[0].bearing>359);
+
+  const edit=new DatabaseSync(path.join(root,'data/trainsim.sqlite'));
+  edit.prepare('INSERT INTO translink_service_date VALUES(?, ?, ?)').run('sunday','2026-10-05',2);
+  edit.prepare('INSERT INTO translink_service_date VALUES(?, ?, ?)').run('sunday','2026-10-26',1);
+  edit.close();
+  assert.equal(map.calendar({date:'2026-10-05',time:'27000'}).trains.length,0,
+    'a feed removal exception overrides the holiday Sunday pattern');
+  assert.equal(map.calendar({date:'2026-10-26',time:'27000'}).trains.length,1,
+    'an explicit added service runs outside the published feed period');
+  assert.throws(()=>map.calendar({date:'2026-02-30',time:'0'}),/valid YYYY-MM-DD/);
+  assert.throws(()=>map.calendar({date:'2026-10-05',time:'86400'}),/whole seconds/);
+});
+
 test('API rejects non-loopback clients',async t=>{
   const {root,log}=project(t);
   const app=createApp({root,log});

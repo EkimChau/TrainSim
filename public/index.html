@@ -53,6 +53,7 @@
           <label><input type="checkbox" data-layer="signals" checked> Signals</label>
           <label><input type="checkbox" data-layer="switches" checked> Switches</label>
           <label><input type="checkbox" data-layer="pois" checked> Railway POIs</label>
+          <label><input type="checkbox" data-layer="timetable" checked> Train lollipops</label>
           <label><input type="checkbox" data-layer="orm"> ORM tiles (reference overlay)</label>
         </details>
         <label class="field" id="basemap-field">
@@ -80,16 +81,36 @@
 
       <section class="sim panel" id="sim" aria-label="Simulation">
         <header><h2>Simulation</h2><span class="muted" id="sim-tick">idle</span></header>
-        <select id="sim-route" aria-label="Route"></select>
-        <select id="sim-engine" aria-label="QR EMU train"></select>
-        <div class="sim-row">
-          <button id="sim-play" class="primary">▶ Run</button>
-          <button id="sim-pause" hidden>Ⅱ Pause</button>
-          <button id="sim-stop" hidden>■ Stop</button>
-          <label class="sim-speed">Speed <input id="sim-speed" type="range" min="5" max="120" value="30"></label>
+        <div class="sim-tabs" role="tablist" aria-label="Simulation mode">
+          <button id="sim-tab-time" role="tab" aria-selected="true">Time</button>
+          <button id="sim-tab-single" role="tab" aria-selected="false">Single</button>
         </div>
-        <label class="sim-axis"><span>Model axis</span><input id="sim-axis" type="range" min="-180" max="180" step="1" value="0" disabled><output id="sim-axis-value">0°</output></label>
-        <div id="sim-log" class="sim-log" role="log"></div>
+        <div id="sim-time" class="sim-time" role="tabpanel" aria-labelledby="sim-tab-time">
+          <div class="sim-row">
+            <button id="time-play" class="primary">▶ Play</button>
+            <button id="time-pause" hidden>Ⅱ Pause</button>
+            <button id="time-stop">■ Stop</button>
+            <label class="time-speed">Speed
+              <select id="time-speed" aria-label="Calendar simulation speed"></select>
+            </label>
+          </div>
+          <input id="time-slider" class="time-slider" type="range" aria-label="Simulation date and time">
+          <div class="time-range"><span id="time-min"></span><output id="time-current"></output><span id="time-max"></span></div>
+          <p id="time-status" class="time-status" role="status">Loading timetable…</p>
+          <p class="time-attribution">Timetable: <a href="https://www.translink.com.au/about-translink/open-data" target="_blank" rel="noopener">Translink SEQ GTFS</a> · CC BY 4.0</p>
+        </div>
+        <div id="sim-single" class="sim-single" role="tabpanel" aria-labelledby="sim-tab-single" hidden>
+          <select id="sim-route" aria-label="Route"></select>
+          <select id="sim-engine" aria-label="QR EMU train"></select>
+          <div class="sim-row">
+            <button id="sim-play" class="primary">▶ Run</button>
+            <button id="sim-pause" hidden>Ⅱ Pause</button>
+            <button id="sim-stop" hidden>■ Stop</button>
+            <label class="sim-speed">Speed <input id="sim-speed" type="range" min="5" max="120" value="30"></label>
+          </div>
+          <label class="sim-axis"><span>Model axis</span><input id="sim-axis" type="range" min="-180" max="180" step="1" value="0" disabled><output id="sim-axis-value">0°</output></label>
+          <div id="sim-log" class="sim-log" role="log"></div>
+        </div>
       </section>
 
       <div class="map-banner" id="map-banner" hidden></div>

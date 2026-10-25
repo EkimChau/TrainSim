@@ -16,6 +16,7 @@ Needs Node.js 22+, [Bun](https://bun.sh/docs/installation) and Python 3.10+ (sta
 cp .env.example .env          # optional: add GOOGLE_MAPS_API_KEY
 npm install
 npm run ingest                # fetch OSM data for every sheet station + 20 km (cached; re-runnable)
+npm run ingest:translink      # fetch current SEQ train timetables and annual holiday dates
 npm run build && npm start    # http://127.0.0.1:3000
 ```
 
@@ -24,6 +25,7 @@ Or `./run.sh --ingest` to do all of it. Without a Google key the map falls back 
 | Command | What it does |
 |---|---|
 | `npm run ingest` | Whole sheet (143 stations, Gympie North to Varsity Lakes), 20 km buffer, Overpass API |
+| `npm run ingest:translink` | Refresh train-only schedules, stops, shapes and QLD public-holiday dates from official sources |
 | `npm run ingest:caboolture` | Only the Caboolture Line stations (+20 km) |
 | `npm run ingest:geofabrik` | Same scope from the Geofabrik Queensland PBF (needs `osmium-tool`); fastest and most robust for full refreshes |
 | `npm run ingest:fixture` | Offline: loads the small synthetic fixture so the UI has something to show |
@@ -74,6 +76,32 @@ One top bar with the global navigation and database switch at the top right.
 
 No sign-in and no permissions by design. The API only answers loopback clients, so keep
 `HOST=127.0.0.1` and never expose the app through a proxy or tunnel. Edits change the live files.
+
+### Calendar simulation data
+
+The map opens in **Time** mode; **Single** retains the hand-selected OSM route simulator.
+Time mode reads Translink's official [SEQ GTFS feed](https://gtfsrt.api.translink.com.au/GTFS/SEQ_GTFS.zip),
+licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), and uses its
+train routes, trips, stop times, stops, service calendars, date exceptions and shapes.
+Run `npm run ingest:translink` to download and refresh these tables in `data/trainsim.sqlite`;
+use `python3 scripts/ingest_translink_gtfs.py --feed PATH --db PATH` to import a saved ZIP
+or a different database.
+
+GTFS calendar weekday patterns are repeated for the two-years-before/two-years-after
+simulation window, including outside the source feed's published date bounds. Exact
+`calendar_dates.txt` exceptions apply only to their source dates. The importer also stores
+Queensland public-holiday dates (including Brisbane RNA Show Day) from the official
+[Queensland public holidays rules](https://www.qld.gov.au/recreation/travel/holidays/public).
+On a holiday the simulation uses the GTFS Sunday pattern, with any exact feed exception
+taking precedence. Translink's current static feed does not provide a separate historical
+or public-holiday timetable series; this Sunday-pattern holiday service is an explicit
+simulation fallback, not a claim that historical special timetables have been recovered.
+Train icons use the six QR EMU profiles in `rail_emu_train`; the GTFS trip shape supplies
+the train's map position and direction. GTFS does not identify physical trainsets or
+carriage formations, so trips are assigned reproducibly across the six existing profiles
+and use their configured carriage counts (three by default); this visual assignment is not
+an assertion about the real fleet allocation. These are simulated timetable runs, not live
+train positions.
 
 ## Layout
 

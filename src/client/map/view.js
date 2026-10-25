@@ -4,6 +4,7 @@ import {api,el,fmt,store,toast} from '../api.js';
 import {createBasemap,rasterLayer,SEQ_VIEW} from './basemap.js';
 import {STYLES,STATION_COLOUR,hex,legend,poiColour,signalColour,trackColour,trackDash,trackWidth,SIGNAL_LEGEND} from './styles.js';
 import {Simulation} from './sim.js';
+import {TimeSimulation} from './time-sim.js';
 import {trainFormation,trainIconAngle} from '../../shared/formation.js';
 import {trainIcon} from './train-icons.js';
 
@@ -12,16 +13,47 @@ const dash=new PathStyleExtension({dash:true});
 const FONT='system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
 const ORM_TILES=style=>['a','b','c'].map(s=>`https://${s}.tiles.openrailwaymap.org/${style}/{z}/{x}/{y}.png`);
 
+function destination(point,bearing,distance){
+  const radius=6371000,angular=distance/radius,heading=bearing*Math.PI/180,lat1=point.lat*Math.PI/180,lon1=point.lng*Math.PI/180;
+  const lat2=Math.asin(Math.sin(lat1)*Math.cos(angular)+Math.cos(lat1)*Math.sin(angular)*Math.cos(heading));
+  const lon2=lon1+Math.atan2(Math.sin(heading)*Math.sin(angular)*Math.cos(lat1),
+    Math.cos(angular)-Math.sin(lat1)*Math.sin(lat2));
+  return {lat:lat2*180/Math.PI,lng:((lon2*180/Math.PI+540)%360)-180};
+}
+
+function clusterTrains(trains,zoom,cellSize){
+  const worldSize=256*2**zoom;
+  const groups=new Map();
+  for(const train of trains){
+    const sin=Math.sin(Math.max(-85,Math.min(85,train.position.lat))*Math.PI/180);
+    const x=(train.position.lng+180)/360*worldSize;
+    const y=(0.5-Math.log((1+sin)/(1-sin))/(4*Math.PI))*worldSize;
+    const key=`${Math.floor(x/cellSize)}:${Math.floor(y/cellSize)}`;
+    const group=groups.get(key)??[];
+    group.push(train);groups.set(key,group);
+  }
+  return [...groups.values()].map(group=>{
+    if(group.length===1)return {...group[0],clusterCount:1};
+    const lat=group.reduce((sum,t)=>sum+t.position.lat,0)/group.length;
+    const lng=group.reduce((sum,t)=>sum+t.position.lng,0)/group.length;
+    return {...group[0],position:{lat,lng},clusterCount:group.length};
+  });
+}
+
 export class MapView{
   constructor({config,onOpenData}){
     this.config=config;this.onOpenData=onOpenData;
     const hashStyle=/[?&]style=(\w+)/.exec(location.hash)?.[1];
     this.style=STYLES.some(s=>s.id===hashStyle)?hashStyle:store.get('mapStyle','infrastructure');
-    this.visible=store.get('mapLayers',{tracks:true,stations:true,scope:true,platforms:true,signals:true,switches:true,pois:true,orm:false});
+    this.visible={tracks:true,stations:true,scope:true,platforms:true,signals:true,switches:true,pois:true,orm:false,timetable:true,
+      ...store.get('mapLayers',{})};
     this.data={tracks:[],stations:[],scope:[],signals:[],switches:[],platforms:[],pois:[],zoom:10};
     this.selected=null;this.request=0;this.started=false;
     this.focusedTrainId=null;
+    this.mode='time';
     this.sim=new Simulation({onFrame:()=>this.render(),log:(m)=>this.simLog(m)});
+    this.timeSim=new TimeSimulation({onFrame:()=>this.render()});
+    this.timeSim.setModeHandler(mode=>this.selectMode(mode));
   }
 
   async start(){
@@ -44,8 +76,22 @@ export class MapView{
     }
     if(this.map.kind!=='google')toast('No GOOGLE_MAPS_API_KEY set: showing OpenStreetMap tiles instead of Google Maps.');
     this.sim.loadRoutes();
+    this.timeSim.load();
     this.renderLegend();
     this.load();
+  }
+
+  selectMode(mode){
+    this.mode=mode;
+    const time=mode==='time';
+    $('sim-tab-time').setAttribute('aria-selected',String(time));
+    $('sim-tab-single').setAttribute('aria-selected',String(!time));
+    $('sim-time').hidden=!time;
+    $('sim-single').hidden=time;
+    if(time){this.sim.stop(false);this.timeSim.setValue(this.timeSim.value,false);}
+    else{this.timeSim.pause();$('sim-tick').textContent='idle';}
+    this.clearTrainFocus(false);
+    this.render();
   }
 
   controls(){
@@ -55,7 +101,11 @@ export class MapView{
     sel.addEventListener('change',()=>{this.style=sel.value;store.set('mapStyle',this.style);this.renderLegend();this.render();this.writeHash(this.viewport);});
     for(const box of document.querySelectorAll('[data-layer]')){
       box.checked=!!this.visible[box.dataset.layer];
-      box.addEventListener('change',()=>{this.visible[box.dataset.layer]=box.checked;store.set('mapLayers',this.visible);this.render();});
+      box.addEventListener('change',()=>{
+        this.visible[box.dataset.layer]=box.checked;
+        if(box.dataset.layer==='timetable'&&!box.checked)this.clearTrainFocus(false);
+        store.set('mapLayers',this.visible);this.render();
+      });
     }
     $('basemap').addEventListener('change',e=>this.map?.setType(e.target.value));
     $('inspector-close').addEventListener('click',()=>{this.selected=null;$('inspector').hidden=true;this.render();});
@@ -114,7 +164,7 @@ export class MapView{
         pickable:true,autoHighlight:true,highlightColor:[255,255,0,180],
         updateTriggers:{getColor:style,getWidth:z}}));
     }
-    if(this.sim.path)layers.push(new PathLayer({id:'sim-route',data:[{path:this.sim.path}],getPath:x=>x.path,getColor:[255,212,0,170],getWidth:9,widthUnits:'pixels',capRounded:true,jointRounded:true}));
+    if(this.mode==='single'&&this.sim.path)layers.push(new PathLayer({id:'sim-route',data:[{path:this.sim.path}],getPath:x=>x.path,getColor:[255,212,0,170],getWidth:9,widthUnits:'pixels',capRounded:true,jointRounded:true}));
     if(v.pois)layers.push(new ScatterplotLayer({id:'pois',data:d.pois.filter(p=>p.kind!=='landuse'),getPosition:p=>[p.lon,p.lat],
       getRadius:p=>p.kind==='milestone'?3:4,radiusUnits:'pixels',getFillColor:p=>poiColour(p),stroked:true,getLineColor:[255,255,255],lineWidthUnits:'pixels',getLineWidth:1,pickable:true}));
     if(v.switches)layers.push(new ScatterplotLayer({id:'switches',data:d.switches,getPosition:s=>[s.lon,s.lat],getRadius:z>=16?4:3,radiusUnits:'pixels',
@@ -139,24 +189,62 @@ export class MapView{
       outlineWidth:3,outlineColor:[255,255,255,230],fontSettings:{sdf:true},characterSet:'auto',background:false}));
     if(this.selected)layers.push(new ScatterplotLayer({id:'selected',data:[this.selected],getPosition:s=>s.pos,getRadius:14,radiusUnits:'pixels',
       filled:false,stroked:true,getLineColor:[255,0,128],lineWidthUnits:'pixels',getLineWidth:3}));
-    const trains=this.sim.trains();
+    const trains=this.activeTrains();
     if(this.focusedTrainId&&!trains.some(t=>t.id===this.focusedTrainId)){
       this.focusedTrainId=null;
       $('inspector').hidden=!this.selected;
     }
-    if(trains.length)layers.push(
+    if(trains.length&&this.mode==='single')layers.push(
       new IconLayer({id:'trains',data:trains.flatMap(t=>trainFormation(t,z,t.id===this.focusedTrainId?2:1)),getIcon:t=>trainIcon(t.skin),
         getPosition:t=>t.position,getAngle:t=>trainIconAngle(t.angle,this.sim.axisOffset),getSize:t=>t.iconSize,
         sizeUnits:'pixels',sizeScale:1,autoPacking:true,pickable:true,autoHighlight:true,
         updateTriggers:{getPosition:this.sim.tick,getAngle:`${this.sim.tick}:${this.sim.axisOffset}`,getSize:this.focusedTrainId}}),
-      new TextLayer({id:'train-labels',data:trains,getPosition:t=>[t.position.lng,t.position.lat],getText:t=>t.id,getSize:11,sizeUnits:'pixels',
+      new TextLayer({id:'train-labels',data:trains,getPosition:t=>[t.position.lng,t.position.lat],getText:t=>t.engineId??t.id,getSize:11,sizeUnits:'pixels',
         getPixelOffset:[0,-18],fontFamily:FONT,outlineWidth:3,outlineColor:[255,255,255],fontSettings:{sdf:true},updateTriggers:{getPosition:this.sim.tick}}));
+    if(trains.length&&this.mode==='time'&&v.timetable){
+      const scale=Math.max(2,Math.min(10,2+(8-z)*1.5));
+      const lollipops=clusterTrains(trains,z,Math.max(72,36*scale)).map(t=>{
+        const iconScale=t.id===this.focusedTrainId?scale*1.25:scale;
+        const markerRadius=48*iconScale/5*(t.carriages/3);
+        const metersPerPixel=40075016.686*Math.cos(t.position.lat*Math.PI/180)/(256*2**z);
+        return {...t,path:[destination(t.position,t.bearing+180,10000),destination(t.position,t.bearing,10000)],
+          segment:0,progress:0.5,iconScale,markerRadius,
+          stemStart:destination(t.position,180,metersPerPixel*markerRadius),
+          stemEnd:destination(t.position,180,metersPerPixel*(markerRadius+20)),
+          labelOffset:markerRadius+26};
+      });
+      const labels=lollipops.filter(t=>t.clusterCount===1&&(scale>=4||z>=12));
+      const clusters=lollipops.filter(t=>t.clusterCount>1);
+      layers.push(
+        new PathLayer({id:'time-train-stems',data:lollipops,getPath:t=>[
+          [t.stemStart.lng,t.stemStart.lat],[t.stemEnd.lng,t.stemEnd.lat],
+        ],getColor:[255,129,0,210],getWidth:2,widthUnits:'pixels',capRounded:true}),
+        new ScatterplotLayer({id:'time-train-balloons',data:lollipops,getPosition:t=>[t.position.lng,t.position.lat],
+          getRadius:t=>t.markerRadius,radiusUnits:'pixels',getFillColor:[255,255,255,235],stroked:true,
+          getLineColor:[255,129,0,240],lineWidthUnits:'pixels',getLineWidth:3,pickable:true}),
+        new IconLayer({id:'time-trains',data:lollipops.flatMap(t=>trainFormation(t,z,t.iconScale)
+          .map(icon=>({...icon,clusterCount:t.clusterCount,clusterPosition:t.position}))),
+          getIcon:t=>trainIcon(t.skin),getPosition:t=>t.position,getAngle:t=>trainIconAngle(t.angle,this.sim.axisOffset),
+          getSize:t=>t.iconSize,sizeUnits:'pixels',sizeScale:1,autoPacking:true,pickable:true,autoHighlight:true,
+          updateTriggers:{getPosition:this.timeSim.value,getAngle:`${this.timeSim.value}:${this.sim.axisOffset}`,getSize:this.focusedTrainId}}),
+        new TextLayer({id:'time-train-labels',data:labels,getPosition:t=>[t.position.lng,t.position.lat],
+          getText:t=>t.engineId,getSize:Math.max(12,Math.min(16,12+(scale-2)*0.5)),sizeUnits:'pixels',
+          getPixelOffset:t=>[0,t.labelOffset],fontFamily:FONT,fontWeight:700,outlineWidth:3,
+          outlineColor:[255,255,255],fontSettings:{sdf:true},pickable:true,
+          updateTriggers:{getPosition:this.timeSim.value,getText:this.timeSim.value}}),
+        new TextLayer({id:'time-train-cluster-counts',data:clusters,getPosition:t=>[t.position.lng,t.position.lat],
+          getText:t=>String(t.clusterCount),getSize:12,sizeUnits:'pixels',getPixelOffset:[23,-23],
+          getColor:[25,25,25],fontFamily:FONT,fontWeight:700,background:true,getBackgroundColor:[255,255,255,245],
+          backgroundPadding:[3,2],pickable:true,updateTriggers:{getPosition:this.timeSim.value}}));
+    }
     this.map.setLayers(layers);
     this.renderTrainDetails(trains.find(t=>t.id===this.focusedTrainId));
   }
 
+  activeTrains(){return this.mode==='time'?this.timeSim.trainsNow():this.sim.trains();}
+
   focusTrain(id){
-    if(!this.sim.trains().some(t=>t.id===id))return;
+    if(!this.activeTrains().some(t=>t.id===id))return;
     this.focusedTrainId=id;
     $('inspector').hidden=true;
     this.render();
@@ -175,13 +263,14 @@ export class MapView{
     if(!train){panel.hidden=true;return;}
     const units=train.carriages/3;
     panel.hidden=false;
-    $('train-detail-title').textContent=train.id;
+    $('train-detail-title').textContent=train.engineId??train.id;
     $('train-detail-body').replaceChildren(
       el('div',{class:'train-detail-model',role:'img', 'aria-label':`${units} three-car QR EMU unit${units===1?'':'s'}`},
         ...Array.from({length:units},()=>el('img',{src:trainIcon(train.skin).url,alt:'Three-car QR EMU unit'}))),
       el('dl',{class:'train-detail-facts'},
-        el('dt',{},'Engine'),el('dd',{},'QR EMU'),
+        el('dt',{},'Engine'),el('dd',{},`${train.engineId??train.id} · QR EMU`),
         el('dt',{},'Formation'),el('dd',{},`${train.carriages} carriages · skin ${train.skin}`),
+        train.route?el('dt',{},'Service'):null,train.route?el('dd',{},train.route):null,
         el('dt',{},'Next stop'),el('dd',{},train.nextStop??'No stop data available'),
         el('dt',{},'Destination'),el('dd',{},train.destination??'Destination unavailable')));
   }
@@ -200,7 +289,21 @@ export class MapView{
 
   click(info){
     const o=info?.object,id=info?.layer?.id;
-    if(id==='trains'&&o){this.focusTrain(o.trainId);return;}
+    if(['trains','time-trains','time-train-balloons','time-train-labels'].includes(id)&&o){
+      if(o.clusterCount>1){
+        const center=o.clusterPosition??o.position;
+        const [lon,lat]=Array.isArray(center)?center:[center.lng,center.lat];
+        this.clearTrainFocus(false);
+        this.map.flyTo(lat,lon,Math.min(18,(this.viewport?.zoom??10)+2));
+        return;
+      }
+      this.focusTrain(o.trainId??o.id);return;
+    }
+    if(id==='time-train-cluster-counts'&&o){
+      this.clearTrainFocus(false);
+      this.map.flyTo(o.position.lat,o.position.lng,Math.min(18,(this.viewport?.zoom??10)+2));
+      return;
+    }
     this.clearTrainFocus(false);
     if(!o){this.render();return;}
     const ref=featureRef(id,o);

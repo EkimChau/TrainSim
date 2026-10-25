@@ -76,6 +76,100 @@ INSERT OR IGNORE INTO rail_emu_train(train_id, engine_type, skin, carriage_count
   ('QR-EMU-05', 'QR EMU', '3a', 3),
   ('QR-EMU-06', 'QR EMU', '3b', 3);
 
+-- -------------------------------------------------------------- Translink GTFS
+CREATE TABLE IF NOT EXISTS translink_feed (
+  feed_id       INTEGER PRIMARY KEY CHECK (feed_id = 1),
+  source_url    TEXT NOT NULL,
+  fetched_at    TEXT NOT NULL,
+  sha256        TEXT NOT NULL,
+  feed_start    TEXT NOT NULL,
+  feed_end      TEXT NOT NULL,
+  attribution   TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS translink_route (
+  route_id       TEXT PRIMARY KEY,
+  short_name     TEXT,
+  long_name      TEXT,
+  description    TEXT,
+  route_type     INTEGER NOT NULL CHECK (route_type = 2),
+  url            TEXT,
+  colour         TEXT,
+  text_colour    TEXT
+);
+
+CREATE TABLE IF NOT EXISTS translink_service (
+  service_id TEXT PRIMARY KEY,
+  monday     INTEGER NOT NULL CHECK (monday IN (0, 1)),
+  tuesday    INTEGER NOT NULL CHECK (tuesday IN (0, 1)),
+  wednesday  INTEGER NOT NULL CHECK (wednesday IN (0, 1)),
+  thursday   INTEGER NOT NULL CHECK (thursday IN (0, 1)),
+  friday     INTEGER NOT NULL CHECK (friday IN (0, 1)),
+  saturday   INTEGER NOT NULL CHECK (saturday IN (0, 1)),
+  sunday     INTEGER NOT NULL CHECK (sunday IN (0, 1)),
+  start_date TEXT NOT NULL,
+  end_date   TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS translink_service_date (
+  service_id     TEXT NOT NULL REFERENCES translink_service(service_id) ON DELETE CASCADE,
+  service_date   TEXT NOT NULL,
+  exception_type INTEGER NOT NULL CHECK (exception_type IN (1, 2)),
+  PRIMARY KEY (service_id, service_date)
+) WITHOUT ROWID;
+
+CREATE TABLE IF NOT EXISTS translink_stop (
+  stop_id       TEXT PRIMARY KEY,
+  stop_code     TEXT,
+  name          TEXT NOT NULL,
+  lat           REAL NOT NULL,
+  lon           REAL NOT NULL,
+  parent_station TEXT,
+  platform_code TEXT
+);
+
+CREATE TABLE IF NOT EXISTS translink_trip (
+  trip_id      TEXT PRIMARY KEY,
+  route_id     TEXT NOT NULL REFERENCES translink_route(route_id),
+  service_id   TEXT NOT NULL REFERENCES translink_service(service_id),
+  headsign     TEXT,
+  direction_id INTEGER,
+  shape_id     TEXT NOT NULL,
+  train_id     TEXT NOT NULL REFERENCES rail_emu_train(train_id)
+);
+CREATE INDEX IF NOT EXISTS translink_trip_service ON translink_trip(service_id, route_id);
+CREATE INDEX IF NOT EXISTS translink_trip_shape ON translink_trip(shape_id);
+
+CREATE TABLE IF NOT EXISTS translink_stop_time (
+  trip_id          TEXT NOT NULL REFERENCES translink_trip(trip_id) ON DELETE CASCADE,
+  stop_sequence    INTEGER NOT NULL,
+  stop_id          TEXT NOT NULL REFERENCES translink_stop(stop_id),
+  arrival_seconds  INTEGER NOT NULL,
+  departure_seconds INTEGER NOT NULL,
+  PRIMARY KEY (trip_id, stop_sequence)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS translink_stop_time_stop ON translink_stop_time(stop_id);
+
+CREATE TABLE IF NOT EXISTS translink_shape_point (
+  shape_id TEXT NOT NULL,
+  sequence INTEGER NOT NULL,
+  lat      REAL NOT NULL,
+  lon      REAL NOT NULL,
+  PRIMARY KEY (shape_id, sequence)
+) WITHOUT ROWID;
+
+CREATE TABLE IF NOT EXISTS sim_public_holiday (
+  holiday_date TEXT NOT NULL,
+  name         TEXT NOT NULL,
+  region       TEXT NOT NULL,
+  holiday_kind TEXT NOT NULL CHECK (holiday_kind IN ('full-day', 'part-day')),
+  start_time   TEXT,
+  end_time     TEXT,
+  source_url   TEXT NOT NULL,
+  PRIMARY KEY (holiday_date, name, region)
+) WITHOUT ROWID;
+CREATE INDEX IF NOT EXISTS sim_public_holiday_date ON sim_public_holiday(holiday_date);
+
 -- ---------------------------------------------------------------- scope (docs/stations.xlsx)
 CREATE TABLE IF NOT EXISTS scope_line (
   line_id       INTEGER PRIMARY KEY,
