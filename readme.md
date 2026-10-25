@@ -57,8 +57,12 @@ One top bar with the global navigation and database switch at the top right.
 
 - **Map**: Google Maps with a deck.gl overlay in OpenRailwayMap's styles (infrastructure,
   max speed, train protection, electrification, gauge), search, layer toggles, a legend,
-  a feature inspector with all OSM tags and track placement, an optional ORM raster
-  reference overlay, and a simulation panel that runs a train along any ingested route.
+  a feature inspector with all OSM tags and track placement, and a simulation panel that
+  runs a train along any ingested route. The Base map selector changes only the background:
+  OpenStreetMap is the default/current appearance, and Google roadmap, satellite, hybrid
+  and terrain are available when `GOOGLE_MAPS_API_KEY` is configured. Railway and train
+  overlays remain visible when changing the background. The separate ORM raster reference
+  overlay remains available as a layer.
   The QR EMU marker is a fixed-pixel vector model for one three-car unit; six-car trains
   show two linked unit icons. Click a running train to enlarge its model and view its next
   stop and destination; clicking elsewhere or pressing Escape returns it to normal.

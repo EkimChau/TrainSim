@@ -2,18 +2,18 @@ import {api,toast} from '../api.js';
 
 const $=id=>document.getElementById(id);
 const ZONE='Australia/Brisbane';
-const SPEEDS=[['1 minute / second',60],['1 hour / second',3600],['1 day / second',86400],['1 week / second',604800]];
+const MAX_SPEED=3600;
 
 function brisbaneNow(){
   const parts=Object.fromEntries(new Intl.DateTimeFormat('en-AU',{
-    timeZone:ZONE,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23',
+    timeZone:ZONE,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',
   }).formatToParts(new Date()).map(part=>[part.type,part.value]));
-  return Date.UTC(Number(parts.year),Number(parts.month)-1,Number(parts.day),Number(parts.hour),Number(parts.minute));
+  return Date.UTC(Number(parts.year),Number(parts.month)-1,Number(parts.day),Number(parts.hour),Number(parts.minute),Number(parts.second));
 }
 
 function dateTime(value){
   return new Intl.DateTimeFormat('en-AU',{
-    timeZone:'UTC',weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23',
+    timeZone:'UTC',weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',
   }).format(new Date(value));
 }
 
@@ -33,19 +33,21 @@ export class TimeSimulation{
     this.request=0;
     this.lastError='';
     const slider=$('time-slider');
-    slider.min=String(this.min);slider.max=String(this.max);slider.step='60000';slider.value=String(this.value);
+    slider.min=String(this.min);slider.max=String(this.max);slider.step='1000';slider.value=String(this.value);
     $('time-min').textContent=`${dateKey(this.min)} · 2 years back`;
     $('time-max').textContent=`${dateKey(this.max)} · 2 years ahead`;
     slider.addEventListener('input',()=>this.setValue(Number(slider.value),false));
     slider.addEventListener('change',()=>this.fetchTime());
-    $('time-speed').replaceChildren(...SPEEDS.map(([label,value])=>new Option(label,String(value))));
-    $('time-speed').value='3600';
+    const speedSlider=$('time-speed');
+    speedSlider.min='1';speedSlider.max=String(MAX_SPEED);speedSlider.step='1';speedSlider.value='1';
+    speedSlider.addEventListener('input',()=>this.updateSpeedLabel());
     $('time-play').addEventListener('click',()=>this.play());
     $('time-pause').addEventListener('click',()=>this.pause());
     $('time-stop').addEventListener('click',()=>this.stop());
     $('sim-tab-time').addEventListener('click',()=>this.onMode?.('time'));
     $('sim-tab-single').addEventListener('click',()=>this.onMode?.('single'));
     this.setValue(this.value,false);
+    this.updateSpeedLabel();
     this.updateControls();
   }
 
@@ -72,8 +74,17 @@ export class TimeSimulation{
 
   setModeHandler(handler){this.onMode=handler;}
 
+  updateSpeedLabel(){
+    const speed=Number($('time-speed').value)||1;
+    $('time-speed-value').textContent=speed===1
+      ?'Real time · 1×'
+      :speed===MAX_SPEED
+        ?'1 hour / second · 3,600×'
+        :`${speed.toLocaleString()}× real time`;
+  }
+
   setValue(value,fetch=true){
-    this.value=Math.max(this.min,Math.min(this.max,Math.round(value/60000)*60000));
+    this.value=Math.max(this.min,Math.min(this.max,Math.round(value/1000)*1000));
     $('time-slider').value=String(this.value);
     $('time-current').textContent=dateTime(this.value);
     $('sim-tick').textContent=dateTime(this.value);
@@ -83,7 +94,7 @@ export class TimeSimulation{
   async fetchTime(){
     if(!this.loaded)return;
     const request=++this.request,date=dateKey(this.value),current=new Date(this.value);
-    const time=current.getUTCHours()*3600+current.getUTCMinutes()*60;
+    const time=current.getUTCHours()*3600+current.getUTCMinutes()*60+current.getUTCSeconds();
     try{
       const data=await api('/map/calendar',{query:{date,time}});
       if(request!==this.request)return;
@@ -120,7 +131,7 @@ export class TimeSimulation{
     const now=performance.now();
     const elapsed=(now-this.lastStep)/1000;
     this.lastStep=now;
-    const speed=Number($('time-speed').value)||3600;
+    const speed=Number($('time-speed').value)||1;
     const next=Math.min(this.max,this.value+elapsed*speed*1000);
     this.setValue(next,false);
     this.fetchTime();

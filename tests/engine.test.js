@@ -89,12 +89,12 @@ test('calendar simulation exposes a four-year Brisbane-local slider and loads ti
   const elements=new Map();
   const getElement=id=>{
     if(!elements.has(id))elements.set(id,{value:'',textContent:'',disabled:false,hidden:false,
-      addEventListener(){},replaceChildren(...children){this.children=children;},setAttribute(){}});
+      listeners:{},addEventListener(name,listener){this.listeners[name]=listener;},
+      replaceChildren(...children){this.children=children;},setAttribute(){}});
     return elements.get(id);
   };
-  const priorDocument=globalThis.document,priorFetch=globalThis.fetch,priorOption=globalThis.Option;
+  const priorDocument=globalThis.document,priorFetch=globalThis.fetch;
   globalThis.document={getElementById:getElement};
-  globalThis.Option=class{constructor(text,value){this.text=text;this.value=value;}};
   const requests=[];
   globalThis.fetch=async url=>{
     requests.push(String(url));
@@ -106,15 +106,25 @@ test('calendar simulation exposes a four-year Brisbane-local slider and loads ti
   t.after(()=>{
     globalThis.document=priorDocument;
     globalThis.fetch=priorFetch;
-    globalThis.Option=priorOption;
   });
   const simulation=new TimeSimulation({onFrame(){}});
   await simulation.load();
   const slider=getElement('time-slider');
   assert.equal(Number(slider.max)-Number(slider.min),simulation.max-simulation.min);
   assert.ok(simulation.max-simulation.min>4*365*86400000-2*86400000);
-  assert.equal(slider.step,'60000');
-  assert.equal(getElement('time-speed').value,'3600');
+  assert.equal(slider.step,'1000');
+  const speed=getElement('time-speed');
+  assert.equal(speed.min,'1');
+  assert.equal(speed.max,'3600');
+  assert.equal(speed.step,'1');
+  assert.equal(speed.value,'1');
+  const before=simulation.value;
+  simulation.setValue(before+2345,false);
+  assert.equal(simulation.value,before+2000,'real-time playback retains second-level precision');
+  assert.equal(getElement('time-speed-value').textContent,'Real time · 1×');
+  speed.value='3600';
+  speed.listeners.input();
+  assert.equal(getElement('time-speed-value').textContent,'1 hour / second · 3,600×');
   assert.notEqual(getElement('time-current').textContent,'');
   assert.notEqual(getElement('sim-tick').textContent,'idle');
   assert.equal(simulation.loaded,true);
