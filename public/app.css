@@ -63,9 +63,17 @@ input:focus,select:focus,button:focus-visible{outline:2px solid #ffb366;outline-
 .legend-row i{width:24px;height:4px;border-radius:2px;flex:0 0 auto}
 .legend-row i.dot{width:10px;height:10px;border-radius:50%}
 .inspector{top:10px;right:10px;width:360px;max-height:calc(100% - 275px);display:flex;flex-direction:column}
-.inspector header,.sim header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 11px;border-bottom:1px solid #eee}
+.train-detail{top:10px;right:10px;width:300px;max-height:calc(100% - 275px);display:flex;flex-direction:column}
+.inspector header,.train-detail header,.sim header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 11px;border-bottom:1px solid #eee}
 .inspector h2,.sim h2{margin:0;font-size:14px}
+.train-detail h2{margin:0;font-size:14px}
 #inspector-body{overflow:auto;padding:4px 11px 11px}
+#train-detail-body{display:flex;gap:12px;align-items:center;overflow:auto;padding:12px}
+.train-detail-model{display:flex;flex:0 0 auto;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.train-detail-model img{display:block;width:42px;height:126px;object-fit:contain}
+.train-detail-facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 10px;margin:0;font-size:12px}
+.train-detail-facts dt{color:var(--muted);font-weight:600}
+.train-detail-facts dd{margin:0;overflow-wrap:anywhere}
 .inspector h3{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:12px 0 4px}
 .tags{width:100%;border-collapse:collapse;font-size:12px}
 .tags td{border-bottom:1px solid #f0f0f0;padding:3px 4px;vertical-align:top;word-break:break-word}

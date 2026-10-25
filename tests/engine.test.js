@@ -32,14 +32,24 @@ test('train formation uses the selected engine skin and carriage count',()=>{
   assert.equal(train.id,'QR-EMU-02');
   assert.equal(train.skin,'3b');
   assert.equal(train.carriages,6);
-  assert.equal(trainFormation(train,12).length,6);
+  assert.equal(trainFormation(train,12).length,2,'six cars use two three-car unit icons');
+  assert.equal(trainFormation({...train,carriages:3},12).length,1,'three cars use one unit icon');
+  assert.equal(trainFormation(train,12,2)[0].iconSize,36,'focused unit is enlarged');
   assert.throws(()=>new Train({id:'bad',path:route.segments[0].map(([lng,lat])=>({lat,lng})),carriages:4}),TypeError);
 });
 test('carriages follow the local route direction through a bend',()=>{
   const train=new Train({id:'QR-EMU-01',path:[{lat:0,lng:0},{lat:0,lng:.001},{lat:.001,lng:.001}]});
-  train.segment=1;train.progress=.15;train.position={lat:.00015,lng:.001};
+  train.segment=1;train.progress=.45;train.position={lat:.00045,lng:.001};
   const coaches=trainFormation(train,16);
-  assert.equal(coaches.length,3);
+  assert.equal(coaches.length,1);
   assert.ok(coaches[0].angle<10||coaches[0].angle>350,'leading coach points north');
-  assert.ok(coaches[2].angle>80&&coaches[2].angle<100,'trailing coach still follows the eastbound track');
+});
+test('train details follow the next stop along the route',()=>{
+  const scene=createRouteScene({id:1,name:'Local',to_name:'Destination',segments:[[[153,-27],[153.002,-27]]],
+    stops:[{name:'Middle',lat:-27,lon:153.001},{name:'End',lat:-27,lon:153.0019}]},{speedMetersPerTick:110});
+  const train=scene.trains[0];
+  assert.equal(train.destination,'Destination');
+  assert.equal(train.nextStop,'Middle');
+  new SimRun(scene).step();
+  assert.equal(train.nextStop,'End');
 });

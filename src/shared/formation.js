@@ -40,10 +40,11 @@ function bearing(a,b){
     Math.sin(lat1)*Math.cos(lat2)*Math.cos(dlng))*180/Math.PI+360)%360;
 }
 
-/** Place fixed-pixel coaches behind the moving cab and give each its local track heading. */
-export function trainFormation(train,zoom=10){
+/** Place one fixed-pixel three-car set per unit behind the lead cab. */
+export function trainFormation(train,zoom=10,sizeScale=1){
   const {path,carriages=3}=train;
-  if(!Array.isArray(path)||path.length<2||![3,6].includes(carriages))throw new TypeError('Invalid train formation');
+  if(!Array.isArray(path)||path.length<2||![3,6].includes(carriages)||!Number.isFinite(sizeScale)||sizeScale<=0)
+    throw new TypeError('Invalid train formation');
   const {cumulative,total}=pathLengths(path);
   if(total<=0)throw new RangeError('Train route has no measurable length');
 
@@ -51,15 +52,42 @@ export function trainFormation(train,zoom=10){
   const segmentLength=cumulative[segment+1]-cumulative[segment];
   const headDistance=cumulative[segment]+segmentLength*(train.progress??0);
   const metersPerPixel=PIXEL_SIZE_M*Math.max(0.01,Math.cos(train.position.lat*Math.PI/180))/2**zoom;
-  const coachLength=6*metersPerPixel;
-  const directionSample=coachLength/3;
+  const unitLength=18*metersPerPixel*sizeScale;
+  const directionSample=unitLength/3;
+  const units=carriages/3;
 
-  return Array.from({length:carriages},(_,index)=>{
-    const centerDistance=headDistance-(index+0.5)*coachLength;
+  return Array.from({length:units},(_,index)=>{
+    const centerDistance=headDistance-(index+0.5)*unitLength;
     const before=pointAtDistance(path,cumulative,total,centerDistance-directionSample);
     const after=pointAtDistance(path,cumulative,total,centerDistance+directionSample);
     const position=pointAtDistance(path,cumulative,total,centerDistance);
     return {id:`${train.id}-${index+1}`,trainId:train.id,name:train.name,skin:train.skin??'3a',
-      position:[position.lng,position.lat],angle:bearing(before,after)};
+      position:[position.lng,position.lat],angle:bearing(before,after),iconSize:18*sizeScale,unit:index+1};
   });
+}
+
+function stopChainage(path,cumulative,stop){
+  let closest={distance:Infinity,chainage:0};
+  for(let i=0;i<path.length-1;i++){
+    const a=path[i],b=path[i+1],meanLat=(a.lat+b.lat+stop.lat)/3*Math.PI/180;
+    const dx=(b.lng-a.lng)*Math.cos(meanLat),dy=b.lat-a.lat;
+    const px=(stop.lng-a.lng)*Math.cos(meanLat),py=stop.lat-a.lat;
+    const fraction=Math.max(0,Math.min(1,(dx*px+dy*py)/(dx*dx+dy*dy||1)));
+    const x=px-dx*fraction,y=py-dy*fraction;
+    const d=x*x+y*y;
+    if(d<closest.distance){
+      closest={distance:d,chainage:cumulative[i]+distance(a,b)*fraction};
+    }
+  }
+  return closest.chainage;
+}
+
+/** Attach ordered stop positions to a path so the simulator can show the next stop. */
+export function locateRouteStops(path,stops=[]){
+  if(!Array.isArray(path)||path.length<2)throw new TypeError('Invalid route path');
+  const cumulative=[0];
+  for(let i=1;i<path.length;i++)cumulative.push(cumulative[i-1]+distance(path[i-1],path[i]));
+  return stops.filter(s=>s.name&&Number.isFinite(s.lat)&&Number.isFinite(s.lon))
+    .map(s=>({...s,lng:s.lon,chainage:stopChainage(path,cumulative,{lat:s.lat,lng:s.lon})}))
+    .sort((a,b)=>a.chainage-b.chainage);
 }
