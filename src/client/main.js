@@ -1,4 +1,5 @@
-import {SEED_WORLD} from '../shared/seed-world.js';
+import {SEED_WORLD,SEED_REGION} from '../shared/seed-world.js';
+import {loadRegionWorld} from '../shared/region-api.js';
 import {SimWorld} from '../shared/simworld.js';
 import {compileDemoInstruments} from '../shared/simspec.js';
 import {SCENES,createScene} from '../shared/simscene.js';
@@ -75,25 +76,29 @@ function renderUser(user){const area=$('auth-area');const name=document.createEl
   const button=document.createElement('button');button.textContent='Sign out';button.className='subtle';button.onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.reload();};area.replaceChildren(name,button);
 }
 async function bootstrap() {
+  // Check the dataset state before requesting an optional world file.
+  let config=null;
   try {
-    const response=await fetch('/api/region/world');
-    if(response.ok){
-      const region=await response.json();
-      if(region.source==='OSM-derived'&&region.dataset_status==='real-source'){
-        state.world=new SimWorld(region,{source:'OSM-derived'});
-        log(`Loaded immutable OSM snapshot: ${state.world.tracks.length} track ways, ${state.world.stations.length} stops and ${state.world.routes.length} fully connected routes.`, 'ok');
-      }
-    }else if(response.status!==404)log(`OSM snapshot API HTTP ${response.status}`, 'warn');
-  }catch(e){log(`OSM snapshot unavailable: ${e.message}`, 'warn');}
+    const response=await fetch('/api/config');
+    if(!response.ok)throw new Error(`HTTP ${response.status}`);
+    config=await response.json();
+  }catch(e){log(`API config failed: ${e.message}`,'warn');}
+  if(config?.regionWorldAvailable) {
+    try {
+      const region=await loadRegionWorld(config,fetch);
+      state.world=new SimWorld(region,{source:'OSM-derived'});
+      log(`Loaded immutable OSM snapshot: ${state.world.tracks.length} track ways, ${state.world.stations.length} stops and ${state.world.routes.length} fully connected routes.`,'ok');
+    }catch(e){log(`OSM snapshot load failed: ${e.message}; using synthetic seed.`,'warn');}
+  }else if(config) {
+    log('No OSM snapshot ingested. Using synthetic seed; run python3 scripts/ingest_osm.py --download for regional railway data.','warn');
+  }
   const scenes=state.world.source==='OSM-derived'
     ?state.world.routes.filter(r=>r.status==='connected').map(r=>({id:`osm:${r.id}`,label:`OSM visual trace · ${r.name}`}))
     :SCENES;
   for(const scene of scenes){const o=document.createElement('option');o.value=scene.id;o.textContent=scene.label;$('scenario-selector').append(o);}
   $('btn-compile').addEventListener('click',compile);$('btn-play-sim').addEventListener('click',start);$('btn-stop-sim').addEventListener('click',()=>stop());
   for(const name of ['tracks','stations','signals'])$(`layer-${name}`).addEventListener('change',layerChange);
-  let config={mapsApiKey:'',gisClientId:''};
-  try{const res=await fetch('/api/config');if(!res.ok)throw new Error('Server unavailable');config=await res.json();}catch(e){log(`API config failed: ${e.message}`,'warn');}
-  if(config.mapsApiKey){try{const maps=await loadGoogleMaps(config.mapsApiKey);if(!maps)throw new Error('Google Maps unavailable');state.adapter=new GoogleMapsAdaptor($('map'),maps,config.region.center);}catch(e){log(`${e.message}; using schematic SVG demo`,'warn');}}
+  if(config?.mapsApiKey){try{const maps=await loadGoogleMaps(config.mapsApiKey);if(!maps)throw new Error('Google Maps unavailable');state.adapter=new GoogleMapsAdaptor($('map'),maps,config.region?.center??SEED_REGION.center);}catch(e){log(`${e.message}; using schematic SVG demo`,'warn');}}
   if(!state.adapter)state.adapter=new SvgAdaptor($('map'),state.world);
   $('map-provider').textContent=state.adapter.name;
   if(state.world.source==='OSM-derived'){
@@ -103,6 +108,6 @@ async function bootstrap() {
     $('dataset-notice').append('Track/station source: ',attr,' · Regional diagram: 2012 reference only · Not verified ETCS/operational data');
   }
   log(`${state.adapter.name} ready. ${state.world.source==='OSM-derived'?'OSM-derived regional world':'Synthetic Brisbane seed'} loaded.`,'ok');
-  await initGIS(config.gisClientId);compile();
+  await initGIS(config?.gisClientId??'');compile();
 }
 bootstrap().catch(error=>{log(`Startup failed: ${error.message}`,'warn');setStatus('Initialization error');});
