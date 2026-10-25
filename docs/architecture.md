@@ -71,3 +71,7 @@ Chapter 9 classification verification, chapter 6 exception handling, explicit
 version/mode/level applicability, protocol and braking model validation,
 and separately sourced acceptance tests (e.g. the SUBSET-076 family).
 Details and commands: [ESIG ingestion](esig-ingestion.md).
+
+## Local SQLite console boundary
+
+The optional `/db.html` developer tool is independent of SimWorld/SimRun and the ESIG ingestion pipeline. It uses project-local file discovery, Node SQLite, CodeMirror and Tabulator. Its unauthenticated SQL API is restricted to loopback connections, and must not be exposed through tunnels or reverse proxies. Query history is local (`data/local/`) and tracks console-driven calls, not external ingestion. CRUD changes modify staged source files; this is not a verified ETCS rule authoring or promotion path. Existing relational keys and duplicate-row insert guards prevent exact duplicates, but domain-level semantic uniqueness requires explicit table-specific keys and separate validation.
