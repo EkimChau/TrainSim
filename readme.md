@@ -60,6 +60,8 @@ One top bar with the global navigation and database switch at the top right.
   The QR EMU marker is a fixed-pixel vector model for one three-car unit; six-car trains
   show two linked unit icons. Click a running train to enlarge its model and view its next
   stop and destination; clicking elsewhere or pressing Escape returns it to normal.
+  Pause playback to adjust and save the model-axis offset (the SVG's long axis is vertical);
+  resume or stop with the Simulation controls.
   Choose one of six engine records in `rail_emu_train` (3-car default, `3a`/`3b` skin);
   set `carriage_count` to 6 in Data to use two units. The saved Sketchfab MHTML contains
   the page and preview images, not mesh/texture files, so these are custom vector

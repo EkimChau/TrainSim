@@ -84,7 +84,11 @@ input:focus,select:focus,button:focus-visible{outline:2px solid #ffb366;outline-
 .sim>select{width:calc(100% - 22px)}
 .sim-row{display:flex;gap:8px;align-items:center}
 .sim-speed{display:flex;align-items:center;gap:6px;margin-left:auto;color:var(--muted);font-size:12px}
-.sim-speed input{width:110px;padding:0}
+.sim-speed input{width:85px;padding:0}
+.sim-axis{display:flex;align-items:center;gap:8px;margin:8px 11px 0;color:var(--muted);font-size:12px}
+.sim-axis input{flex:1;min-width:0;padding:0}
+.sim-axis input:disabled{opacity:.5}
+.sim-axis output{width:38px;text-align:right;font-variant-numeric:tabular-nums}
 .sim-log{height:84px;overflow:auto;font:11.5px/1.45 var(--mono);color:#444;background:#fafafa;border:1px solid #eee;border-radius:4px;padding:4px 6px}
 .sim-log p{margin:0}
 .map-banner{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:3;background:#fff8e1;border:1px solid #ffe08a;border-radius:var(--radius);padding:8px 12px;box-shadow:var(--shadow);max-width:560px}
