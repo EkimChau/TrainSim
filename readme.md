@@ -83,3 +83,34 @@ python3 scripts/ingest_osm.py --osm-json ./your-osm-export.json
 ```
 
 On successful ingestion, the UI replaces *synthetic* tracks/stations with OSM WGS84 ways, railway stations and mapped OSM signal nodes. Diagram service paths are visualized with a train only if the complete stop sequence can be resolved through connected OSM way nodes. Unmatched stops and disconnected routes remain unresolved, not faked. Original simulation tests still run without network access or downloaded data. The 2012 schematic is not precise track geometry, and OpenStreetMap infrastructure is **not** a validated railway operational/safety model.
+
+## ESIG / SUBSET-026 complete nine-volume ingestion
+
+TrainSim now has a **staging-only** ETCS standards registry: SQLite schema in
+`db/esig/schema.sql`, pinned document/version/hashes in `data/esig/catalog/`,
+and ingestion/verification tooling in `scripts/esig/`. This ingests every page of
+SUBSET-026 chapters 1–9 (issue 4.0.0, 848 pages) including Chapter 9 classification
+rows. Extraction of diagrams, formulae, bit fields and complex tables remains
+**unverified**, so no automatic ETCS conformance is claimed.
+
+**Important:** ETCS application levels in these volumes are **0, NTC, 1 and 2**;
+Baseline **4** is the specification release, **not** application Level 4. Level 3
+is intentionally deleted in §2.6.7. The pipeline ingests the *entire* SRS,
+independently of the level chosen for a particular simulated track.
+
+```bash
+# Requires Python 3 and Poppler utilities (pdftotext, pdfinfo).
+# Place exactly the nine source PDFs in data/esig/sources/subset-026/4.0.0/
+mkdir -p data/esig/sources/subset-026/4.0.0
+cp "/path/to/SUBSET-026-"*' v400.pdf' data/esig/sources/subset-026/4.0.0/
+npm run ingest:etcs          # generate local data/esig/esig.sqlite and audit report
+npm run check:etcs           # source hashes + 848 pages + SQLite integrity
+# optional: python3 scripts/esig/seed_example.py
+```
+
+The source PDFs and generated SQLite database are deliberately ignored by Git;
+source hashes and a reproducible schema are committed. Nothing is imported
+straight into the live `SimRun` as verified rules. See
+[ESIG ingestion, schema, provenance and GA/SA](docs/esig-ingestion.md),
+[application-level catalogue](data/esig/catalog/application-levels.json), and
+[architecture contract](docs/architecture.md).
