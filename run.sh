@@ -8,6 +8,6 @@ if [[ "${1:-}" == '--preview' ]]; then
 fi
 command -v bun >/dev/null || { echo 'Bun missing. Install Bun or run ./run.sh --preview (no Express/GIS).' >&2; exit 1; }
 command -v npm >/dev/null || { echo 'npm is required.' >&2; exit 1; }
-if [[ ! -d node_modules ]]; then npm install; fi
+if [[ ! -d node_modules/tabulator-tables || ! -d node_modules/codemirror || ! -d node_modules/@codemirror/lang-sql ]]; then npm install; fi
 npm run build
 exec npm start
