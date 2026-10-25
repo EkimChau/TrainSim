@@ -5,6 +5,7 @@ import {SimRun} from '../src/shared/simrun.js';
 import {Train} from '../src/shared/models.js';
 import {trainFormation,trainIconAngle} from '../src/shared/formation.js';
 import {Simulation} from '../src/client/map/sim.js';
+import {TimeSimulation} from '../src/client/map/time-sim.js';
 
 const route={id:8001,ref:'CAB',name:'Test line',segments:[[[153.02,-27.45],[153.02,-27.4501]],[[153.02,-27.45],[153.02,-27.4501],[153.02,-27.4502],[153.021,-27.4503]]]};
 
@@ -83,6 +84,41 @@ test('simulation pause freezes time and enables the saved axis adjustment',t=>{
   assert.equal(elements.get('sim-axis').disabled,true);
   simulation.stop(false);
   assert.equal(elements.get('sim-tick').textContent,'idle');
+});
+test('calendar simulation exposes a four-year Brisbane-local slider and loads timetable data',async t=>{
+  const elements=new Map();
+  const getElement=id=>{
+    if(!elements.has(id))elements.set(id,{value:'',textContent:'',disabled:false,hidden:false,
+      addEventListener(){},replaceChildren(...children){this.children=children;},setAttribute(){}});
+    return elements.get(id);
+  };
+  const priorDocument=globalThis.document,priorFetch=globalThis.fetch,priorOption=globalThis.Option;
+  globalThis.document={getElementById:getElement};
+  globalThis.Option=class{constructor(text,value){this.text=text;this.value=value;}};
+  const requests=[];
+  globalThis.fetch=async url=>{
+    requests.push(String(url));
+    const status=String(url).includes('/calendar/status');
+    return {ok:true,json:async()=>status
+      ?{available:true,trips:10606,holidays:98}
+      :{date:'2026-10-25',time:0,holidays:[],trains:[]}};
+  };
+  t.after(()=>{
+    globalThis.document=priorDocument;
+    globalThis.fetch=priorFetch;
+    globalThis.Option=priorOption;
+  });
+  const simulation=new TimeSimulation({onFrame(){}});
+  await simulation.load();
+  const slider=getElement('time-slider');
+  assert.equal(Number(slider.max)-Number(slider.min),simulation.max-simulation.min);
+  assert.ok(simulation.max-simulation.min>4*365*86400000-2*86400000);
+  assert.equal(slider.step,'60000');
+  assert.equal(getElement('time-speed').value,'3600');
+  assert.notEqual(getElement('time-current').textContent,'');
+  assert.notEqual(getElement('sim-tick').textContent,'idle');
+  assert.equal(simulation.loaded,true);
+  assert.equal(requests.length,2,'load checks feed status then requests trains for the initial calendar time');
 });
 test('train details follow the next stop along the route',()=>{
   const scene=createRouteScene({id:1,name:'Local',to_name:'Destination',segments:[[[153,-27],[153.002,-27]]],

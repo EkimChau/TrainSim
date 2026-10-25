@@ -16,6 +16,7 @@
     "test:py": "python3 -m unittest discover -s tests -p 'test_*.py'",
     "check": "npm test && npm run build",
     "ingest": "python3 scripts/ingest_osm.py",
+    "ingest:translink": "python3 scripts/ingest_translink_gtfs.py",
     "ingest:caboolture": "python3 scripts/ingest_osm.py --lines \"Caboolture Line\"",
     "ingest:geofabrik": "python3 scripts/ingest_osm.py --source geofabrik",
     "ingest:fixture": "python3 scripts/ingest_osm.py --source file data/fixtures/osm-seq-fixture.osm",

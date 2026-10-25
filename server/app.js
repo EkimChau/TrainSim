@@ -69,6 +69,8 @@ export function createApp(options={}){
   m.get('/routes',use(()=>({routes:map.routes()})));
   m.get('/routes/:id',use(req=>map.route(req.params.id)));
   m.get('/engines',use(()=>({engines:map.engines()})));
+  m.get('/calendar/status',use(()=>map.calendarStatus()));
+  m.get('/calendar',use(req=>map.calendar(req.query)));
   app.use('/api/map',m);
 
   app.use('/api',(_req,res)=>res.status(404).json({error:'Not found'}));
