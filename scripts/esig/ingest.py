@@ -95,22 +95,26 @@ def extract_clauses(conn: sqlite3.Connection, doc_id: str, ch: int,
     return count
 
 def header_centres(lines: list[str]) -> dict[str,int] | None:
-    # Coordinates are pdftotext -layout character columns, NOT fixed across pages.
-    combined = "\n".join(lines[:15])
-    on = re.search(r"ETCS on-", combined)
-    if on is None:
+    """Read per-page classification columns, including Chapter 6 dual tables.
+
+    Chapter 9 changes page widths and Chapter 6 has an additional SECOND
+    'replacing clause classification' table. Only its left primary table is
+    staged as individual categories; the full raw row retains the second.
+    """
+    head=lines[:15]
+    on=next((line.find("ETCS on-") for line in head if "ETCS on-" in line),-1)
+    header=next((line for line in head if "trackside" in line
+                 and "Definition" in line and "Informative" in line),"")
+    if on<0 or not header:
         return None
-    first_line = next((x for x in lines[:15] if "ETCS on-" in x), "")
-    other = first_line.find("ETCS", first_line.find("ETCS on-") + len("ETCS on-"))
-    fields = {"onboard_requirement": first_line.find("ETCS on-") + 5}
-    if other >= 0:
-        fields["trackside_requirement"] = other + 5
-    detail_line = next((x for x in lines[:15] if "Definition" in x and "Informative" in x), "")
-    for label, key in (("Definition","definition"), ("Informative","informative"), ("Others","other")):
-        i = detail_line.find(label)
-        if i >= 0:
-            fields[key] = i + 5
-    return fields if len(fields) == 5 else None
+    fields={"onboard_requirement":on+5}
+    for label,key in (("trackside","trackside_requirement"),("Definition","definition"),
+                      ("Informative","informative"),("Others","other")):
+        i=header.find(label)
+        if i<0:
+            return None
+        fields[key]=i+5
+    return fields
 
 def extract_classification(conn: sqlite3.Connection, doc_id: str,
                            pages: list[str], warnings: list[str]) -> int:
@@ -120,6 +124,9 @@ def extract_classification(conn: sqlite3.Connection, doc_id: str,
             continue
         lines = page.splitlines()
         cols = header_centres(lines)
+        replaced_at = next((line.find("Replaced") for line in lines[:15] if "Replaced" in line),None)
+        if replaced_at is not None:
+            warnings.append(f"Chapter 6 replacement-clause columns staged as raw text; page {page_num} needs secondary table review")
         pending_ref, pending_lines = None, []
 
         def flush() -> None:
@@ -144,6 +151,8 @@ def extract_classification(conn: sqlite3.Connection, doc_id: str,
                 return
             parsed = set()
             for _,pos in marks:
+                if replaced_at is not None and pos >= replaced_at:
+                    continue  # belongs to second Chapter 6 replacement-clause table
                 nearest,delta = min(((name,abs(pos - x)) for name,x in cols.items()),
                                      key=lambda x: x[1])
                 if delta > 8:
