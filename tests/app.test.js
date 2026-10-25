@@ -145,6 +145,12 @@ test('calendar API extrapolates weekly GTFS service and applies holiday/exceptio
   assert.equal(holiday.holidays[0].name,"King's Birthday");
   assert.equal(holiday.trains.length,1);
   assert.equal(holiday.trains[0].engineId,'QR-EMU-01');
+  assert.equal(holiday.trains[0].serviceName,'Central - North');
+  assert.equal(holiday.trains[0].serviceDate,'2026-10-05');
+  assert.equal(holiday.trains[0].startStation,'Central');
+  assert.equal(holiday.trains[0].startSeconds,25200);
+  assert.equal(holiday.trains[0].endStation,'North');
+  assert.equal(holiday.trains[0].endSeconds,28800);
   assert.equal(holiday.trains[0].nextStop,'North');
   assert.ok(Math.abs(holiday.trains[0].position.lat+27.46)<0.00001,
     'trains remain at a scheduled intermediate stop during dwell time');

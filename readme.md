@@ -105,7 +105,10 @@ the train's map position and direction. GTFS does not identify physical trainset
 carriage formations, so trips are assigned reproducibly across the six existing profiles
 and use their configured carriage counts (three by default); this visual assignment is not
 an assertion about the real fleet allocation. These are simulated timetable runs, not live
-train positions.
+train positions. The Time panel's **Train** layer provides the active service list with each
+GTFS route long name, destination, and scheduled origin/destination station times. QR EMU
+profile IDs identify the train icon appearance, not physical trainsets.
+Select a service or train icon to focus the train, follow its position, and open its details.
 
 ## Layout
 

@@ -4,7 +4,7 @@ import {api,el,fmt,store,toast} from '../api.js';
 import {BASEMAP_TYPES,createBasemap,rasterLayer,SEQ_VIEW} from './basemap.js';
 import {STYLES,STATION_COLOUR,hex,legend,poiColour,signalColour,trackColour,trackDash,trackWidth,SIGNAL_LEGEND} from './styles.js';
 import {Simulation} from './sim.js';
-import {TimeSimulation} from './time-sim.js';
+import {formatServiceTime,TimeSimulation} from './time-sim.js';
 import {trainFormation,trainIconAngle} from '../../shared/formation.js';
 import {trainIcon} from './train-icons.js';
 
@@ -50,6 +50,8 @@ export class MapView{
     this.data={tracks:[],stations:[],scope:[],signals:[],switches:[],platforms:[],pois:[],zoom:10};
     this.selected=null;this.request=0;this.started=false;
     this.focusedTrainId=null;
+    this.followTrain=false;this.followedPosition=null;this.trainListSignature='';
+    this.trainListButtons=new Map();
     this.mode='time';
     this.sim=new Simulation({onFrame:()=>this.render(),log:(m)=>this.simLog(m)});
     this.timeSim=new TimeSimulation({onFrame:()=>this.render()});
@@ -92,10 +94,14 @@ export class MapView{
   selectMode(mode){
     this.mode=mode;
     const time=mode==='time';
+    $('sim').classList.toggle('sim-time-mode',time);
+    $('sim').classList.toggle('sim-single-mode',!time);
     $('sim-tab-time').setAttribute('aria-selected',String(time));
     $('sim-tab-single').setAttribute('aria-selected',String(!time));
     $('sim-time').hidden=!time;
     $('sim-single').hidden=time;
+    if(time)$('sim-time').append($('train-detail'));
+    else $('view-map').append($('train-detail'));
     if(time){this.sim.stop(false);this.timeSim.setValue(this.timeSim.value,false);}
     else{this.timeSim.pause();$('sim-tick').textContent='idle';}
     this.clearTrainFocus(false);
@@ -130,7 +136,7 @@ export class MapView{
     $('train-detail-close').addEventListener('click',()=>this.clearTrainFocus());
     document.addEventListener('keydown',e=>{if(e.key==='Escape')this.clearTrainFocus();});
     document.addEventListener('pointerdown',e=>{
-      if(this.focusedTrainId&&!e.target.closest('#map')&&!e.target.closest('#train-detail'))this.clearTrainFocus();
+      if(this.focusedTrainId&&!e.target.closest('#map')&&!e.target.closest('#sim')&&!e.target.closest('#train-detail'))this.clearTrainFocus();
     });
     let timer;
     const input=$('map-search'),results=$('search-results');
@@ -210,8 +216,12 @@ export class MapView{
     const trains=this.activeTrains();
     if(this.focusedTrainId&&!trains.some(t=>t.id===this.focusedTrainId)){
       this.focusedTrainId=null;
+      this.followTrain=false;
+      this.followedPosition=null;
       $('inspector').hidden=!this.selected;
     }
+    this.renderTrainList(trains);
+    this.followFocusedTrain(trains);
     if(trains.length&&this.mode==='single')layers.push(
       new IconLayer({id:'trains',data:trains.flatMap(t=>trainFormation(t,z,t.id===this.focusedTrainId?2:1)),getIcon:t=>trainIcon(t.skin),
         getPosition:t=>t.position,getAngle:t=>trainIconAngle(t.angle,this.sim.axisOffset),getSize:t=>t.iconSize,
@@ -235,7 +245,7 @@ export class MapView{
           getSize:t=>t.iconSize,sizeUnits:'pixels',sizeScale:1,autoPacking:true,pickable:true,autoHighlight:true,
           updateTriggers:{getPosition:this.timeSim.value,getAngle:`${this.timeSim.value}:${this.sim.axisOffset}`,getSize:this.focusedTrainId}}),
         new TextLayer({id:'time-train-labels',data:labels,getPosition:t=>[t.position.lng,t.position.lat],
-          getText:t=>t.engineId,getSize:Math.max(12,Math.min(16,12+(scale-2)*0.5)),sizeUnits:'pixels',
+          getText:t=>t.serviceName,getSize:Math.max(12,Math.min(16,12+(scale-2)*0.5)),sizeUnits:'pixels',
           getPixelOffset:[0,-18],fontFamily:FONT,fontWeight:700,outlineWidth:3,
           outlineColor:[255,255,255],fontSettings:{sdf:true},pickable:true,
           updateTriggers:{getPosition:this.timeSim.value,getText:this.timeSim.value}}),
@@ -250,19 +260,78 @@ export class MapView{
 
   activeTrains(){return this.mode==='time'?this.timeSim.trainsNow():this.sim.trains();}
 
-  focusTrain(id){
-    if(!this.activeTrains().some(t=>t.id===id))return;
+  focusTrain(id,{follow=this.mode==='time',focusList=false}={}){
+    const train=this.activeTrains().find(t=>t.id===id);
+    if(!train)return;
     this.focusedTrainId=id;
+    this.followTrain=follow;
+    this.followedPosition=follow?train.position:null;
     $('inspector').hidden=true;
+    if(follow)this.map.flyTo(train.position.lat,train.position.lng,Math.min(18,Math.max(15,this.viewport?.zoom??10)));
     this.render();
+    if(focusList)this.focusTrainListItem(id);
   }
 
   clearTrainFocus(render=true){
     if(!this.focusedTrainId)return;
     this.focusedTrainId=null;
+    this.followTrain=false;
+    this.followedPosition=null;
     $('train-detail').hidden=true;
     $('inspector').hidden=!this.selected;
     if(render)this.render();
+  }
+
+  followFocusedTrain(trains){
+    if(!this.followTrain||!this.focusedTrainId)return;
+    const train=trains.find(item=>item.id===this.focusedTrainId);
+    if(!train)return;
+    const previous=this.followedPosition;
+    const latScale=111320,lonScale=latScale*Math.cos(train.position.lat*Math.PI/180);
+    const distance=previous?Math.hypot(
+      (train.position.lat-previous.lat)*latScale,
+      (train.position.lng-previous.lng)*lonScale,
+    ):Infinity;
+    if(distance>60){
+      this.followedPosition=train.position;
+      this.map.flyTo(train.position.lat,train.position.lng);
+    }
+  }
+
+  renderTrainList(trains){
+    const list=$('time-train-list');
+    const signature=`${this.focusedTrainId??''}\n${trains.map(train=>[
+      train.id,train.engineId,train.serviceName,train.destination,train.startStation,train.startSeconds,
+      train.endStation,train.endSeconds,train.serviceDate,
+    ].join('|')).join('\n')}`;
+    if(signature===this.trainListSignature)return;
+    this.trainListSignature=signature;
+    this.trainListButtons.clear();
+    if(!trains.length){
+      list.replaceChildren(el('p',{class:'time-train-empty'},'No trains in service at this simulation time.'));
+      return;
+    }
+    const sorted=[...trains].sort((a,b)=>a.startSeconds-b.startSeconds||
+      String(a.engineId).localeCompare(String(b.engineId))||String(a.id).localeCompare(String(b.id)));
+    list.replaceChildren(el('ol',{class:'time-train-items'},
+      ...sorted.map(train=>{
+        const selected=train.id===this.focusedTrainId;
+        const button=el('button',{type:'button',class:`time-train-entry${selected?' active':''}`,
+          'aria-pressed':String(selected),onclick:()=>this.focusTrain(train.id,{follow:true,focusList:true})},
+        el('strong',{class:'time-train-heading'},train.serviceName),
+        el('span',{class:'time-train-destination'},train.destination),
+        el('span',{class:'time-train-stops'},
+          `${formatServiceTime(train.serviceDate,train.startSeconds)} ${train.startStation} → ${formatServiceTime(train.serviceDate,train.endSeconds)} ${train.endStation}`));
+        this.trainListButtons.set(train.id,button);
+        return el('li',{},button);
+      })));
+  }
+
+  focusTrainListItem(id){
+    const button=this.trainListButtons.get(id);
+    if(!button)return;
+    button.focus({preventScroll:true});
+    button.scrollIntoView({block:'nearest'});
   }
 
   renderTrainDetails(train){
@@ -270,14 +339,17 @@ export class MapView{
     if(!train){panel.hidden=true;return;}
     const units=train.carriages/3;
     panel.hidden=false;
-    $('train-detail-title').textContent=train.engineId??train.id;
+    $('train-detail-title').textContent=train.serviceName??train.id;
     $('train-detail-body').replaceChildren(
       el('div',{class:'train-detail-model',role:'img', 'aria-label':`${units} three-car QR EMU unit${units===1?'':'s'}`},
         ...Array.from({length:units},()=>el('img',{src:trainIcon(train.skin).url,alt:'Three-car QR EMU unit'}))),
       el('dl',{class:'train-detail-facts'},
-        el('dt',{},'Engine'),el('dd',{},`${train.engineId??train.id} · QR EMU`),
         el('dt',{},'Formation'),el('dd',{},`${train.carriages} carriages · skin ${train.skin}`),
-        train.route?el('dt',{},'Service'):null,train.route?el('dd',{},train.route):null,
+        train.serviceName?el('dt',{},'Service'):null,train.serviceName?el('dd',{},train.serviceName):null,
+        train.startStation?el('dt',{},'Starts'):null,
+        train.startStation?el('dd',{},`${formatServiceTime(train.serviceDate,train.startSeconds)} · ${train.startStation}`):null,
+        train.endStation?el('dt',{},'Ends'):null,
+        train.endStation?el('dd',{},`${formatServiceTime(train.serviceDate,train.endSeconds)} · ${train.endStation}`):null,
         el('dt',{},'Next stop'),el('dd',{},train.nextStop??'No stop data available'),
         el('dt',{},'Destination'),el('dd',{},train.destination??'Destination unavailable')));
   }
@@ -304,7 +376,7 @@ export class MapView{
         this.map.flyTo(lat,lon,Math.min(18,(this.viewport?.zoom??10)+2));
         return;
       }
-      this.focusTrain(o.trainId??o.id);return;
+      this.focusTrain(o.trainId??o.id,{follow:this.mode==='time',focusList:this.mode==='time'});return;
     }
     if(id==='time-train-cluster-counts'&&o){
       this.clearTrainFocus(false);

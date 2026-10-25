@@ -5,7 +5,7 @@ import {SimRun} from '../src/shared/simrun.js';
 import {Train} from '../src/shared/models.js';
 import {trainFormation,trainIconAngle} from '../src/shared/formation.js';
 import {Simulation} from '../src/client/map/sim.js';
-import {TimeSimulation} from '../src/client/map/time-sim.js';
+import {formatServiceTime,TimeSimulation} from '../src/client/map/time-sim.js';
 
 const route={id:8001,ref:'CAB',name:'Test line',segments:[[[153.02,-27.45],[153.02,-27.4501]],[[153.02,-27.45],[153.02,-27.4501],[153.02,-27.4502],[153.021,-27.4503]]]};
 
@@ -129,6 +129,12 @@ test('calendar simulation exposes a four-year Brisbane-local slider and loads ti
   assert.notEqual(getElement('sim-tick').textContent,'idle');
   assert.equal(simulation.loaded,true);
   assert.equal(requests.length,2,'load checks feed status then requests trains for the initial calendar time');
+});
+test('GTFS service times render across midnight and reject invalid values',()=>{
+  assert.equal(formatServiceTime('2026-10-25',7*3600+30*60),'07:30');
+  assert.equal(formatServiceTime('2026-10-25',25*3600+5*60),'01:05 (+1d)');
+  assert.throws(()=>formatServiceTime('not-a-date',0),/Invalid GTFS service time/);
+  assert.throws(()=>formatServiceTime('2026-10-25',-1),/Invalid GTFS service time/);
 });
 test('train details follow the next stop along the route',()=>{
   const scene=createRouteScene({id:1,name:'Local',to_name:'Destination',segments:[[[153,-27],[153.002,-27]]],
