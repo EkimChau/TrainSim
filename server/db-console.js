@@ -34,6 +34,7 @@ export class DbConsole {
   constructor(root,{historyFile=path.join(root,'data/local/db-queries.json')}={}){
     this.root=path.resolve(root);this.historyFile=historyFile;
     try{this.history=JSON.parse(fs.readFileSync(historyFile,'utf8'));if(!Array.isArray(this.history))this.history=[];}catch{this.history=[];}
+    this.nextSequence=this.history.reduce((max,q)=>Math.max(max,q.lastSequence||0),0);
   }
   databases(){
     const found=[];
@@ -79,7 +80,7 @@ export class DbConsole {
     const key=crypto.createHash('sha256').update(id+'\0'+sql.trim()).digest('hex');
     let item=this.history.find(q=>q.id===key);
     if(!item){item={id:key,database:id,sql:sql.trim(),name:sql.trim().replace(/\s+/g,' ').slice(0,84),count:0,lastCalled:null};this.history.push(item);}
-    item.count++;item.lastCalled=new Date().toISOString();
+    item.count++;item.lastSequence=++this.nextSequence;item.lastCalled=new Date().toISOString();
     this._saveHistory();
   }
   _saveHistory(){
@@ -88,7 +89,7 @@ export class DbConsole {
     fs.writeFileSync(temp,JSON.stringify(this.history,null,2)+'\n',{mode:0o600});
     fs.renameSync(temp,this.historyFile);
   }
-  saved(){return [...this.history].sort((a,b)=>(b.lastCalled??'').localeCompare(a.lastCalled??'')||a.name.localeCompare(b.name));}
+  saved(){return [...this.history].sort((a,b)=>(b.lastSequence??0)-(a.lastSequence??0)||(b.lastCalled??'').localeCompare(a.lastCalled??'')||a.name.localeCompare(b.name));}
   rename(queryId,name){
     const q=this.history.find(q=>q.id===queryId);
     if(!q)throw new Error('Saved query not found');
