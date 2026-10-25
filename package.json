@@ -15,7 +15,10 @@
     "check": "npm run test && npm run build",
     "preview": "node ./scripts/preview.mjs",
     "ingest:osm": "python3 scripts/ingest_osm.py --download",
-    "check:region": "python3 -m unittest discover -s tests -p test_rail_ingest.py"
+    "check:region": "python3 -m unittest discover -s tests -p test_rail_ingest.py",
+    "ingest:etcs": "python3 scripts/esig/ingest.py",
+    "check:etcs": "python3 scripts/esig/verify.py",
+    "test:esig": "python3 -m unittest discover -s tests -p test_esig_ingest.py"
   },
   "dependencies": {
     "express": "^5.1.0",
