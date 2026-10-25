@@ -1,4 +1,5 @@
 import {Train} from './models.js';
+import {locateRouteStops} from './formation.js';
 
 /** Pick the longest continuous piece of an OSM route path ([[lon,lat],...] segments). */
 export function longestSegment(segments){
@@ -14,6 +15,8 @@ export function longestSegment(segments){
 export function createRouteScene(route,{speedMetersPerTick=10,color='#ffd400',engine={}}={}){
   const path=longestSegment(route?.segments).map(([lng,lat])=>({lat,lng}));
   if(path.length<2)throw new RangeError('Route has no continuous path in the database');
+  const stops=locateRouteStops(path,route.stops??[]);
+  const destination=route.to_name||stops.at(-1)?.name||route.name||`Route ${route.id}`;
   return {id:`route:${route.id}`,trains:[new Train({id:engine.id||`T-${route.ref||route.id}`,name:route.name||`Route ${route.id}`,path,color,
-    speedMetersPerTick,skin:engine.skin??'3a',carriages:engine.carriages??3})]};
+    speedMetersPerTick,skin:engine.skin??'3a',carriages:engine.carriages??3,stops,destination})]};
 }

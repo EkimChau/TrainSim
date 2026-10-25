@@ -20,6 +20,7 @@ export class MapView{
     this.visible=store.get('mapLayers',{tracks:true,stations:true,scope:true,platforms:true,signals:true,switches:true,pois:true,orm:false});
     this.data={tracks:[],stations:[],scope:[],signals:[],switches:[],platforms:[],pois:[],zoom:10};
     this.selected=null;this.request=0;this.started=false;
+    this.focusedTrainId=null;
     this.sim=new Simulation({onFrame:()=>this.render(),log:(m)=>this.simLog(m)});
   }
 
@@ -58,6 +59,11 @@ export class MapView{
     }
     $('basemap').addEventListener('change',e=>this.map?.setType(e.target.value));
     $('inspector-close').addEventListener('click',()=>{this.selected=null;$('inspector').hidden=true;this.render();});
+    $('train-detail-close').addEventListener('click',()=>this.clearTrainFocus());
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')this.clearTrainFocus();});
+    document.addEventListener('pointerdown',e=>{
+      if(this.focusedTrainId&&!e.target.closest('#map')&&!e.target.closest('#train-detail'))this.clearTrainFocus();
+    });
     let timer;
     const input=$('map-search'),results=$('search-results');
     input.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>this.search(input.value),220);});
@@ -134,13 +140,49 @@ export class MapView{
     if(this.selected)layers.push(new ScatterplotLayer({id:'selected',data:[this.selected],getPosition:s=>s.pos,getRadius:14,radiusUnits:'pixels',
       filled:false,stroked:true,getLineColor:[255,0,128],lineWidthUnits:'pixels',getLineWidth:3}));
     const trains=this.sim.trains();
+    if(this.focusedTrainId&&!trains.some(t=>t.id===this.focusedTrainId)){
+      this.focusedTrainId=null;
+      $('inspector').hidden=!this.selected;
+    }
     if(trains.length)layers.push(
-      new IconLayer({id:'trains',data:trains.flatMap(t=>trainFormation(t,z)),getIcon:t=>trainIcon(t.skin),
-        getPosition:t=>t.position,getAngle:t=>t.angle,getSize:6,sizeUnits:'pixels',sizeScale:1,autoPacking:true,pickable:true,autoHighlight:true,
-        updateTriggers:{getPosition:this.sim.tick,getAngle:this.sim.tick}}),
+      new IconLayer({id:'trains',data:trains.flatMap(t=>trainFormation(t,z,t.id===this.focusedTrainId?2:1)),getIcon:t=>trainIcon(t.skin),
+        getPosition:t=>t.position,getAngle:t=>t.angle,getSize:t=>t.iconSize,sizeUnits:'pixels',sizeScale:1,autoPacking:true,pickable:true,autoHighlight:true,
+        updateTriggers:{getPosition:this.sim.tick,getAngle:this.sim.tick,getSize:this.focusedTrainId}}),
       new TextLayer({id:'train-labels',data:trains,getPosition:t=>[t.position.lng,t.position.lat],getText:t=>t.id,getSize:11,sizeUnits:'pixels',
         getPixelOffset:[0,-18],fontFamily:FONT,outlineWidth:3,outlineColor:[255,255,255],fontSettings:{sdf:true},updateTriggers:{getPosition:this.sim.tick}}));
     this.map.setLayers(layers);
+    this.renderTrainDetails(trains.find(t=>t.id===this.focusedTrainId));
+  }
+
+  focusTrain(id){
+    if(!this.sim.trains().some(t=>t.id===id))return;
+    this.focusedTrainId=id;
+    $('inspector').hidden=true;
+    this.render();
+  }
+
+  clearTrainFocus(render=true){
+    if(!this.focusedTrainId)return;
+    this.focusedTrainId=null;
+    $('train-detail').hidden=true;
+    $('inspector').hidden=!this.selected;
+    if(render)this.render();
+  }
+
+  renderTrainDetails(train){
+    const panel=$('train-detail');
+    if(!train){panel.hidden=true;return;}
+    const units=train.carriages/3;
+    panel.hidden=false;
+    $('train-detail-title').textContent=train.id;
+    $('train-detail-body').replaceChildren(
+      el('div',{class:'train-detail-model',role:'img', 'aria-label':`${units} three-car QR EMU unit${units===1?'':'s'}`},
+        ...Array.from({length:units},()=>el('img',{src:trainIcon(train.skin).url,alt:'Three-car QR EMU unit'}))),
+      el('dl',{class:'train-detail-facts'},
+        el('dt',{},'Engine'),el('dd',{},'QR EMU'),
+        el('dt',{},'Formation'),el('dd',{},`${train.carriages} carriages · skin ${train.skin}`),
+        el('dt',{},'Next stop'),el('dd',{},train.nextStop??'No stop data available'),
+        el('dt',{},'Destination'),el('dd',{},train.destination??'Destination unavailable')));
   }
 
   renderLegend(){
@@ -157,7 +199,9 @@ export class MapView{
 
   click(info){
     const o=info?.object,id=info?.layer?.id;
-    if(!o)return;
+    if(id==='trains'&&o){this.focusTrain(o.trainId);return;}
+    this.clearTrainFocus(false);
+    if(!o){this.render();return;}
     const ref=featureRef(id,o);
     if(!ref){
       if(id==='scope')toast(`${o.name}: ${o.status} (${o.line??'no line'})`);

@@ -151,8 +151,17 @@ export class MapApi{
         round(path_length_m) AS length_m, stop_count FROM rail_route ORDER BY path_status<>'ok', name`);
   }
   route(id){
-    const r=this.q('SELECT relation_id AS id, name, ref, colour, path_status AS status, path_length_m AS length_m, path_coords FROM rail_route WHERE relation_id=?',[num(id)])[0];
+    const r=this.q(`SELECT relation_id AS id, name, ref, colour, from_name, to_name, path_status AS status,
+        path_length_m AS length_m, path_coords FROM rail_route WHERE relation_id=?`,[num(id)])[0];
     if(!r)throw new Error('Route not found');
-    return {...r,path_coords:undefined,segments:json(r.path_coords)??[]};
+    const stops=this.q(`SELECT m.seq, m.member_type AS type, m.member_id AS id,
+        coalesce(s.name, f.name, json_extract(n.tags, '$.name')) AS name,
+        coalesce(s.lat, f.lat, n.lat) AS lat, coalesce(s.lon, f.lon, n.lon) AS lon
+      FROM rail_route_member m
+      LEFT JOIN rail_station s ON s.osm_type=m.member_type AND s.osm_id=m.member_id
+      LEFT JOIN rail_feature f ON f.osm_type=m.member_type AND f.osm_id=m.member_id
+      LEFT JOIN osm_node n ON m.member_type='node' AND n.id=m.member_id
+      WHERE m.relation_id=? AND m.role LIKE 'stop%' ORDER BY m.seq`,[r.id]);
+    return {...r,path_coords:undefined,segments:json(r.path_coords)??[],stops};
   }
 }

@@ -4,19 +4,21 @@ const skins={
 };
 const icons=new Map();
 
-/** Small, top-down vector coach for the map overlay; real Sketchfab geometry is not embedded. */
+/** Top-down vector icon for one three-car QR EMU unit; no 3D model is embedded. */
 export function trainIcon(skin='3a'){
   if(icons.has(skin))return icons.get(skin);
   const colors=skins[skin]??skins['3a'];
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="36" viewBox="0 0 24 36">
-    <path d="M12 1C5.7 1 3 5.1 3 11v17c0 4 3.6 7 9 7s9-3 9-7V11C21 5.1 18.3 1 12 1Z" fill="${colors.body}" stroke="#17222a" stroke-width="1.5"/>
-    <path d="M4 12h16v5H4zM4 26h16v3H4z" fill="${colors.stripe}"/>
-    <path d="M7 8c.8-3 2.5-4.4 5-4.4s4.2 1.4 5 4.4v3H7z" fill="${colors.window}" stroke="#fff" stroke-width=".7"/>
-    <path d="M7 19h3v4H7zm7 0h3v4h-3z" fill="${colors.window}"/>
-    <path d="M10.3 32h3.4v2h-3.4z" fill="${colors.accent}"/>
-    <circle cx="3.8" cy="14.5" r="1" fill="#17222a"/><circle cx="20.2" cy="14.5" r="1" fill="#17222a"/>
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="72" viewBox="0 0 24 72">
+    <path d="M12 1C6.2 1 3 4.8 3 10v9h18v-9c0-5.2-3.2-9-9-9ZM3 22h18v19H3zM3 44h18v18c0 5.2-3.2 9-9 9s-9-3.8-9-9z"
+      fill="${colors.body}" stroke="#17222a" stroke-width="1.5"/>
+    <path d="M3 12h18v4H3zM3 28h18v4H3zM3 50h18v4H3z" fill="${colors.stripe}"/>
+    <path d="M6 6c1.3-2 3.2-3 6-3s4.7 1 6 3v4H6z" fill="${colors.window}"/>
+    <path d="M6 24h4v12H6zm8 0h4v12h-4zM6 46h4v11H6zm8 0h4v11h-4z" fill="${colors.window}"/>
+    <path d="M10 65h4v3h-4z" fill="${colors.accent}"/>
+    <path d="M3 20h18M3 42h18" stroke="#17222a" stroke-width="1.5"/>
+    <circle cx="3.8" cy="17" r="1.1" fill="#17222a"/><circle cx="20.2" cy="17" r="1.1" fill="#17222a"/>
   </svg>`;
-  const icon={url:`data:image/svg+xml,${encodeURIComponent(svg)}`,width:24,height:36,anchorX:12,anchorY:18,mask:false};
+  const icon={url:`data:image/svg+xml,${encodeURIComponent(svg)}`,width:24,height:72,anchorX:12,anchorY:36,mask:false};
   icons.set(skin,icon);
   return icon;
 }
