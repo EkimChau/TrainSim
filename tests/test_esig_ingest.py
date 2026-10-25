@@ -62,7 +62,7 @@ class EsigIngestTests(unittest.TestCase):
             for entry in manifest["volumes"]:
                 n=entry["chapter"]
                 body=page_data[entry["filename"]]
-                synthetic[entry["filename"]]=["\n"]*(ingest.BODY_START[n]-1)+[body]
+                synthetic[entry["filename"]]=["\n"]*(max(6,ingest.BODY_START[n])-1)+[body]
                 entry["pages"]=len(synthetic[entry["filename"]])
             def pages_for(path):
                 return synthetic[path.name]
@@ -78,6 +78,7 @@ class EsigIngestTests(unittest.TestCase):
                 self.assertEqual(connection.execute("SELECT count(*) FROM source_page").fetchone()[0],
                                  stats["pages"])
                 self.assertEqual(connection.execute("SELECT count(*) FROM rule").fetchone()[0],0)
+                self.assertGreater(stats["classification_rows"],0)
                 self.assertGreater(connection.execute("SELECT count(*) FROM clause").fetchone()[0],0)
                 self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(),[])
 
