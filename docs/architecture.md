@@ -6,31 +6,40 @@ The main canvas is Google Maps with a SimAdaptor providing all map rendering cal
 
 `SimSpec` will eventually compile a regional track topology into configured signalling components according to selected regional laws and ETCS/UNISIG profiles. `BaseModels` define unconfigured component types. `SimWorld` owns deployed instances, tracks, stations, trackside devices, trains and command/schedule state. `SimScene` specifies a scenario. `SimRun` advances the scenario against the world, produces observable `SimStates` and supplies an overlay renderer. The view never owns train motion rules or compiler outputs.
 
-## Prototype module ownership
+## Module ownership
 
 ```text
-Node.js Express (server/*)
- ├─ /api/config and /api/health
- └─ GIS authentication: signed session cookie, token verification
+scripts/ingest_osm.py + scripts/ingest/   (Python, stdlib)
+ ├─ xlsx.py      docs/stations.xlsx → scope
+ ├─ sources.py   Overpass tiles | Geofabrik/PBF via osmium | OSM XML/JSON files
+ ├─ scope.py     station name matching, 20 km scope
+ ├─ store.py     schema, idempotent upserts by OSM id, prune, provenance
+ ├─ derive.py    rail_* layers (OpenRailwayMap data model)
+ ├─ topology.py  topo_* track graph, switch legs, linear referencing
+ └─ report.py    measured coverage
+        ↓
+data/trainsim.sqlite  (schema: db/trainsim/schema.sql)
 
-Bun build (src/client/main.js → public/assets/app.js)
- ├─ UI controller / scene playback
- └─ SimAdaptor
-     ├─ Google Maps renderer (configured deployment)
-     └─ local SVG schematic renderer (zero-credential demo)
+Node.js Express (server/*), loopback only, no sign-in
+ ├─ db/console.js    every project SQLite DB: browse, filter, live CRUD, one-statement SQL
+ ├─ db/query-log.js  every call logged: unique per (database, SQL), count, last call
+ └─ map-api.js       viewport features, feature detail, search, routes (logged as 'api')
 
-src/shared/ (no DOM or Maps imports)
- ├─ BaseModels
- ├─ SimWorld  ← source: synthetic mock seed today
- ├─ SimSpec   ← midpoint heuristic ONLY today
- ├─ SimScene  ← three original scenarios
- └─ SimRun    ← deterministic time step and warnings
+Bun build (src/client/app.js → public/assets/app.js)
+ ├─ map/   Google Maps (or OSM tiles) + deck.gl overlay in ORM styles, inspector, simulation panel
+ ├─ data/  Tabulator editor
+ └─ query/ CodeMirror SQL editor + saved/called query list
+
+src/shared/ (no DOM or map imports)
+ ├─ models.js    Train, WGS84 coordinates
+ ├─ simscene.js  scene from an ingested OSM route path
+ └─ simrun.js    deterministic fixed-step engine
 ```
 
 ## Non-negotiable separation & provenance
 
 1. Map/identity vendors are outside the pure simulation engine.
-2. Synthetic seed geometry cannot be labeled ORM-derived, surveyed, topology-validated or engineering-grade.
+2. Synthetic fixture geometry (`data/fixtures/`) cannot be labeled ORM-derived, surveyed, topology-validated or engineering-grade.
 3. Midpoint markers cannot be labeled validated balise positions; synthetic proximity warnings cannot be labeled implemented ETCS or RBC behaviours.
 4. Future provenance must track OSM way/node IDs, ingestion timestamp, bounding region, data license, source coordinate system, transformed WGS84 data and source revisions. Do not overwrite the mirrored source record when generating derived assets.
 5. Future law/rule engine must associate each deployed component and decision with rule ID, version, input evidence and test vectors before promoting it beyond illustrative prototype.
@@ -38,7 +47,7 @@ src/shared/ (no DOM or Maps imports)
 
 ## Acceptance gates
 
-Prototype: working compile/play/stop with seed, passing pure-model tests and visible warnings. Next milestone: real ORM ingestion plus reproducibility, no claims of compliance. Production or engineering use requires separate specification, safety assurance and rule verification; unit tests of this mock are insufficient.
+Current: reproducible OSM ingestion with provenance and coverage, a derived track graph, and illustrative playback along real route geometry. No claims of compliance. Production or engineering use requires separate specification, safety assurance and rule verification; unit tests of this mock are insufficient.
 
 ## ESIG source registry and conformance boundary
 
@@ -72,6 +81,14 @@ version/mode/level applicability, protocol and braking model validation,
 and separately sourced acceptance tests (e.g. the SUBSET-076 family).
 Details and commands: [ESIG ingestion](esig-ingestion.md).
 
-## Local SQLite console boundary
+## Database console boundary
 
-The optional `/db.html` developer tool is independent of SimWorld/SimRun and the ESIG ingestion pipeline. It uses project-local file discovery, Node SQLite, CodeMirror and Tabulator. Its unauthenticated SQL API is restricted to loopback connections, and must not be exposed through tunnels or reverse proxies. Query history is local (`data/local/`) and tracks console-driven calls, not external ingestion. CRUD changes modify staged source files; this is not a verified ETCS rule authoring or promotion path. Existing relational keys and duplicate-row insert guards prevent exact duplicates, but domain-level semantic uniqueness requires explicit table-specific keys and separate validation.
+The Data and Query pages work on every SQLite file in the project (world, ESIG, query log)
+through one adapter, `server/db/console.js`. The API has no sign-in or roles by design and
+rejects non-loopback clients; never expose it through a tunnel or reverse proxy. Edits change
+the live files immediately. Every statement the app runs (grid, editor and map API) is logged
+in `data/local/console.sqlite`. Databases built from TrainSim's schemas declare
+`schema_info.natural_keys='all'`: every table is keyed by OSM or natural ids, so the console adds
+no triggers there. Other databases get a duplicate-payload insert trigger per table, and every
+row added from the grid is checked against identical rows first. Editing ESIG rows is not a
+verified rule-authoring path.

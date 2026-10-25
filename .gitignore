@@ -4,11 +4,13 @@ public/assets/
 .DS_Store
 coverage/
 *.log
-
-# Source snapshots are potentially large; manifest sha256 captures immutable bytes.
-data/current/
 __pycache__/
 *.pyc
+
+# Generated world database and raw OSM snapshot cache (rebuild with npm run ingest)
+data/trainsim.sqlite
+data/trainsim.sqlite-*
+data/cache/
 
 # ESIG source PDFs and generated evidence DB / audit artefacts (local only)
 data/esig/sources/
@@ -16,5 +18,5 @@ data/esig/esig.sqlite
 data/esig/esig.sqlite-*
 data/esig/reports/
 
-# Local console history (never committed)
+# Local query log (data/local/console.sqlite)
 data/local/

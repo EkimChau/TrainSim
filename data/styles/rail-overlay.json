@@ -1,8 +1,0 @@
-{
-  "name": "TrainSim railway overlay (ORM-inspired, independently defined)",
-  "notice": "Display styling only. Not a copy of OpenRailwayMap tile artwork. Underlying tracks and tags come from OSM, with attribution.",
-  "rail": { "strokeColor": "#e96260", "strokeOpacity": 0.9, "strokeWeight": 3 },
-  "station": { "fillColor": "#f8fbff", "strokeColor": "#0a7cba", "scale": 5 },
-  "signal": { "fillColor": "#66d6a4", "scale": 5 },
-  "train": { "fillColor": "#fbdc59", "scale": 6 }
-}

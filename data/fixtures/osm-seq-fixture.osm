@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="TrainSim synthetic fixture (approximate positions, not survey truth)">
+  <meta osm_base="2026-10-01T00:00:00Z"/>
+  <node id="1001" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.293" lon="152.969"/>
+  <node id="1002" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2913333" lon="152.971"/>
+  <node id="1003" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2896667" lon="152.973"/>
+  <node id="1004" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.288" lon="152.975">
+    <tag k="railway" v="signal"/>
+    <tag k="ref" v="BP12"/>
+    <tag k="railway:signal:direction" v="forward"/>
+    <tag k="railway:signal:position" v="left"/>
+    <tag k="railway:signal:main" v="AU:QLD:main"/>
+    <tag k="railway:signal:main:states" v="YGYR;GR;R"/>
+  </node>
+  <node id="1005" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2863333" lon="152.977"/>
+  <node id="1006" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2846667" lon="152.979"/>
+  <node id="1007" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.283" lon="152.981"/>
+  <node id="1008" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2801667" lon="152.9808333"/>
+  <node id="1009" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2773333" lon="152.9806667"/>
+  <node id="1010" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2745" lon="152.9805"/>
+  <node id="1011" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2716667" lon="152.9803333">
+    <tag k="railway" v="signal"/>
+    <tag k="ref" v="PE4"/>
+    <tag k="railway:signal:direction" v="forward"/>
+    <tag k="railway:signal:main" v="AU:QLD:main"/>
+    <tag k="railway:signal:shunting" v="AU:QLD:standalone"/>
+  </node>
+  <node id="1012" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2688333" lon="152.9801667">
+    <tag k="public_transport" v="stop_position"/>
+    <tag k="train" v="yes"/>
+    <tag k="name" v="Petrie"/>
+  </node>
+  <node id="1013" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.266" lon="152.98">
+    <tag k="railway" v="switch"/>
+    <tag k="ref" v="P101"/>
+    <tag k="railway:switch" v="default"/>
+    <tag k="railway:turnout_side" v="right"/>
+  </node>
+  <node id="1014" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.262" lon="152.9804"/>
+  <node id="1015" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.258" lon="152.9808"/>
+  <node id="1016" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.254" lon="152.9812"/>
+  <node id="1017" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.25" lon="152.9816">
+    <tag k="railway" v="switch"/>
+    <tag k="ref" v="P107"/>
+  </node>
+  <node id="1018" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.246" lon="152.982"/>
+  <node id="1019" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.242" lon="152.9824"/>
+  <node id="1020" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.238" lon="152.9828">
+    <tag k="railway" v="milestone"/>
+    <tag k="railway:position" v="33.5"/>
+  </node>
+  <node id="1021" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.234" lon="152.9832"/>
+  <node id="1022" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.23" lon="152.9836"/>
+  <node id="1023" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.226" lon="152.984"/>
+  <node id="1024" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.265" lon="152.9806"/>
+  <node id="1025" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2635" lon="152.983">
+    <tag k="railway" v="signal"/>
+    <tag k="ref" v="RP1"/>
+    <tag k="railway:signal:direction" v="backward"/>
+    <tag k="railway:signal:main" v="AU:QLD:main"/>
+  </node>
+  <node id="1026" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.262" lon="152.986"/>
+  <node id="1027" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2605" lon="152.9891667"/>
+  <node id="1028" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.259" lon="152.9923333">
+    <tag k="railway" v="level_crossing"/>
+  </node>
+  <node id="1029" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2575" lon="152.9955"/>
+  <node id="1030" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.256" lon="152.9986667"/>
+  <node id="1031" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2545" lon="153.0018333"/>
+  <node id="1032" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.253" lon="153.005"/>
+  <node id="1033" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.25" lon="152.983"/>
+  <node id="1034" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.249" lon="152.9822"/>
+  <node id="1035" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.248" lon="152.9818">
+    <tag k="railway" v="buffer_stop"/>
+  </node>
+  <node id="1036" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.29" lon="152.97"/>
+  <node id="1037" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2905" lon="152.966"/>
+  <node id="1038" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2672" lon="152.9793">
+    <tag k="railway" v="station"/>
+    <tag k="name" v="Petrie"/>
+    <tag k="public_transport" v="station"/>
+    <tag k="train" v="yes"/>
+    <tag k="network" v="Translink"/>
+  </node>
+  <node id="1039" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2832" lon="152.9806">
+    <tag k="railway" v="station"/>
+    <tag k="name" v="Lawnton"/>
+    <tag k="public_transport" v="station"/>
+    <tag k="train" v="yes"/>
+  </node>
+  <node id="1040" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2928" lon="152.9686">
+    <tag k="railway" v="station"/>
+    <tag k="name" v="Bray Park"/>
+    <tag k="public_transport" v="station"/>
+    <tag k="train" v="yes"/>
+  </node>
+  <node id="1041" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2262" lon="152.9836">
+    <tag k="railway" v="station"/>
+    <tag k="name" v="Dakabin"/>
+  </node>
+  <node id="1042" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2532" lon="153.0046">
+    <tag k="railway" v="station"/>
+    <tag k="name" v="Kallangur"/>
+    <tag k="public_transport" v="station"/>
+    <tag k="train" v="yes"/>
+  </node>
+  <node id="1043" version="1" timestamp="2026-10-01T00:00:00Z" lat="-19.26" lon="146.8">
+    <tag k="railway" v="halt"/>
+    <tag k="name" v="Petrie"/>
+  </node>
+  <node id="1044" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2676" lon="152.9797"/>
+  <node id="1045" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2668" lon="152.9798"/>
+  <node id="1046" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2668" lon="152.98"/>
+  <node id="1047" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2676" lon="152.9799"/>
+  <node id="1048" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2835" lon="152.9811"/>
+  <node id="1049" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.2828" lon="152.9812"/>
+  <node id="1050" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.268" lon="152.9785">
+    <tag k="railway" v="signal_box"/>
+    <tag k="name" v="Petrie Signal Cabin"/>
+  </node>
+  <node id="1051" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.27" lon="152.977">
+    <tag k="power" v="substation"/>
+    <tag k="substation" v="traction"/>
+    <tag k="name" v="Petrie TSS"/>
+  </node>
+  <node id="1052" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.56" lon="151.95"/>
+  <node id="1053" version="1" timestamp="2026-10-01T00:00:00Z" lat="-27.561" lon="151.96"/>
+  <way id="5001" version="1" timestamp="2026-10-01T00:00:00Z">
+    <nd ref="1001"/>
+    <nd ref="1002"/>
+    <nd ref="1003"/>
+    <nd ref="1004"/>
+    <nd ref="1005"/>
+    <nd ref="1006"/>
+    <nd ref="1007"/>
+    <nd ref="1008"/>
+    <nd ref="1009"/>
+    <nd ref="1010"/>
+    <nd ref="1011"/>
+    <nd ref="1012"/>
+    <nd ref="1013"/>
+    <tag k="railway" v="rail"/>
+    <tag k="usage" v="main"/>
+    <tag k="name" v="North Coast Line"/>
+    <tag k="ref" v="North Coast"/>
+    <tag k="gauge" v="1067"/>
+    <tag k="electrified" v="contact_line"/>
+    <tag k="voltage" v="25000"/>
+    <tag k="frequency" v="50"/>
+    <tag k="maxspeed" v="80"/>
+    <tag k="railway:aws" v="yes"/>
+    <tag k="operator" v="Queensland Rail"/>
+  </way>
+  <way id="5002" version="1" timestamp="2026-10-01T00:00:00Z">
+    <nd ref="1013"/>
+    <nd ref="1014"/>
+    <nd ref="1015"/>
+    <nd ref="1016"/>
+    <nd ref="1017"/>
+    <nd ref="1018"/>
+    <nd ref="1019"/>
+    <nd ref="1020"/>
+    <nd ref="1021"/>
+    <nd ref="1022"/>
+    <nd ref="1023"/>
+    <tag k="railway" v="rail"/>
+    <tag k="usage" v="main"/>
+    <tag k="name" v="North Coast Line"/>
+    <tag k="ref" v="North Coast"/>
+    <tag k="gauge" v="1067"/>
+    <tag k="electrified" v="contact_line"/>
+    <tag k="voltage" v="25000"/>
+    <tag k="frequency" v="50"/>
+    <tag k="maxspeed" v="100"/>
+    <tag k="railway:aws" v="yes"/>
+  </way>
+  <way id="5003" version="1" timestamp="2026-10-01T00:00:00Z">
+    <nd ref="1013"/>
+    <nd ref="1024"/>
+    <nd ref="1025"/>
+    <nd ref="1026"/>
+    <nd ref="1027"/>
+    <nd ref="1028"/>
+    <nd ref="1029"/>
+    <nd ref="1030"/>
+    <nd ref="1031"/>
+    <nd ref="1032"/>
+    <tag k="railway" v="rail"/>
+    <tag k="usage" v="branch"/>
+    <tag k="name" v="Redcliffe Peninsula Line"/>
+    <tag k="gauge" v="1067"/>
+    <tag k="electrified" v="contact_line"/>
+    <tag k="voltage" v="25000"/>
+    <tag k="frequency" v="50"/>
+    <tag k="maxspeed" v="100"/>
+    <tag k="railway:etcs" v="2"/>
+  </way>
+  <way id="5004" version="1" timestamp="2026-10-01T00:00:00Z">
+    <nd ref="1017"/>
+    <nd ref="1033"/>
+    <nd ref="1034"/>
+    <nd ref="1035"/>
+    <tag k="railway" v="rail"/>
+    <tag k="service" v="siding"/>
+    <tag k="gauge" v="1067"/>
+    <tag k="electrified" v="no"/>
+  </way>
+  <way id="5005" version="1" timestamp="2026-10-01T00:00:00Z">
+    <nd ref="1036"/>
+    <nd ref="1037"/>
+    <tag k="railway" v="disused"/>
+    <tag k="disused:railway" v="rail"/>
+  </way>
+  <way id="5101" version="1" timestamp="2026-10-01T00:00:00Z">
+    <nd ref="1044"/>
+    <nd ref="1045"/>
+    <nd ref="1046"/>
+    <nd ref="1047"/>
+    <nd ref="1044"/>
+    <tag k="railway" v="platform"/>
+    <tag k="public_transport" v="platform"/>
+    <tag k="train" v="yes"/>
+    <tag k="ref" v="1"/>
+    <tag k="height" v="1.1"/>
+  </way>
+  <way id="5102" version="1" timestamp="2026-10-01T00:00:00Z">
+    <nd ref="1048"/>
+    <nd ref="1049"/>
+    <tag k="railway" v="platform"/>
+    <tag k="ref" v="2"/>
+  </way>
+  <way id="5900" version="1" timestamp="2026-10-01T00:00:00Z">
+    <nd ref="1052"/>
+    <nd ref="1053"/>
+    <tag k="railway" v="rail"/>
+    <tag k="usage" v="main"/>
+    <tag k="name" v="Main Line (out of scope)"/>
+  </way>
+  <relation id="7001" version="1" timestamp="2026-10-01T00:00:00Z">
+    <member type="node" ref="1038" role=""/>
+    <member type="way" ref="5101" role="platform"/>
+    <member type="node" ref="1012" role="stop"/>
+    <tag k="type" v="public_transport"/>
+    <tag k="public_transport" v="stop_area"/>
+    <tag k="name" v="Petrie"/>
+  </relation>
+  <relation id="8001" version="1" timestamp="2026-10-01T00:00:00Z">
+    <member type="node" ref="1012" role="stop"/>
+    <member type="way" ref="5001" role=""/>
+    <member type="way" ref="5002" role=""/>
+    <tag k="type" v="route"/>
+    <tag k="route" v="train"/>
+    <tag k="name" v="Caboolture Line: Bray Park =&gt; Dakabin"/>
+    <tag k="ref" v="CAB"/>
+    <tag k="from" v="Bray Park"/>
+    <tag k="to" v="Dakabin"/>
+    <tag k="network" v="Translink"/>
+    <tag k="operator" v="Queensland Rail"/>
+    <tag k="colour" v="#0072bb"/>
+  </relation>
+  <relation id="8002" version="1" timestamp="2026-10-01T00:00:00Z">
+    <member type="way" ref="5001" role=""/>
+    <member type="way" ref="5003" role=""/>
+    <tag k="type" v="route"/>
+    <tag k="route" v="train"/>
+    <tag k="name" v="Redcliffe Peninsula: Bray Park =&gt; Kallangur"/>
+    <tag k="network" v="Translink"/>
+  </relation>
+  <relation id="8003" version="1" timestamp="2026-10-01T00:00:00Z">
+    <member type="way" ref="5002" role=""/>
+    <member type="way" ref="999999" role=""/>
+    <tag k="type" v="route"/>
+    <tag k="route" v="train"/>
+    <tag k="name" v="Sunshine Coast Line: Petrie =&gt; Nambour"/>
+    <tag k="network" v="Translink"/>
+  </relation>
+  <relation id="8100" version="1" timestamp="2026-10-01T00:00:00Z">
+    <member type="relation" ref="8001" role=""/>
+    <member type="relation" ref="8003" role=""/>
+    <tag k="type" v="route_master"/>
+    <tag k="route_master" v="train"/>
+    <tag k="name" v="Caboolture Line"/>
+    <tag k="ref" v="CAB"/>
+  </relation>
+</osm>

@@ -3,29 +3,162 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>TrainSim · Brisbane Prototype</title>
-  <link rel="stylesheet" href="/style.css">
+  <title>TrainSim</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ff8100'/%3E%3Cpath d='M9 6v20M23 6v20M9 10h14M9 16h14M9 22h14' stroke='%23fff' stroke-width='2.4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/assets/app.css">
+  <link rel="stylesheet" href="/app.css">
   <script type="module" src="/assets/app.js"></script>
 </head>
 <body>
-  <aside class="sidebar">
-    <header class="brand"><div class="eyebrow">TRAIN SIM / PROTOTYPE 01</div><h1>Railway digital twin</h1><p>Brisbane · synthetic seed geometry</p></header>
-    <div class="panel-scroll">
-      <section class="section"><div class="section-head"><h2>01 · SimWorld</h2><span class="pill">SEED</span></div><p>Overlay visibility</p>
-        <label class="switch"><span><i class="swatch red"></i>Track corridors</span><input type="checkbox" id="layer-tracks" checked></label>
-        <label class="switch"><span><i class="swatch blue"></i>Passenger stations</span><input type="checkbox" id="layer-stations" checked></label>
-        <label class="switch"><span><i class="swatch green"></i>Virtual balises</span><input type="checkbox" id="layer-signals" checked></label>
-      </section>
-      <section class="section"><div class="section-head"><h2>02 · SimScene</h2></div><label class="field-label" for="scenario-selector">Operational scenario</label><select id="scenario-selector"></select></section>
-      <section class="section"><div class="section-head"><h2>03 · SimSpec</h2></div><p>Compile synthetic track segments into illustrative trackside devices.</p><button id="btn-compile" class="secondary">Compile layout</button></section>
-      <section class="section"><div class="section-head"><h2>04 · SimRun</h2></div><div class="button-row"><button id="btn-play-sim" disabled>▶ Run scenario</button><button id="btn-stop-sim" class="danger" hidden>■ Stop simulation</button></div></section>
-      <section class="section log-section"><div class="section-head"><h2>Telemetry</h2><span class="pill">LIVE</span></div><div id="telemetry-log" role="log" aria-live="off"></div></section>
+  <header class="topbar">
+    <a class="brand" href="#/map" aria-label="TrainSim home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7"/><path d="M9 6v20M23 6v20M9 10h14M9 16h14M9 22h14"/></svg>
+      <span class="brand-name">TrainSim</span>
+      <span class="brand-sub">OpenRailwayMap data · South East Queensland</span>
+    </a>
+    <div class="topbar-right">
+      <nav class="global-nav" aria-label="Global navigation">
+        <a href="#/map" data-route="map">Map</a>
+        <a href="#/data" data-route="data">Data</a>
+        <a href="#/query" data-route="query">Query</a>
+      </nav>
+      <label class="db-switch" title="Database used by the Data and Query pages">
+        <span>Database</span>
+        <select id="global-db" aria-label="Database"></select>
+      </label>
+      <span id="world-status" class="status-dot" title="World database status"></span>
     </div>
-    <footer class="sidebar-footer"><div id="auth-area">Loading sign-in…</div><span>Prototype only · Not for railway operations</span></footer>
-  </aside>
-  <main class="workspace"><div class="topbar"><div><b>SimAdaptor</b><span id="map-provider">Loading canvas…</span></div><div class="topbar-actions"><span class="mode-label" id="dataset-label">DEMO DATA / NOT GEOSPATIAL TRUTH</span><nav class="global-nav" aria-label="Global navigation"><a href="/" aria-current="page">Simulator</a><a href="/db.html">Databases</a></nav></div></div>
-    <div id="map" aria-label="Railway map canvas"></div><div id="sim-status-overlay"><span class="status-dot"></span><span id="status-text">Initializing</span></div>
-    <div class="footnote" id="dataset-notice">Illustrative track geometry · Synthetic balise placement · No actual ETCS, RBC, or interlocking validation</div>
+  </header>
+
+  <main class="views">
+    <!-- MAP ------------------------------------------------------------- -->
+    <section id="view-map" class="view" aria-label="Map">
+      <div id="map" class="map-canvas"></div>
+
+      <div class="map-panel panel">
+        <div class="search">
+          <input id="map-search" type="search" placeholder="Search stations, signals, switches, km posts…" autocomplete="off" aria-label="Search">
+          <div id="search-results" class="search-results" hidden></div>
+        </div>
+        <label class="field">
+          <span>Map style</span>
+          <select id="map-style"></select>
+        </label>
+        <details class="layers" open>
+          <summary>Layers</summary>
+          <label><input type="checkbox" data-layer="tracks" checked> Tracks</label>
+          <label><input type="checkbox" data-layer="stations" checked> Stations &amp; operating points</label>
+          <label><input type="checkbox" data-layer="scope" checked> Scope stations (sheet)</label>
+          <label><input type="checkbox" data-layer="platforms" checked> Platforms</label>
+          <label><input type="checkbox" data-layer="signals" checked> Signals</label>
+          <label><input type="checkbox" data-layer="switches" checked> Switches</label>
+          <label><input type="checkbox" data-layer="pois" checked> Railway POIs</label>
+          <label><input type="checkbox" data-layer="orm"> ORM tiles (reference overlay)</label>
+        </details>
+        <label class="field" id="basemap-field">
+          <span>Base map</span>
+          <select id="basemap">
+            <option value="roadmap">Map</option>
+            <option value="satellite">Satellite</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="terrain">Terrain</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="legend panel" id="legend" aria-label="Legend"></div>
+
+      <aside class="inspector panel" id="inspector" hidden aria-label="Selected feature">
+        <header><h2 id="inspector-title">Feature</h2><button class="icon" id="inspector-close" aria-label="Close">×</button></header>
+        <div id="inspector-body"></div>
+      </aside>
+
+      <section class="sim panel" id="sim" aria-label="Simulation">
+        <header><h2>Simulation</h2><span class="muted" id="sim-tick">idle</span></header>
+        <select id="sim-route" aria-label="Route"></select>
+        <div class="sim-row">
+          <button id="sim-play" class="primary">▶ Run</button>
+          <button id="sim-stop" hidden>■ Stop</button>
+          <label class="sim-speed">Speed <input id="sim-speed" type="range" min="5" max="120" value="30"></label>
+        </div>
+        <div id="sim-log" class="sim-log" role="log"></div>
+      </section>
+
+      <div class="map-banner" id="map-banner" hidden></div>
+      <div class="attribution">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors · style after <a href="https://openrailwaymap.app" target="_blank" rel="noopener">OpenRailwayMap</a></div>
+    </section>
+
+    <!-- DATA ------------------------------------------------------------ -->
+    <section id="view-data" class="view" aria-label="Data" hidden>
+      <aside class="side">
+        <input id="table-filter" type="search" placeholder="Filter tables" aria-label="Filter tables">
+        <div id="table-list" class="table-list"></div>
+      </aside>
+      <div class="main">
+        <div class="toolbar">
+          <h1 id="table-title">Select a table</h1>
+          <span class="muted" id="table-total"></span>
+          <div class="spacer"></div>
+          <button id="row-add" disabled>+ Add row</button>
+          <button id="row-delete" class="danger" disabled>Delete selected</button>
+          <button id="table-refresh">Refresh</button>
+        </div>
+        <form class="filterbar" id="filter-form">
+          <select id="filter-column" aria-label="Filter column"><option value="">Filter column…</option></select>
+          <select id="filter-op" aria-label="Operator">
+            <option value="=">=</option><option value="!=">≠</option><option value="like">contains</option>
+            <option value="<">&lt;</option><option value="<=">≤</option><option value=">">&gt;</option><option value=">=">≥</option>
+            <option value="is null">is null</option><option value="not null">is not null</option>
+          </select>
+          <input id="filter-value" placeholder="value" aria-label="Filter value">
+          <button type="submit">Apply</button>
+          <button type="button" id="filter-clear">Clear</button>
+          <div class="spacer"></div>
+          <button type="button" id="page-prev">‹ Prev</button>
+          <span id="page-label" class="muted">Page 1</span>
+          <button type="button" id="page-next">Next ›</button>
+        </form>
+        <div id="table-grid" class="grid"></div>
+        <p class="hint" id="table-hint">Live data: edits save immediately. Click a cell to edit · select rows to delete · rows you add must be unique.</p>
+      </div>
+    </section>
+
+    <!-- QUERY ----------------------------------------------------------- -->
+    <section id="view-query" class="view" aria-label="Query" hidden>
+      <aside class="side">
+        <div class="tabs" role="tablist" id="query-tabs">
+          <button role="tab" data-source="" aria-selected="true">All calls</button>
+          <button role="tab" data-source="console">Saved</button>
+          <button role="tab" data-source="api">Map API</button>
+        </div>
+        <input id="query-filter" type="search" placeholder="Filter queries" aria-label="Filter queries">
+        <div id="query-list" class="query-list"></div>
+      </aside>
+      <div class="main">
+        <div class="toolbar">
+          <h1>Query editor</h1>
+          <span class="muted" id="query-db"></span>
+          <div class="spacer"></div>
+          <input id="query-name" placeholder="Query name" aria-label="Query name">
+          <button id="query-save">Save</button>
+          <button id="query-delete" class="danger" disabled>Delete</button>
+          <button id="query-play" class="primary" title="Run (Ctrl/⌘+Enter)">▶ Play</button>
+        </div>
+        <div id="sql-editor" class="sql-editor"></div>
+        <div class="result-bar"><span id="query-status" class="muted">Pick a saved query or write one statement and press Play.</span></div>
+        <div id="query-grid" class="grid"></div>
+      </div>
+    </section>
   </main>
+
+  <dialog id="row-dialog">
+    <form method="dialog" id="row-form">
+      <h2>Add row</h2>
+      <p class="muted" id="row-dialog-hint"></p>
+      <div id="row-fields" class="row-fields"></div>
+      <menu><button value="cancel" formnovalidate>Cancel</button><button value="ok" class="primary">Insert</button></menu>
+    </form>
+  </dialog>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
 </body>
 </html>

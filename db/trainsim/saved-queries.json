@@ -1,0 +1,112 @@
+[
+  {
+    "name": "Ingest runs (latest first)",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT run_id, started_at, finished_at, source, status, json_extract(stats_json,'$.seconds') AS seconds FROM ingest_run ORDER BY run_id DESC"
+  },
+  {
+    "name": "Coverage of the latest run",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT metric, numerator, denominator, round(100.0*numerator/denominator,1) AS pct, note FROM coverage WHERE run_id=(SELECT max(run_id) FROM ingest_run WHERE status='ok') ORDER BY rowid"
+  },
+  {
+    "name": "Sheet stations not matched to OSM",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT s.name, l.name AS line, s.match_status, s.match_note FROM scope_station s LEFT JOIN scope_line l USING(line_id) WHERE s.match_status NOT IN ('matched','manual') ORDER BY l.name, s.line_seq"
+  },
+  {
+    "name": "Sheet stations by line with OSM ids",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT l.name AS line, s.line_seq, s.name, s.zone, s.osm_type, s.osm_id, round(s.lat,5) AS lat, round(s.lon,5) AS lon FROM scope_station s LEFT JOIN scope_line l USING(line_id) ORDER BY l.name, s.line_seq"
+  },
+  {
+    "name": "Track km by type, usage and service",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT railway, state, coalesce(usage,'-') AS usage, coalesce(service,'-') AS service, count(*) AS ways, round(sum(length_m)/1000,2) AS km FROM rail_track GROUP BY 1,2,3,4 ORDER BY km DESC"
+  },
+  {
+    "name": "Running lines missing a speed limit",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT way_id, ref, name, usage, round(length_m) AS length_m FROM rail_track WHERE state='present' AND service IS NULL AND railway IN ('rail','narrow_gauge') AND coalesce(maxspeed,maxspeed_forward,maxspeed_backward) IS NULL ORDER BY length_m DESC"
+  },
+  {
+    "name": "Speed profile (km by maxspeed)",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT coalesce(maxspeed, maxspeed_forward) AS maxspeed_kmh, count(*) AS ways, round(sum(length_m)/1000,2) AS km FROM rail_track WHERE state='present' GROUP BY 1 ORDER BY 1"
+  },
+  {
+    "name": "Electrification summary",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT coalesce(electrified,'(untagged)') AS electrified, voltage, frequency, round(sum(length_m)/1000,2) AS km FROM rail_track WHERE state='present' GROUP BY 1,2,3 ORDER BY km DESC"
+  },
+  {
+    "name": "Train protection by system",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT coalesce(train_protection,'(none tagged)') AS system, count(*) AS ways, round(sum(length_m)/1000,2) AS km FROM rail_track WHERE state='present' GROUP BY 1 ORDER BY km DESC"
+  },
+  {
+    "name": "Gauge summary",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT coalesce(gauge,'(untagged)') AS gauge, round(sum(length_m)/1000,2) AS km FROM rail_track WHERE state='present' GROUP BY 1 ORDER BY km DESC"
+  },
+  {
+    "name": "Signals by category and type",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT category, json_extract(categories_json,'$.\"railway:signal:'||category||'\"') AS type, count(*) AS signals, sum(direction IS NULL) AS no_direction FROM rail_signal GROUP BY 1,2 ORDER BY signals DESC"
+  },
+  {
+    "name": "Switches with their legs",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT s.node_id, s.ref, s.switch_type, s.turnout_side, l.leg, l.trunk_edge, l.branch_edge, l.angle_deg FROM rail_switch s LEFT JOIN topo_switch_leg l ON l.switch_node=s.node_id ORDER BY s.ref, l.leg DESC"
+  },
+  {
+    "name": "Untagged junctions (inferred switches)",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT node_id, degree, round(lat,6) AS lat, round(lon,6) AS lon FROM topo_node WHERE kind='junction' ORDER BY degree DESC"
+  },
+  {
+    "name": "Shunting localities: yards, sidings and spurs",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT service, coalesce(name, ref) AS label, count(*) AS ways, round(sum(length_m)) AS metres FROM rail_track WHERE service IN ('yard','siding','spur') GROUP BY 1,2 ORDER BY metres DESC"
+  },
+  {
+    "name": "Stations with platform count",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT s.name, s.kind, count(p.osm_id) AS platforms, group_concat(p.ref, ', ') AS refs FROM rail_station s LEFT JOIN rail_platform p ON p.station_osm_type=s.osm_type AND p.station_osm_id=s.osm_id WHERE s.kind IN ('station','halt') GROUP BY s.osm_type, s.osm_id ORDER BY s.name"
+  },
+  {
+    "name": "Railway POIs by kind",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT kind, count(*) AS n FROM rail_feature GROUP BY kind ORDER BY n DESC"
+  },
+  {
+    "name": "Routes and path completeness",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT relation_id, name, ref, network, path_status, path_gaps, round(path_length_m/1000,2) AS km, stop_count FROM rail_route ORDER BY path_status, name"
+  },
+  {
+    "name": "Sheet lines mapped to OSM routes",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT l.name AS line, l.colour, count(x.relation_id) AS routes, group_concat(r.name, ' | ') AS route_names FROM scope_line l LEFT JOIN scope_line_route x USING(line_id) LEFT JOIN rail_route r USING(relation_id) GROUP BY l.line_id ORDER BY l.name"
+  },
+  {
+    "name": "Features placed along edges (linear referencing)",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT e.way_id, f.edge_id, f.feature_kind, f.osm_type, f.osm_id, round(f.offset_m,1) AS offset_m, round(f.snap_m,1) AS snap_m, f.facing FROM topo_edge_feature f JOIN topo_edge e USING(edge_id) ORDER BY e.way_id, f.edge_id, f.offset_m"
+  },
+  {
+    "name": "Hand-made rows (negative ids)",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT 'osm_node' AS tbl, count(*) AS n FROM osm_node WHERE id<0 UNION ALL SELECT 'osm_way', count(*) FROM osm_way WHERE id<0 UNION ALL SELECT 'rail_station', count(*) FROM rail_station WHERE osm_id<0 UNION ALL SELECT 'rail_signal', count(*) FROM rail_signal WHERE node_id<0"
+  },
+  {
+    "name": "Raw OSM tag keys on railway nodes",
+    "database": "data/trainsim.sqlite",
+    "sql": "SELECT j.key, count(*) AS uses FROM osm_node, json_each(osm_node.tags) AS j WHERE osm_node.tags <> '{}' GROUP BY j.key ORDER BY uses DESC LIMIT 200"
+  },
+  {
+    "name": "Most called queries (query log)",
+    "database": "data/local/console.sqlite",
+    "sql": "SELECT database, name, call_count, last_called_at, last_source FROM saved_query ORDER BY call_count DESC LIMIT 100"
+  }
+]
