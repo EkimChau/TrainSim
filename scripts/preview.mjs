@@ -4,6 +4,7 @@ import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {regionStatus} from '../server/region-status.js';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const port=Number(process.env.PORT||3000);
 const routes={'/':'public/index.html','/index.html':'public/index.html','/style.css':'public/style.css'};
@@ -17,7 +18,7 @@ http.createServer(async(req,res)=>{
     try{const body=await readFile(f);res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'}).end(body);}catch{res.writeHead(404,{'Content-Type':'application/json'}).end('{}');}
     return;
   }
-  if(name==='/api/config'){res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({mapsApiKey:'',gisClientId:''}));return;}
+  if(name==='/api/config'){res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({mapsApiKey:'',gisClientId:'',...regionStatus(root)}));return;}
   if(name==='/api/auth/me'){res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({enabled:false,user:null}));return;}
   if(name==='/api/health'){res.writeHead(200,{'Content-Type':'application/json'}).end(JSON.stringify({ok:true,mode:'offline-preview'}));return;}
   const rel=routes[name]||(name.startsWith('/src/')&&!name.includes('..')?name.slice(1):null);
