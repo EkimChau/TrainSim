@@ -19,14 +19,23 @@ function setStatus(text,running=false){$('status-text').textContent=text;$('sim-
 function layerChange(){for(const type of ['tracks','stations','signals'])for(const item of state.objects[type])item.setVisible($(`layer-${type}`).checked);}
 function compile() {
   stop(false);for(const type of ['tracks','stations','signals'])clear(type);
-  const result=compileDemoInstruments(state.world);
+  const real=state.world.source==='OSM-derived';
+  const result=real?{devices:state.world.signals.map(s=>({id:s.id,position:{lat:s.lat,lng:s.lng},provenance:'OSM'}))}:compileDemoInstruments(state.world);
   state.objects.tracks=state.world.tracks.map(t=>state.adapter.addTrack(t));
   state.objects.stations=state.world.stations.map(s=>state.adapter.addPoint('station',s));
   state.objects.signals=result.devices.map(d=>state.adapter.addPoint('signal',{...d,position:d.position}));
-  state.compiled=true;$('btn-play-sim').disabled=false;layerChange();
-  setStatus('Infrastructure compiled · demo heuristic');
-  log(`SimSpec: ${state.world.tracks.length} synthetic tracks, ${state.world.stations.length} stations, ${result.devices.length} illustrative balises.`, 'ok');
-  log('NOT validated against live ORM or engineering regulations.', 'warn');
+  state.compiled=true;$('btn-play-sim').disabled=!$('scenario-selector').options.length;layerChange();
+  if(real&&state.adapter.fitWorld)state.adapter.fitWorld(state.world);
+  if(real){
+    setStatus('OSM snapshot · mapped infrastructure');
+    log(`OSM: ${state.world.tracks.length} source railway ways, ${state.world.stations.length} mapped stations, ${result.devices.length} OSM signals.`, 'ok');
+    log('Visual route trace only; track/signal rules and station stop order NOT safety verified.', 'warn');
+    if(!state.world.routes.length)log('No complete connected service routes. Playback disabled; inspect unresolved station matches.', 'warn');
+  }else{
+    setStatus('Infrastructure compiled · demo heuristic');
+    log(`SimSpec: ${state.world.tracks.length} synthetic tracks, ${state.world.stations.length} stations, ${result.devices.length} illustrative balises.`, 'ok');
+    log('NOT validated against live ORM or engineering regulations.', 'warn');
+  }
 }
 function updateTick() {
   const {events,trains}=state.runner.step();
@@ -66,7 +75,20 @@ function renderUser(user){const area=$('auth-area');const name=document.createEl
   const button=document.createElement('button');button.textContent='Sign out';button.className='subtle';button.onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.reload();};area.replaceChildren(name,button);
 }
 async function bootstrap() {
-  for(const scene of SCENES){const o=document.createElement('option');o.value=scene.id;o.textContent=scene.label;$('scenario-selector').append(o);}
+  try {
+    const response=await fetch('/api/region/world');
+    if(response.ok){
+      const region=await response.json();
+      if(region.source==='OSM-derived'&&region.dataset_status==='real-source'){
+        state.world=new SimWorld(region,{source:'OSM-derived'});
+        log(`Loaded immutable OSM snapshot: ${state.world.tracks.length} track ways, ${state.world.stations.length} stops and ${state.world.routes.length} fully connected routes.`, 'ok');
+      }
+    }else if(response.status!==404)log(`OSM snapshot API HTTP ${response.status}`, 'warn');
+  }catch(e){log(`OSM snapshot unavailable: ${e.message}`, 'warn');}
+  const scenes=state.world.source==='OSM-derived'
+    ?state.world.routes.filter(r=>r.status==='connected').map(r=>({id:`osm:${r.id}`,label:`OSM visual trace · ${r.name}`}))
+    :SCENES;
+  for(const scene of scenes){const o=document.createElement('option');o.value=scene.id;o.textContent=scene.label;$('scenario-selector').append(o);}
   $('btn-compile').addEventListener('click',compile);$('btn-play-sim').addEventListener('click',start);$('btn-stop-sim').addEventListener('click',()=>stop());
   for(const name of ['tracks','stations','signals'])$(`layer-${name}`).addEventListener('change',layerChange);
   let config={mapsApiKey:'',gisClientId:''};
@@ -74,7 +96,13 @@ async function bootstrap() {
   if(config.mapsApiKey){try{const maps=await loadGoogleMaps(config.mapsApiKey);if(!maps)throw new Error('Google Maps unavailable');state.adapter=new GoogleMapsAdaptor($('map'),maps,config.region.center);}catch(e){log(`${e.message}; using schematic SVG demo`,'warn');}}
   if(!state.adapter)state.adapter=new SvgAdaptor($('map'),state.world);
   $('map-provider').textContent=state.adapter.name;
-  log(`${state.adapter.name} ready. Synthetic Brisbane seed loaded.`,'ok');
+  if(state.world.source==='OSM-derived'){
+    $('dataset-label').textContent='OSM WGS84 RAILWAY SNAPSHOT / UNVERIFIED OPERATIONS';
+    $('dataset-notice').replaceChildren();
+    const attr=document.createElement('a');attr.href='https://www.openstreetmap.org/copyright';attr.rel='noopener noreferrer';attr.target='_blank';attr.textContent='© OpenStreetMap contributors (ODbL)';
+    $('dataset-notice').append('Track/station source: ',attr,' · Regional diagram: 2012 reference only · Not verified ETCS/operational data');
+  }
+  log(`${state.adapter.name} ready. ${state.world.source==='OSM-derived'?'OSM-derived regional world':'Synthetic Brisbane seed'} loaded.`,'ok');
   await initGIS(config.gisClientId);compile();
 }
 bootstrap().catch(error=>{log(`Startup failed: ${error.message}`,'warn');setStatus('Initialization error');});

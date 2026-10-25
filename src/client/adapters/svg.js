@@ -16,7 +16,7 @@ export class SvgAdaptor {
   }
   xy(pos) {const {minLat,maxLat,minLng,maxLng}=this.bounds;return {x:50+(pos.lng-minLng)/(maxLng-minLng)*900,y:40+(maxLat-pos.lat)/(maxLat-minLat)*600};}
   addTrack(track) {
-    const el=make('polyline',{points:track.coords.map(c=>{const p=this.xy(c);return `${p.x},${p.y}`}).join(' '),fill:'none',stroke:'#fb6964','stroke-width':4,'stroke-linejoin':'round','stroke-linecap':'round'});
+    const el=make('polyline',{points:track.coords.map(c=>{const p=this.xy(c);return `${p.x},${p.y}`}).join(' '),fill:'none',stroke:'#e96260','stroke-width':track.source==='OSM'?3:4,'stroke-linejoin':'round','stroke-linecap':'round'});
     this.svg.append(el);return this.control(el);
   }
   addPoint(kind,record) {

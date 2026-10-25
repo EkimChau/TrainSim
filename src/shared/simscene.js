@@ -5,6 +5,13 @@ export const SCENES = Object.freeze([
   {id:'ipswich-maintenance',label:'Ipswich Corridor Block Event (demo)'}
 ]);
 export function createScene(id,world) {
+  if (id.startsWith('osm:')) {
+    if(world.source!=='OSM-derived')throw new RangeError('OSM route requires an ingested OSM world');
+    const route=world.routes.find(r=>r.id===id.slice(4));
+    if(!route||route.status!=='connected'||route.coords.length<2)throw new RangeError('OSM route unverified or missing');
+    return {id,trains:[new Train({id:`OSM-VISUAL-${route.id}`,name:`Visual trace · ${route.name}`,path:route.coords,speed:0,color:'#fbdc59',speedMetersPerTick:22})]};
+  }
+  if(world.source==='OSM-derived')throw new RangeError('Synthetic scene not permitted for real OSM world');
   const t=world.tracks;
   const defs={
     'bne-morning-peak':[

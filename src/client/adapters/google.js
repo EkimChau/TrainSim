@@ -17,7 +17,14 @@ export class GoogleMapsAdaptor {
     this.name='Google Maps';this.maps=maps;
     this.map=new maps.Map(container,{center,zoom:12,streetViewControl:false,fullscreenControl:true});
   }
-  addTrack(track){const line=new this.maps.Polyline({path:track.coords,geodesic:true,strokeColor:'#fb6964',strokeOpacity:.9,strokeWeight:4,map:this.map});return{setVisible:on=>line.setMap(on?this.map:null),remove:()=>line.setMap(null)};}
+  fitWorld(world) {
+    const points=world.stations;
+    if(!points.length)return;
+    const bounds=new this.maps.LatLngBounds();
+    for(const p of points)bounds.extend({lat:p.lat,lng:p.lng});
+    this.map.fitBounds(bounds,48);
+  }
+  addTrack(track){const line=new this.maps.Polyline({path:track.coords,geodesic:true,strokeColor:'#e96260',strokeOpacity:.90,strokeWeight:track.source==='OSM'?3:4,map:this.map});return{setVisible:on=>line.setMap(on?this.map:null),remove:()=>line.setMap(null)};}
   addPoint(kind,record){
     const icon=kind==='station'?{path:this.maps.SymbolPath.CIRCLE,scale:7,fillColor:'#77b4ff',fillOpacity:1,strokeColor:'#fff',strokeWeight:2}:kind==='signal'?{path:'M 0 -9 L 9 8 L -9 8 Z',scale:1,fillColor:'#52e1a3',fillOpacity:1,strokeColor:'#071e14',strokeWeight:2}:{path:this.maps.SymbolPath.FORWARD_CLOSED_ARROW,scale:6,fillColor:record.color||'#ffdb52',fillOpacity:1,strokeColor:'#10151d',strokeWeight:2};
     const marker=new this.maps.Marker({map:this.map,position:record.position||record,title:record.name||record.id,icon});

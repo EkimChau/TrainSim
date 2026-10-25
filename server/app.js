@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {createAuth} from './auth.js';
@@ -13,6 +14,16 @@ export function createApp(options={}) {
   app.use((req,res,next)=>{res.set('X-Content-Type-Options','nosniff');res.set('Referrer-Policy','strict-origin-when-cross-origin');next();});
   app.get('/api/health',(_req,res)=>res.json({ok:true,app:'TrainSim',mode:'prototype'}));
   app.get('/api/config',(_req,res)=>res.json({mapsApiKey:config.mapsApiKey,gisClientId:config.gisClientId,region:SEED_REGION,scenes:SCENES,source:'synthetic-seed'}));
+  app.get('/api/region/world', (_req,res)=>{
+    const file=path.join(ROOT,'data/current/world.json');
+    if(!fs.existsSync(file))return res.status(404).json({error:'No ingested OSM snapshot. Use scripts/ingest_osm.py. Synthetic demo remains available.'});
+    res.type('application/json').set('Cache-Control','no-store').sendFile(file);
+  });
+  app.get('/api/region/manifest',(_req,res)=>{
+    const file=path.join(ROOT,'data/current/manifest.json');
+    if(!fs.existsSync(file))return res.status(404).json({error:'No ingestion manifest'});
+    res.type('application/json').sendFile(file);
+  });
   createAuth(config).mount(app);
   app.use(express.static(path.join(ROOT,'public'),{index:'index.html',extensions:false}));
   app.use((_req,res)=>res.status(404).json({error:'Not found'}));

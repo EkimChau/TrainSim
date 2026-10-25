@@ -1,0 +1,251 @@
+{
+  "version": 0.6,
+  "generator": "TrainSim synthetic OSM-format TEST FIXTURE; NEVER real source",
+  "osm3s": {
+    "timestamp_osm_base": "2000-01-01T00:00:00Z"
+  },
+  "elements": [
+    {
+      "type": "node",
+      "id": 900000,
+      "lat": -27.42,
+      "lon": 153.06,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700000,
+      "lat": -27.419900000000002,
+      "lon": 153.06004000000001,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Doomben"
+      }
+    },
+    {
+      "type": "node",
+      "id": 900001,
+      "lat": -27.423000000000002,
+      "lon": 153.056,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700001,
+      "lat": -27.422900000000002,
+      "lon": 153.05604000000002,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Ascot"
+      }
+    },
+    {
+      "type": "node",
+      "id": 900002,
+      "lat": -27.426000000000002,
+      "lon": 153.052,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700002,
+      "lat": -27.425900000000002,
+      "lon": 153.05204,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Hendra"
+      }
+    },
+    {
+      "type": "node",
+      "id": 900003,
+      "lat": -27.429000000000002,
+      "lon": 153.048,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700003,
+      "lat": -27.428900000000002,
+      "lon": 153.04804000000001,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Clayfield"
+      }
+    },
+    {
+      "type": "node",
+      "id": 900004,
+      "lat": -27.432000000000002,
+      "lon": 153.044,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700004,
+      "lat": -27.431900000000002,
+      "lon": 153.04404000000002,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Eagle Junction"
+      }
+    },
+    {
+      "type": "node",
+      "id": 900005,
+      "lat": -27.435000000000002,
+      "lon": 153.04,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700005,
+      "lat": -27.434900000000003,
+      "lon": 153.04004,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Wooloowin"
+      }
+    },
+    {
+      "type": "node",
+      "id": 900006,
+      "lat": -27.438000000000002,
+      "lon": 153.036,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700006,
+      "lat": -27.437900000000003,
+      "lon": 153.03604,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Albion"
+      }
+    },
+    {
+      "type": "node",
+      "id": 900007,
+      "lat": -27.441000000000003,
+      "lon": 153.032,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700007,
+      "lat": -27.440900000000003,
+      "lon": 153.03204000000002,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Bowen Hills"
+      }
+    },
+    {
+      "type": "node",
+      "id": 900008,
+      "lat": -27.444000000000003,
+      "lon": 153.028,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700008,
+      "lat": -27.443900000000003,
+      "lon": 153.02804,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Fortitude Valley"
+      }
+    },
+    {
+      "type": "node",
+      "id": 900009,
+      "lat": -27.447000000000003,
+      "lon": 153.024,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700009,
+      "lat": -27.446900000000003,
+      "lon": 153.02404,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Central"
+      }
+    },
+    {
+      "type": "node",
+      "id": 900010,
+      "lat": -27.450000000000003,
+      "lon": 153.02,
+      "version": 1
+    },
+    {
+      "type": "node",
+      "id": 700010,
+      "lat": -27.449900000000003,
+      "lon": 153.02004000000002,
+      "version": 1,
+      "tags": {
+        "railway": "station",
+        "name": "Roma Street"
+      }
+    },
+    {
+      "type": "way",
+      "id": 800001,
+      "version": 1,
+      "nodes": [
+        900000,
+        900001,
+        900002,
+        900003,
+        900004,
+        900005
+      ],
+      "tags": {
+        "railway": "rail",
+        "name": "Synthetic test rail way A"
+      }
+    },
+    {
+      "type": "way",
+      "id": 800002,
+      "version": 1,
+      "nodes": [
+        900005,
+        900006,
+        900007,
+        900008,
+        900009,
+        900010
+      ],
+      "tags": {
+        "railway": "rail",
+        "name": "Synthetic test rail way B"
+      }
+    },
+    {
+      "type": "node",
+      "id": 709999,
+      "lat": -27.43,
+      "lon": 153.04,
+      "tags": {
+        "railway": "signal",
+        "railway:signal:main": "yes"
+      }
+    }
+  ]
+}

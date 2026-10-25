@@ -30,3 +30,16 @@ test('reject unknown scene and invalid WGS84 data types',()=>{
   assert.throws(()=>createScene('missing',world()),RangeError);
   assert.throws(()=>new SimWorld({tracks:[{id:'x',coords:[{lat:1,lng:2}]}],stations:[]}),TypeError);
 });
+
+test('OSM scene runs only on a verified connected track path using metre increments',()=>{
+  const points=[{lat:-27.45,lng:153.02},{lat:-27.4501,lng:153.02},{lat:-27.4502,lng:153.02}];
+  const osm=new SimWorld({tracks:[{id:'way/123',coords:points}],stations:[{id:'node/1',name:'A',...points[0]}],
+    routes:[{id:'test',name:'Test OSM line',status:'connected',coords:points}]},{source:'OSM-derived'});
+  assert.throws(()=>createScene('bne-morning-peak',osm),/Synthetic scene not permitted/);
+  const run=new SimRun(createScene('osm:test',osm));
+  const a=run.step().trains[0].position;
+  assert.ok(Number.isFinite(a.lat)&&a.lat<=points[0].lat);
+  for(let i=0;i<9;i++)run.step();
+  assert.equal(run.tick,10);
+  assert.throws(()=>createScene('osm:nonexistent',osm),RangeError);
+});

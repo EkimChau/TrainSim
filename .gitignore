@@ -4,3 +4,8 @@ public/assets/
 .DS_Store
 coverage/
 *.log
+
+# Source snapshots are potentially large; manifest sha256 captures immutable bytes.
+data/current/
+__pycache__/
+*.pyc
