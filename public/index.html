@@ -84,9 +84,11 @@
         <select id="sim-engine" aria-label="QR EMU train"></select>
         <div class="sim-row">
           <button id="sim-play" class="primary">▶ Run</button>
+          <button id="sim-pause" hidden>Ⅱ Pause</button>
           <button id="sim-stop" hidden>■ Stop</button>
           <label class="sim-speed">Speed <input id="sim-speed" type="range" min="5" max="120" value="30"></label>
         </div>
+        <label class="sim-axis"><span>Model axis</span><input id="sim-axis" type="range" min="-180" max="180" step="1" value="0" disabled><output id="sim-axis-value">0°</output></label>
         <div id="sim-log" class="sim-log" role="log"></div>
       </section>
 

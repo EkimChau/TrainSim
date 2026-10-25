@@ -40,6 +40,12 @@ function bearing(a,b){
     Math.sin(lat1)*Math.cos(lat2)*Math.cos(dlng))*180/Math.PI+360)%360;
 }
 
+/** Convert north-clockwise track bearing to IconLayer's screen-space clockwise angle. */
+export function trainIconAngle(trackBearing,axisOffset=0){
+  if(!Number.isFinite(trackBearing)||!Number.isFinite(axisOffset))throw new TypeError('Invalid train icon angle');
+  return ((axisOffset-trackBearing)%360+360)%360;
+}
+
 /** Place one fixed-pixel three-car set per unit behind the lead cab. */
 export function trainFormation(train,zoom=10,sizeScale=1){
   const {path,carriages=3}=train;

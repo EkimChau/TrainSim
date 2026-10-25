@@ -4,7 +4,7 @@ import {api,el,fmt,store,toast} from '../api.js';
 import {createBasemap,rasterLayer,SEQ_VIEW} from './basemap.js';
 import {STYLES,STATION_COLOUR,hex,legend,poiColour,signalColour,trackColour,trackDash,trackWidth,SIGNAL_LEGEND} from './styles.js';
 import {Simulation} from './sim.js';
-import {trainFormation} from '../../shared/formation.js';
+import {trainFormation,trainIconAngle} from '../../shared/formation.js';
 import {trainIcon} from './train-icons.js';
 
 const $=id=>document.getElementById(id);
@@ -146,8 +146,9 @@ export class MapView{
     }
     if(trains.length)layers.push(
       new IconLayer({id:'trains',data:trains.flatMap(t=>trainFormation(t,z,t.id===this.focusedTrainId?2:1)),getIcon:t=>trainIcon(t.skin),
-        getPosition:t=>t.position,getAngle:t=>t.angle,getSize:t=>t.iconSize,sizeUnits:'pixels',sizeScale:1,autoPacking:true,pickable:true,autoHighlight:true,
-        updateTriggers:{getPosition:this.sim.tick,getAngle:this.sim.tick,getSize:this.focusedTrainId}}),
+        getPosition:t=>t.position,getAngle:t=>trainIconAngle(t.angle,this.sim.axisOffset),getSize:t=>t.iconSize,
+        sizeUnits:'pixels',sizeScale:1,autoPacking:true,pickable:true,autoHighlight:true,
+        updateTriggers:{getPosition:this.sim.tick,getAngle:`${this.sim.tick}:${this.sim.axisOffset}`,getSize:this.focusedTrainId}}),
       new TextLayer({id:'train-labels',data:trains,getPosition:t=>[t.position.lng,t.position.lat],getText:t=>t.id,getSize:11,sizeUnits:'pixels',
         getPixelOffset:[0,-18],fontFamily:FONT,outlineWidth:3,outlineColor:[255,255,255],fontSettings:{sdf:true},updateTriggers:{getPosition:this.sim.tick}}));
     this.map.setLayers(layers);

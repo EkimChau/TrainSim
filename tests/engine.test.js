@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {createRouteScene,longestSegment} from '../src/shared/simscene.js';
 import {SimRun} from '../src/shared/simrun.js';
 import {Train} from '../src/shared/models.js';
-import {trainFormation} from '../src/shared/formation.js';
+import {trainFormation,trainIconAngle} from '../src/shared/formation.js';
+import {Simulation} from '../src/client/map/sim.js';
 
 const route={id:8001,ref:'CAB',name:'Test line',segments:[[[153.02,-27.45],[153.02,-27.4501]],[[153.02,-27.45],[153.02,-27.4501],[153.02,-27.4502],[153.021,-27.4503]]]};
 
@@ -43,6 +44,45 @@ test('carriages follow the local route direction through a bend',()=>{
   const coaches=trainFormation(train,16);
   assert.equal(coaches.length,1);
   assert.ok(coaches[0].angle<10||coaches[0].angle>350,'leading coach points north');
+});
+test('train icon axis converts route bearings and applies a saved correction',()=>{
+  assert.equal(trainIconAngle(0),0,'northbound SVG length axis points north by default');
+  assert.equal(trainIconAngle(90),270,'eastbound track rotates the vertical SVG axis east');
+  assert.equal(trainIconAngle(90,10),280,'axis correction applies to every route direction');
+  assert.throws(()=>trainIconAngle(Number.NaN),TypeError);
+});
+test('simulation pause freezes time and enables the saved axis adjustment',t=>{
+  const elements=new Map();
+  for(const id of ['sim-play','sim-pause','sim-stop','sim-speed','sim-axis','sim-axis-value','sim-tick']){
+    elements.set(id,{hidden:false,disabled:false,value:'0',textContent:'',addEventListener(){}});
+  }
+  const priorDocument=globalThis.document,priorSetInterval=globalThis.setInterval,priorClearInterval=globalThis.clearInterval;
+  let intervalId=0,cleared=[];
+  globalThis.document={getElementById:id=>elements.get(id)};
+  globalThis.setInterval=()=>++intervalId;
+  globalThis.clearInterval=id=>cleared.push(id);
+  t.after(()=>{
+    globalThis.document=priorDocument;
+    globalThis.setInterval=priorSetInterval;
+    globalThis.clearInterval=priorClearInterval;
+  });
+  const simulation=new Simulation({onFrame(){},log(){}});
+  simulation.runner={scene:{trains:[]},step(){}};
+  simulation.timer=9;
+  simulation.togglePause();
+  assert.equal(simulation.paused,true);
+  assert.deepEqual(cleared,[9]);
+  assert.equal(simulation.timer,null);
+  assert.equal(elements.get('sim-axis').disabled,false);
+  elements.get('sim-axis').value='35';
+  simulation.applyAxisOffset();
+  assert.equal(simulation.axisOffset,35);
+  simulation.togglePause();
+  assert.equal(simulation.paused,false);
+  assert.equal(simulation.timer,1);
+  assert.equal(elements.get('sim-axis').disabled,true);
+  simulation.stop(false);
+  assert.equal(elements.get('sim-tick').textContent,'idle');
 });
 test('train details follow the next stop along the route',()=>{
   const scene=createRouteScene({id:1,name:'Local',to_name:'Destination',segments:[[[153,-27],[153.002,-27]]],
