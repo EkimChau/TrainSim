@@ -19,6 +19,7 @@ The catalogue is a **curated publication/version index**, **not** a certificate 
 We have also identified **18 runnable, substantially complete, or research-grade railway scenario datasets**, separately catalogued from regulations and standards:
 
 - [Scenario selection, examples and fit/gap matrix](SCENARIO-DATASETS.md)
+- [Tabular scenario dataset inventory](scenario-datasets.csv)
 - [Machine-readable scenario dataset catalogue](scenario-datasets.json)
 - [Defensive local downloader](fetch_datasets.py) and [validation script](check_datasets.py)
 - [Two actually imported OSM Interlocking configuration datasets](dataset-seeds/osmhpi/README.md) — exact copied Git blobs with GPLv3 licence and provenance.
