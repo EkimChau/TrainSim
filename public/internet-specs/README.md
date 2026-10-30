@@ -6,13 +6,13 @@ This directory is intentionally separated from [SUBSET-026 ingestion](../../docs
 
 ## Files and source control
 
-- [catalog.json](catalog.json): 38 separately versioned, official/reference records. Each document has an authority, scope, issue, source URL, expected download URL where discovered, status and integration priority.
+- [catalog.json](catalog.json): 43 separately versioned, official/reference records. Each document has an authority, scope, issue, source URL, expected download URL where discovered, status and integration priority.
 - [fetch_specs.py](fetch_specs.py): standard-library downloader; checks actual PDF/ZIP signatures, checks ZIP CRC, records SHA-256, handles transient rate-limits, refuses unexpected redirects.
 - [SCENARIO-ETCS-L2.md](SCENARIO-ETCS-L2.md): one contiguous demonstration from path planning through an interlocked route, RBC authority, OBU supervision and release, with explicitly identified gaps.
 - [check_catalog.py](check_catalog.py): local catalogue and URL sanity checks.
 - `downloads/` and `download-lock.json`: intentionally **not tracked** until each source's redistribution rights have been checked.
 
-The catalogue is a **verified publication/version index**, **not** a certificate of conformance, proof of a complete national installation, or a claim that these materials can be freely rehosted.
+The catalogue is a **curated publication/version index**, **not** a certificate of conformance, proof of a complete national installation, or a claim that these materials can be freely rehosted.
 
 ## Download and validate
 
@@ -39,7 +39,7 @@ The last example selects a reference-only item to avoid another network transfer
 3. **Conformance tests:** SUBSET-076-5-2, 076-6-3 **13 ZIP parts**, 076-7; SUBSET-094 reference test facility. Tests cover the on-board equipment, not TMS/interlocking end to end.
 4. **Interlocking engineering reference:** official Indian Railways CAMTECH handbook, September 2021, which includes control tables, route proving, conflicting routes, locking, FAT/SAT and negative tests. **Not EU legislation and not an approved logic table for an EU ETCS site.**
 5. **Queensland context:** QLD MRTS333/MRS333 are construction/specification documents; MRTS333 explicitly points to Queensland Rail's separate technical documentation. The SEQ OpenStreetMap/GTFS simulator cannot infer vital signalling logic from public mapping data.
-6. **Separate design inputs:** selected station signalling plan, actual route control table, asset layout, points/crossings and overlaps, detection sections, braking parameters, radio/keys, national values, valid infrastructure data, TMS configuration, operating rules and certified implementation evidence. None can be fabricated and labelled official.
+6. **CENELEC assurance reference metadata:** EN 50126-1/-2 (2017+A1:2024), EN 50716:2023 (supersedes older EN 50128/50657), EN 50129:2026 and EN 50159:2026. These licensed standards are **reference-only**; do not copy previews or paywalled texts into this public repository.\n7. **Separate design inputs:** selected station signalling plan, actual route control table, asset layout, points/crossings and overlaps, detection sections, braking parameters, radio/keys, national values, valid infrastructure data, TMS configuration, operating rules and certified implementation evidence. None can be fabricated and labelled official.
 
 ## Capability / gap matrix
 
