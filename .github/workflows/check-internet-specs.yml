@@ -1,0 +1,25 @@
+name: Check internet standards and scenario sources
+
+on:
+  push:
+    paths:
+      - 'public/internet-specs/**'
+      - '.github/workflows/check-internet-specs.yml'
+  pull_request:
+    paths:
+      - 'public/internet-specs/**'
+      - '.github/workflows/check-internet-specs.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-registry-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate official standards catalogue
+        run: python3 public/internet-specs/check_catalog.py
+      - name: Validate independent scenario catalogue and vendored fixture provenance
+        run: python3 public/internet-specs/check_datasets.py
