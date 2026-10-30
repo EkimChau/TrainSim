@@ -119,3 +119,14 @@ test('rejects unknown IDs and invalid numeric / text inputs; immutable prior sta
   assert.throws(()=>stepLesson(radio,{type:'set',values:{trainId:' '.repeat(3)}}),/characters/);
   assert.equal(lessonById('notfound').id,'ma');
 });
+
+test('re-request cannot silently replace a locked interlocking route',()=>{
+  let s=createLessonState('interlocking');
+  s=stepLesson(s,{type:'request'});
+  s=stepLesson(s,{type:'set',values:{conflictFree:false}});
+  assert.equal(s.phase,'REVIEW');
+  s=stepLesson(s,{type:'request'});
+  assert.equal(s.routeLocked,true);
+  assert.equal(s.phase,'REVIEW');
+  assert.equal(lessonSnapshot(s).valid,false);
+});
