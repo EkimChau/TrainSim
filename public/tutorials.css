@@ -215,3 +215,34 @@
   .paper-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
   .paper-book{padding:12px!important}.paper-log li{grid-template-columns:70px 1fr}}
 @media(prefers-reduced-motion:reduce){#view-tutorials *,#view-tutorials *::before,#view-tutorials *::after{animation:none!important;transition:none!important}}
+
+/* Data-driven ESIG series: shared paper components for all modules and levels. */
+#view-tutorials .paper-lesson-menu{width:min(500px,90vw);min-width:min(340px,90vw);max-height:min(78vh,710px);display:flex;flex-direction:column}
+#view-tutorials .paper-menu-search-label{display:grid;gap:5px;margin:4px 7px 8px;font-weight:750;font-size:12px}
+#view-tutorials .paper-menu-search{width:100%;min-width:0;min-height:34px;border:2px solid var(--p-ink);border-radius:5px 8px 4px 8px;
+  padding:7px 10px;background:#fffdf0;color:var(--p-ink)}
+#view-tutorials .paper-menu-results{min-height:0;overflow-y:auto;overscroll-behavior:contain;border-top:2px dashed #9da1a5;padding:4px 3px 10px}
+#view-tutorials .paper-menu-module{margin:5px 0 10px;border:1.5px solid #a7b0ba;border-radius:6px 3px 8px 4px;background:#fff9e7}
+#view-tutorials .paper-menu-module[hidden],#view-tutorials .paper-lesson-menu-item[hidden]{display:none!important}
+#view-tutorials .paper-menu-module-title{position:sticky;top:0;z-index:1;background:#f6e9bd;color:#21354f;
+  font:800 12px/1.4 "Segoe Print",cursive;padding:8px!important;border-bottom:1.5px dashed var(--p-ink);margin:0!important}
+#view-tutorials .paper-lesson-menu-item{white-space:normal!important;font-size:12px!important;line-height:1.45;overflow-wrap:anywhere;padding:8px 11px!important}
+#view-tutorials .paper-tier-strip{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:13px}
+#view-tutorials .paper-difficulty{display:flex;gap:0;border:2px solid #283649;border-radius:7px;background:#fffdf2;box-shadow:3px 3px 0 #283649;overflow:hidden}
+#view-tutorials .paper-tier{padding:7px 15px;border:0!important;border-right:2px solid #283649!important;border-radius:0!important;box-shadow:none!important;
+  background:transparent!important;letter-spacing:.03em;text-transform:uppercase;font-size:11px;font-weight:850;color:#283649}
+#view-tutorials .paper-tier:last-child{border-right:0!important}
+#view-tutorials .paper-tier.current{background:#cfe4ff!important;color:#124994!important;text-decoration:underline;text-decoration-color:#f9ce54;text-decoration-thickness:3px}
+#view-tutorials .paper-tier[data-tier="busy"].current{background:#ffe0c6!important;color:#922b20!important}
+#view-tutorials .paper-tier:hover{filter:brightness(.95)}
+.paper-tier-desc{font-size:12px;font-style:italic;color:#5e6670;max-width:390px}
+.paper-figure-atlas{margin-top:14px;padding:10px;border:2px solid var(--p-ink);background:rgba(249,239,204,.43);border-radius:7px}
+.paper-figure-list{display:flex;gap:6px;overflow-x:auto;padding:3px 1px 9px;margin-bottom:9px;overscroll-behavior-x:contain}
+#view-tutorials .paper-figure-choice{flex:0 0 auto;white-space:normal;max-width:270px;text-align:left;padding:7px 10px;
+  border:2px solid var(--p-ink);border-radius:6px 3px 8px 4px;background:#fffaf0;box-shadow:2px 2px 0 #26354a;font-size:11px;line-height:1.45}
+#view-tutorials .paper-figure-choice.current{background:#dcecfb;color:#174a82;border-color:#2e5a8c}
+#view-tutorials .paper-source-figure{border:2px dashed #354758;background:rgba(255,255,255,.55)}
+#view-tutorials .paper-source-figure .paper-diagram-svg{display:block;width:100%;height:auto;min-height:120px;max-height:240px}
+#view-tutorials .paper-source-figure .paper-small{margin:4px 0 0;font-size:11px;color:#8a4b29}
+@media(max-width:575px){#view-tutorials .paper-lesson-menu{position:fixed;top:90px;left:8px;right:8px;width:auto;max-width:none;max-height:calc(100vh - 105px)}
+  #view-tutorials .paper-tier{padding:7px 9px}}

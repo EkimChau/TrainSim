@@ -1,9 +1,11 @@
+import {GENERATED_LESSONS} from './curriculum.js';
+
 /**
  * Fictitious SimWorld teaching fixtures; no network access, live source DB or runtime
  * coupling. Each lesson pins the cited reference and explicitly states its scope.
  * Source notes are labels, not copied normative requirements or certifications.
  */
-export const LESSONS = [
+const CORE_LESSONS = [
   {
     id:'ma', number:'01', title:'Movement Authority (MA)', short:'Movement Authority', icon:'🚆',
     goal:'See how trackside evidence gates a proposed MA, then watch the train approach its authority boundary.',
@@ -127,6 +129,25 @@ export const LESSONS = [
       {id:'unknown',label:'Position unknown',kind:'alert',steps:[{action:'connect'},{set:{positionKnown:false}},{action:'report'}],expect:{phase:'REPORT_BLOCKED',session:true}},
     ],
   },
-];
+ ];
+// Three hand-tuned pilot lessons remain first. Every ESIG source lesson follows
+// in SUBSET-026 order, with independent simple / medium / busy scenarios.
+for (const lesson of CORE_LESSONS){
+  lesson.module='00';lesson.moduleTitle='Featured learning labs';
+  lesson.sourceFigures=[];
+  lesson.scenarios=lesson.scenarios.map(s=>({...s,tier:s.tier??'simple'}));
+  const additional=lesson.id==='ma'?[
+    {id:'ma-medium',tier:'medium',label:'Issue + advance twice',kind:'ok',steps:[{action:'issue'},{action:'advance'},{action:'advance'}],expect:{phase:'TRAIN_RUNNING'}},
+    {id:'ma-busy',tier:'busy',label:'Radio & route failure cascade',kind:'alert',steps:[{action:'issue'},{set:{radioSafe:false,routeProved:false}},{action:'issue'},{set:{radioSafe:true,routeProved:true}},{action:'issue'}],expect:{phase:'MA_GRANTED'}},
+  ]:lesson.id==='interlocking'?[
+    {id:'ixl-medium',tier:'medium',label:'Prove → traverse → release',kind:'ok',steps:[{action:'request'},{action:'enter'},{action:'clear'}],expect:{phase:'RELEASED'}},
+    {id:'ixl-busy',tier:'busy',label:'Conflict & flank fault',kind:'alert',steps:[{action:'request'},{set:{flankLocked:false,conflictFree:false}},{action:'cancel'},{set:{flankLocked:true,conflictFree:true}},{action:'request'}],expect:{phase:'ROUTE_LOCKED'}},
+  ]:[
+    {id:'radio-medium',tier:'medium',label:'New position report',kind:'ok',steps:[{action:'connect'},{action:'report'},{set:{front:450}},{action:'report'}],expect:{phase:'REPORT_RECEIVED'}},
+    {id:'radio-busy',tier:'busy',label:'Drop and re-establish',kind:'alert',steps:[{action:'connect'},{action:'report'},{action:'drop'},{action:'restore'},{action:'connect'},{action:'report'}],expect:{phase:'REPORT_RECEIVED'}},
+  ];
+  lesson.scenarios.push(...additional);
+}
+export const LESSONS=[...CORE_LESSONS,...GENERATED_LESSONS];
 export const lessonById=id=>LESSONS.find(l=>l.id===id)||LESSONS[0];
 export const lessonIndex=id=>Math.max(0,LESSONS.findIndex(l=>l.id===id));

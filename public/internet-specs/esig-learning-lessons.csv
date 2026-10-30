@@ -1,0 +1,307 @@
+<PARSED TEXT FOR SHEET: 1 / 1 TABS
+TAB NAME: 09-esig-learning-lessons.csv>index,lesson_id,module,source_chapter,source_clause,printed_page,concept,engine_family,source_figures,complexities,fidelity
+0,esig-1-4,Foundations & interoperability,1,1.4,6,Advantages of an International Interoperable System,architecture,,simple;medium;busy,teaching_abstraction
+1,esig-1-5,Foundations & interoperability,1,1.5,6,About this Document,architecture,,simple;medium;busy,teaching_abstraction
+2,esig-1-6,Foundations & interoperability,1,1.6,7,How to Read and Use the SRS,architecture,,simple;medium;busy,teaching_abstraction
+3,esig-1-7,Foundations & interoperability,1,1.7,7,Requirements,architecture,,simple;medium;busy,teaching_abstraction
+4,esig-2-4,ETCS architecture and levels,2,2.4,7,System structure,architecture,,simple;medium;busy,teaching_abstraction
+5,esig-2-5,ETCS architecture and levels,2,2.5,8,Subsystems,architecture,,simple;medium;busy,teaching_abstraction
+6,esig-2-5-1,ETCS architecture and levels,2,2.5.1,8,Trackside subsystem,architecture,,simple;medium;busy,teaching_abstraction
+7,esig-2-5-2,ETCS architecture and levels,2,2.5.2,9,On-board subsystem,architecture,,simple;medium;busy,teaching_abstraction
+8,esig-2-5-3,ETCS architecture and levels,2,2.5.3,11,ERTMS/ETCS reference architecture,architecture,2:Fig:1,simple;medium;busy,teaching_abstraction
+9,esig-2-6,ETCS architecture and levels,2,2.6,12,Levels and transitions,level,,simple;medium;busy,teaching_abstraction
+10,esig-2-6-3,ETCS architecture and levels,2,2.6.3,14,ERTMS/ETCS Application Level 0,level,2:Fig:2,simple;medium;busy,teaching_abstraction
+11,esig-2-6-4,ETCS architecture and levels,2,2.6.4,16,ERTMS/ETCS Application Level NTC,level,2:Fig:3,simple;medium;busy,teaching_abstraction
+12,esig-2-6-5,ETCS architecture and levels,2,2.6.5,18,ERTMS/ETCS Application Level 1,level,2:Fig:4;2:Fig:5,simple;medium;busy,teaching_abstraction
+13,esig-2-6-6,ETCS architecture and levels,2,2.6.6,21,ERTMS/ETCS Application Level 2,level,2:Fig:6,simple;medium;busy,teaching_abstraction
+14,esig-2-6-8,ETCS architecture and levels,2,2.6.8,25,Level transitions,level,,simple;medium;busy,teaching_abstraction
+15,esig-3-4,"Balises, linking & Euroloop",3,3.4,10,"Balise configuration, linking and Euroloop",position,,simple;medium;busy,teaching_abstraction
+16,esig-3-4-1,"Balises, linking & Euroloop",3,3.4.1,10,Balise Configurations – Balise Group Definition,position,,simple;medium;busy,teaching_abstraction
+17,esig-3-4-2,"Balises, linking & Euroloop",3,3.4.2,10,Balise Co-ordinate System,position,3:Fig:1;3:Fig:1a;3:Fig:2;3:Fig:2a;3:Fig:2b,simple;medium;busy,teaching_abstraction
+18,esig-3-4-3,"Balises, linking & Euroloop",3,3.4.3,15,Balise Information Types and Usage,position,,simple;medium;busy,teaching_abstraction
+19,esig-3-4-4,"Balises, linking & Euroloop",3,3.4.4,15,Linking,position,,simple;medium;busy,teaching_abstraction
+20,esig-3-4-5,"Balises, linking & Euroloop",3,3.4.5,18,Euroloop (level 1 only),position,,simple;medium;busy,teaching_abstraction
+21,esig-3-5,Radio communication,3,3.5,19,Management of Radio Communication,radio,,simple;medium;busy,teaching_abstraction
+22,esig-3-5-3,Radio communication,3,3.5.3,20,Establishing a communication session,radio,3:Fig:3,simple;medium;busy,teaching_abstraction
+23,esig-3-5-4,Radio communication,3,3.5.4,25,Maintaining a communication session,radio,,simple;medium;busy,teaching_abstraction
+24,esig-3-5-5,Radio communication,3,3.5.5,26,Terminating a communication session,radio,3:Fig:5,simple;medium;busy,teaching_abstraction
+25,esig-3-5-6,Radio communication,3,3.5.6,28,Managing the Radio Networks,radio,,simple;medium;busy,teaching_abstraction
+26,esig-3-5-7,Radio communication,3,3.5.7,30,Safe Radio Connection Indication,radio,,simple;medium;busy,teaching_abstraction
+27,esig-3-6,Location and position confidence,3,3.6,31,"Location Principles, Train Position and Train Orientation",position,3:Fig:6;3:Fig:7,simple;medium;busy,teaching_abstraction
+28,esig-3-6-2,Location and position confidence,3,3.6.2,34,Location reference of Data Transmitted to the On-Board Equipment,position,3:Fig:8,simple;medium;busy,teaching_abstraction
+29,esig-3-6-3,Location and position confidence,3,3.6.3,36,Validity direction of transmitted information,position,3:Fig:9;3:Fig:10;3:Fig:12;3:Fig:13,simple;medium;busy,teaching_abstraction
+30,esig-3-6-4,Location and position confidence,3,3.6.4,40,Train Position Confidence Interval and Relocation,position,3:Fig:13a;3:Fig:13b;3:Fig:13c;3:Fig:13d,simple;medium;busy,teaching_abstraction
+31,esig-3-6-5,Location and position confidence,3,3.6.5,59,Position Reporting to the RBC,position,3:Fig:13e;3:Fig:14;3:Fig:15,simple;medium;busy,teaching_abstraction
+32,esig-3-6-6,Location and position confidence,3,3.6.6,66,Geographical position reporting,position,,simple;medium;busy,teaching_abstraction
+33,esig-3-6-7,Location and position confidence,3,3.6.7,68,Supervision of distances not referred to balise groups,position,3:Fig:16,simple;medium;busy,teaching_abstraction
+34,esig-3-6-8,Location and position confidence,3,3.6.8,70,Monitoring of odometer accuracy,position,,simple;medium;busy,teaching_abstraction
+35,esig-3-7,Data completeness,3,3.7,71,Completeness of data for safe train movement,guard,,simple;medium;busy,teaching_abstraction
+36,esig-3-7-1,Data completeness,3,3.7.1,71,Completeness of data,guard,,simple;medium;busy,teaching_abstraction
+37,esig-3-7-2,Data completeness,3,3.7.2,71,Responsibility for completeness of information,guard,,simple;medium;busy,teaching_abstraction
+38,esig-3-7-3,Data completeness,3,3.7.3,72,"Extension, replacement and deletion of location based information",guard,,simple;medium;busy,teaching_abstraction
+39,esig-3-8,Movement Authority,3,3.8,75,Movement authority,authority,,simple;medium;busy,teaching_abstraction
+40,esig-3-8-1,Movement Authority,3,3.8.1,75,Characteristics of a MA,authority,,simple;medium;busy,teaching_abstraction
+41,esig-3-8-2,Movement Authority,3,3.8.2,77,MA request to the RBC,authority,,simple;medium;busy,teaching_abstraction
+42,esig-3-8-3,Movement Authority,3,3.8.3,79,Structure of a Movement Authority (MA),authority,3:Fig:17;3:Fig:18,simple;medium;busy,teaching_abstraction
+43,esig-3-8-4,Movement Authority,3,3.8.4,81,Use of the MA on board the train,authority,3:Fig:19,simple;medium;busy,teaching_abstraction
+44,esig-3-8-5,Movement Authority,3,3.8.5,84,MA Update,authority,3:Fig:21a;3:Fig:21b;3:Fig:22a;3:Fig:22b;3:Fig:22c;3:Fig:23a;3:Fig:23b;3:Fig:24,simple;medium;busy,teaching_abstraction
+45,esig-3-8-6,Movement Authority,3,3.8.6,91,Co-operative shortening of MA (Level 2 only),authority,3:Fig:25,simple;medium;busy,teaching_abstraction
+46,esig-3-9,Infill & emergency orders,3,3.9,92,Means to transmit Infill information (Level 1 only),radio,,simple;medium;busy,teaching_abstraction
+47,esig-3-9-2,Infill & emergency orders,3,3.9.2,92,Infill by loop,radio,,simple;medium;busy,teaching_abstraction
+48,esig-3-9-3,Infill & emergency orders,3,3.9.3,93,Infill by radio,radio,3:Fig:25a,simple;medium;busy,teaching_abstraction
+49,esig-3-10,Infill & emergency orders,3,3.10,96,Emergency Messages,emergency,,simple;medium;busy,teaching_abstraction
+50,esig-3-10-2,Infill & emergency orders,3,3.10.2,96,Emergency Stop,emergency,,simple;medium;busy,teaching_abstraction
+51,esig-3-10-3,Infill & emergency orders,3,3.10.3,97,Revocation of an Emergency Message,emergency,,simple;medium;busy,teaching_abstraction
+52,esig-3-11,"Speed, gradient & route profiles",3,3.11,97,Static Speed Restrictions and Gradients,profile,,simple;medium;busy,teaching_abstraction
+53,esig-3-11-2,"Speed, gradient & route profiles",3,3.11.2,97,Definition of Static Speed Restriction,profile,,simple;medium;busy,teaching_abstraction
+54,esig-3-11-3,"Speed, gradient & route profiles",3,3.11.3,98,Static Speed Profile (SSP),profile,3:Fig:26,simple;medium;busy,teaching_abstraction
+55,esig-3-11-4,"Speed, gradient & route profiles",3,3.11.4,100,Axle load Speed Profile,profile,,simple;medium;busy,teaching_abstraction
+56,esig-3-11-5,"Speed, gradient & route profiles",3,3.11.5,100,Temporary Speed Restrictions,profile,,simple;medium;busy,teaching_abstraction
+57,esig-3-11-6,"Speed, gradient & route profiles",3,3.11.6,102,Signalling related speed restrictions,profile,,simple;medium;busy,teaching_abstraction
+58,esig-3-11-7,"Speed, gradient & route profiles",3,3.11.7,102,Mode related speed restrictions,profile,,simple;medium;busy,teaching_abstraction
+59,esig-3-11-8,"Speed, gradient & route profiles",3,3.11.8,102,Train related speed restriction,profile,,simple;medium;busy,teaching_abstraction
+60,esig-3-11-9,"Speed, gradient & route profiles",3,3.11.9,103,LX speed restriction,profile,,simple;medium;busy,teaching_abstraction
+61,esig-3-11-10,"Speed, gradient & route profiles",3,3.11.10,103,Override function related Speed Restriction,profile,,simple;medium;busy,teaching_abstraction
+62,esig-3-11-11,"Speed, gradient & route profiles",3,3.11.11,103,Speed restriction to ensure permitted braking distance,profile,,simple;medium;busy,teaching_abstraction
+63,esig-3-11-12,"Speed, gradient & route profiles",3,3.11.12,106,Gradients,profile,3:Fig:27,simple;medium;busy,teaching_abstraction
+64,esig-3-12,"Speed, gradient & route profiles",3,3.12,107,Other Profiles,profile,,simple;medium;busy,teaching_abstraction
+65,esig-3-12-1,"Speed, gradient & route profiles",3,3.12.1,107,Track Conditions,profile,,simple;medium;busy,teaching_abstraction
+66,esig-3-12-2,"Speed, gradient & route profiles",3,3.12.2,109,Route Suitability,profile,,simple;medium;busy,teaching_abstraction
+67,esig-3-12-3,"Speed, gradient & route profiles",3,3.12.3,110,Text Transmission,profile,,simple;medium;busy,teaching_abstraction
+68,esig-3-12-4,"Speed, gradient & route profiles",3,3.12.4,113,Mode profile,profile,,simple;medium;busy,teaching_abstraction
+69,esig-3-12-5,"Speed, gradient & route profiles",3,3.12.5,114,Level Crossings,profile,3:Fig:28,simple;medium;busy,teaching_abstraction
+70,esig-3-13,Braking and speed supervision,3,3.13,114,Speed and distance monitoring,braking,,simple;medium;busy,teaching_abstraction
+71,esig-3-13-2,Braking and speed supervision,3,3.13.2,116,Inputs for speed and distance monitoring,braking,3:Fig:29;3:Fig:30;3:Fig:31,simple;medium;busy,teaching_abstraction
+72,esig-3-13-3,Braking and speed supervision,3,3.13.3,129,Conversion Models,braking,,simple;medium;busy,teaching_abstraction
+73,esig-3-13-4,Braking and speed supervision,3,3.13.4,130,Acceleration / Deceleration due to gradient,braking,3:Fig:35,simple;medium;busy,teaching_abstraction
+74,esig-3-13-6,Braking and speed supervision,3,3.13.6,133,Calculation of the deceleration and brake build up time,braking,3:Fig:36;3:Fig:37;3:Fig:38,simple;medium;busy,teaching_abstraction
+75,esig-3-13-7,Braking and speed supervision,3,3.13.7,140,Determination of Most Restrictive Speed Profile (MRSP),braking,,simple;medium;busy,teaching_abstraction
+76,esig-3-13-8,Braking and speed supervision,3,3.13.8,140,Determination of targets and brake deceleration curves,braking,3:Fig:39;3:Fig:40;3:Fig:41,simple;medium;busy,teaching_abstraction
+77,esig-3-13-9,Braking and speed supervision,3,3.13.9,143,Supervision limits,braking,3:Fig:42;3:Fig:43;3:Fig:44;3:Fig:45;3:Fig:46;3:Fig:47;3:Fig:48;3:Fig:49;3:Fig:50;3:Fig:51;3:Fig:51a,simple;medium;busy,teaching_abstraction
+78,esig-3-13-10,Braking and speed supervision,3,3.13.10,159,Speed and distance monitoring commands,braking,3:Fig:52;3:Fig:53;3:Fig:54;3:Fig:55,simple;medium;busy,teaching_abstraction
+79,esig-3-13-11,Braking and speed supervision,3,3.13.11,176,Perturbation location,braking,3:Fig:56,simple;medium;busy,teaching_abstraction
+80,esig-3-14,Braking and speed supervision,3,3.14,179,Brake Command Handling and Protection against Undesirable Train Movement,braking,,simple;medium;busy,teaching_abstraction
+81,esig-3-14-1,Braking and speed supervision,3,3.14.1,179,Brake Command Handling,braking,,simple;medium;busy,teaching_abstraction
+82,esig-3-14-2,Braking and speed supervision,3,3.14.2,181,Roll Away Protection,braking,,simple;medium;busy,teaching_abstraction
+83,esig-3-14-3,Braking and speed supervision,3,3.14.3,181,Unauthorised Direction Movement Protection,braking,,simple;medium;busy,teaching_abstraction
+84,esig-3-15,Special functions & handover,3,3.15,182,Special functions,procedure,,simple;medium;busy,teaching_abstraction
+85,esig-3-15-1,Special functions & handover,3,3.15.1,182,RBC/RBC Handover,handover,,simple;medium;busy,teaching_abstraction
+86,esig-3-15-2,Special functions & handover,3,3.15.2,187,Handling of Trains with Non Leading Engines,procedure,,simple;medium;busy,teaching_abstraction
+87,esig-3-15-3,Special functions & handover,3,3.15.3,188,Splitting/joining,procedure,,simple;medium;busy,teaching_abstraction
+88,esig-3-15-4,Special functions & handover,3,3.15.4,188,Reversing of movement direction,procedure,3:Fig:57;3:Fig:58,simple;medium;busy,teaching_abstraction
+89,esig-3-15-5,Special functions & handover,3,3.15.5,190,Track ahead free,procedure,,simple;medium;busy,teaching_abstraction
+90,esig-3-15-6,Special functions & handover,3,3.15.6,190,Handling of National Systems,procedure,,simple;medium;busy,teaching_abstraction
+91,esig-3-15-7,Special functions & handover,3,3.15.7,191,Tolerance of Big Metal Mass,procedure,,simple;medium;busy,teaching_abstraction
+92,esig-3-15-8,Special functions & handover,3,3.15.8,191,Cold Movement Detection,procedure,,simple;medium;busy,teaching_abstraction
+93,esig-3-15-9,Special functions & handover,3,3.15.9,192,Virtual Balise Cover,procedure,,simple;medium;busy,teaching_abstraction
+94,esig-3-15-10,Special functions & handover,3,3.15.10,193,Advance display of route related information,procedure,,simple;medium;busy,teaching_abstraction
+95,esig-3-15-11,Special functions & handover,3,3.15.11,193,Driving with Automatic Train Operation,procedure,,simple;medium;busy,teaching_abstraction
+96,esig-3-16,Data consistency and versioning,3,3.16,194,Data Consistency,message,,simple;medium;busy,teaching_abstraction
+97,esig-3-16-2,Data consistency and versioning,3,3.16.2,194,Balises,message,,simple;medium;busy,teaching_abstraction
+98,esig-3-16-3,Data consistency and versioning,3,3.16.3,200,Radio,message,3:Fig:60;3:Fig:61;3:Fig:62,simple;medium;busy,teaching_abstraction
+99,esig-3-16-4,Data consistency and versioning,3,3.16.4,203,Error reporting to RBC,message,,simple;medium;busy,teaching_abstraction
+100,esig-3-17,Data consistency and versioning,3,3.17,203,System Version Management,version,,simple;medium;busy,teaching_abstraction
+101,esig-3-17-2,Data consistency and versioning,3,3.17.2,204,Determination of the operated system version,version,,simple;medium;busy,teaching_abstraction
+102,esig-3-17-3,Data consistency and versioning,3,3.17.3,206,Handling of trackside data in relation to system version,version,,simple;medium;busy,teaching_abstraction
+103,esig-3-18,"National, train and juridical data",3,3.18,208,System Data,parameter,,simple;medium;busy,teaching_abstraction
+104,esig-3-18-1,"National, train and juridical data",3,3.18.1,208,Fixed Values,parameter,,simple;medium;busy,teaching_abstraction
+105,esig-3-18-2,"National, train and juridical data",3,3.18.2,208,National / Default Values,parameter,,simple;medium;busy,teaching_abstraction
+106,esig-3-18-3,"National, train and juridical data",3,3.18.3,209,Train Data,parameter,,simple;medium;busy,teaching_abstraction
+107,esig-3-18-4,"National, train and juridical data",3,3.18.4,213,Additional Data,parameter,,simple;medium;busy,teaching_abstraction
+108,esig-3-18-5,"National, train and juridical data",3,3.18.5,216,Date and Time,parameter,,simple;medium;busy,teaching_abstraction
+109,esig-3-18-6,"National, train and juridical data",3,3.18.6,216,Data view,parameter,3:Fig:63,simple;medium;busy,teaching_abstraction
+110,esig-3-20,"National, train and juridical data",3,3.20,216,Juridical Data,parameter,,simple;medium;busy,teaching_abstraction
+111,esig-4-3-1,Modes and transitions,4,4.3.1,8,Presentation of the document,mode,,simple;medium;busy,teaching_abstraction
+112,esig-4-3-2,Modes and transitions,4,4.3.2,8,Identification of the possible modes,mode,,simple;medium;busy,teaching_abstraction
+113,esig-4-4,Modes and transitions,4,4.4,10,Definition of the modes,mode,,simple;medium;busy,teaching_abstraction
+114,esig-4-4-3,Modes and transitions,4,4.4.3,11,ISOLATION,mode,,simple;medium;busy,teaching_abstraction
+115,esig-4-4-4,Modes and transitions,4,4.4.4,12,NO POWER,mode,,simple;medium;busy,teaching_abstraction
+116,esig-4-4-5,Modes and transitions,4,4.4.5,13,SYSTEM FAILURE,mode,,simple;medium;busy,teaching_abstraction
+117,esig-4-4-6,Modes and transitions,4,4.4.6,14,SLEEPING,mode,,simple;medium;busy,teaching_abstraction
+118,esig-4-4-7,Modes and transitions,4,4.4.7,16,STAND BY,mode,,simple;medium;busy,teaching_abstraction
+119,esig-4-4-8,Modes and transitions,4,4.4.8,18,SHUNTING,mode,,simple;medium;busy,teaching_abstraction
+120,esig-4-4-9,Modes and transitions,4,4.4.9,20,FULL SUPERVISION,mode,,simple;medium;busy,teaching_abstraction
+121,esig-4-4-10,Modes and transitions,4,4.4.10,21,UNFITTED,mode,,simple;medium;busy,teaching_abstraction
+122,esig-4-4-11,Modes and transitions,4,4.4.11,22,STAFF RESPONSIBLE,mode,,simple;medium;busy,teaching_abstraction
+123,esig-4-4-12,Modes and transitions,4,4.4.12,25,ON SIGHT,mode,,simple;medium;busy,teaching_abstraction
+124,esig-4-4-13,Modes and transitions,4,4.4.13,26,TRIP,mode,,simple;medium;busy,teaching_abstraction
+125,esig-4-4-14,Modes and transitions,4,4.4.14,27,POST TRIP,mode,,simple;medium;busy,teaching_abstraction
+126,esig-4-4-15,Modes and transitions,4,4.4.15,29,NON LEADING,mode,,simple;medium;busy,teaching_abstraction
+127,esig-4-4-16,Modes and transitions,4,4.4.16,31,AUTOMATIC DRIVING,mode,,simple;medium;busy,teaching_abstraction
+128,esig-4-4-17,Modes and transitions,4,4.4.17,32,NATIONAL SYSTEM (SN),mode,,simple;medium;busy,teaching_abstraction
+129,esig-4-4-18,Modes and transitions,4,4.4.18,33,REVERSING,mode,,simple;medium;busy,teaching_abstraction
+130,esig-4-4-19,Modes and transitions,4,4.4.19,35,LIMITED SUPERVISION,mode,,simple;medium;busy,teaching_abstraction
+131,esig-4-4-20,Modes and transitions,4,4.4.20,37,PASSIVE SHUNTING,mode,,simple;medium;busy,teaching_abstraction
+132,esig-4-4-21,Modes and transitions,4,4.4.21,39,SUPERVISED MANOEUVRE,mode,,simple;medium;busy,teaching_abstraction
+133,esig-4-5,Modes and transitions,4,4.5,42,Modes and on-board functions,mode,,simple;medium;busy,teaching_abstraction
+134,esig-4-5-2,Modes and transitions,4,4.5.2,42,Active Functions Table,mode,4:Fig:1,simple;medium;busy,teaching_abstraction
+135,esig-4-6,Modes and transitions,4,4.6,47,Transitions between modes,mode,,simple;medium;busy,teaching_abstraction
+136,esig-4-6-1,Modes and transitions,4,4.6.1,47,Symbols,mode,,simple;medium;busy,teaching_abstraction
+137,esig-4-6-2,Modes and transitions,4,4.6.2,48,Transitions Table,mode,4:Fig:2,simple;medium;busy,teaching_abstraction
+138,esig-4-6-3,Modes and transitions,4,4.6.3,49,Transitions Conditions Table,mode,,simple;medium;busy,teaching_abstraction
+139,esig-4-7,Modes and transitions,4,4.7,55,DMI depending on modes,mode,,simple;medium;busy,teaching_abstraction
+140,esig-4-7-2,Modes and transitions,4,4.7.2,55,DMI versus Mode Table,mode,,simple;medium;busy,teaching_abstraction
+141,esig-4-8,Modes and transitions,4,4.8,60,Acceptance of received information,mode,,simple;medium;busy,teaching_abstraction
+142,esig-4-8-2,Modes and transitions,4,4.8.2,61,Assumptions,mode,4:Fig:3,simple;medium;busy,teaching_abstraction
+143,esig-4-8-4,Modes and transitions,4,4.8.4,71,Accepted Information depending on the mode and the type of information,mode,,simple;medium;busy,teaching_abstraction
+144,esig-4-9,Modes and transitions,4,4.9,80,What happens to accepted and stored information when entering a given level,mode,,simple;medium;busy,teaching_abstraction
+145,esig-4-10,Modes and transitions,4,4.10,81,What happens to accepted and stored information when entering a given mode,mode,,simple;medium;busy,teaching_abstraction
+146,esig-4-11,Modes and transitions,4,4.11,89,What happens to stored information when exiting NP mode,mode,,simple;medium;busy,teaching_abstraction
+147,esig-4-12,Modes and transitions,4,4.12,90,What happens to an ongoing brake command when entering a given mode,mode,,simple;medium;busy,teaching_abstraction
+148,esig-5-4,Operational procedures,5,5.4,12,Procedure Start of mission,procedure,5:Fig:1,simple;medium;busy,teaching_abstraction
+149,esig-5-5,Operational procedures,5,5.5,28,Procedure End of Mission,procedure,,simple;medium;busy,teaching_abstraction
+150,esig-5-6,Operational procedures,5,5.6,30,Shunting Initiated by Driver,procedure,5:Fig:2,simple;medium;busy,teaching_abstraction
+151,esig-5-7,Operational procedures,5,5.7,34,Entry in Shunting with Order from Trackside,procedure,5:Fig:3,simple;medium;busy,teaching_abstraction
+152,esig-5-8,Operational procedures,5,5.8,37,Procedure Override,procedure,,simple;medium;busy,teaching_abstraction
+153,esig-5-9,Operational procedures,5,5.9,41,Procedure On-Sight,procedure,5:Fig:4;5:Fig:5;5:Fig:6,simple;medium;busy,teaching_abstraction
+154,esig-5-10,Operational procedures,5,5.10,46,Level Transitions,level,5:Fig:7,simple;medium;busy,teaching_abstraction
+155,esig-5-11,Operational procedures,5,5.11,57,Procedure Train Trip,emergency,5:Fig:8,simple;medium;busy,teaching_abstraction
+156,esig-5-12,Operational procedures,5,5.12,63,Change of Train Orientation,procedure,,simple;medium;busy,teaching_abstraction
+157,esig-5-13,Operational procedures,5,5.13,66,Train Reversing,procedure,,simple;medium;busy,teaching_abstraction
+158,esig-5-14,Operational procedures,5,5.14,67,Joining / Splitting,procedure,,simple;medium;busy,teaching_abstraction
+159,esig-5-15,Operational procedures,5,5.15,69,RBC/RBC Handover,handover,5:Fig:9,simple;medium;busy,teaching_abstraction
+160,esig-5-16,Operational procedures,5,5.16,75,Procedure passing a non protected Level Crossing,procedure,5:Fig:10,simple;medium;busy,teaching_abstraction
+161,esig-5-17,Operational procedures,5,5.17,77,Changing Train Data from sources different from the driver,procedure,5:Fig:11;5:Fig:12,simple;medium;busy,teaching_abstraction
+162,esig-5-18,Operational procedures,5,5.18,82,Indication of Track Conditions,procedure,5:Fig:13;5:Fig:14;5:Fig:15;5:Fig:16;5:Fig:17;5:Fig:18;5:Fig:19;5:Fig:20;5:Fig:21,simple;medium;busy,teaching_abstraction
+163,esig-5-19,Operational procedures,5,5.19,93,Procedure Limited Supervision,procedure,5:Fig:22;5:Fig:23;5:Fig:24;5:Fig:25;5:Fig:26;5:Fig:27;5:Fig:28;5:Fig:29;5:Fig:30;5:Fig:31,simple;medium;busy,teaching_abstraction
+164,esig-5-21,Operational procedures,5,5.21,108,Procedure Supervised Manoeuvre,procedure,5:Fig:32,simple;medium;busy,teaching_abstraction
+165,esig-5-22,Operational procedures,5,5.22,111,Procedure Inhibition of balise transmission alarm reaction,procedure,,simple;medium;busy,teaching_abstraction
+166,esig-6-4,Older system versions,6,6.4,6,Envelopes of system versions,version,,simple;medium;busy,teaching_abstraction
+167,esig-6-4-1,Older system versions,6,6.4.1,6,Trackside - envelope of legally operated system versions,version,,simple;medium;busy,teaching_abstraction
+168,esig-6-4-2,Older system versions,6,6.4.2,6,On-board – allowed envelopes of supported system versions,version,,simple;medium;busy,teaching_abstraction
+169,esig-6-5,Older system versions,6,6.5,7,Trackside requirements in relation to older system versions,version,,simple;medium;busy,teaching_abstraction
+170,esig-6-5-1,Older system versions,6,6.5.1,7,Trackside areas operated with system version number X = 1,version,,simple;medium;busy,teaching_abstraction
+171,esig-6-5-2,Older system versions,6,6.5.2,37,Trackside areas operated with system version number X = 2,version,,simple;medium;busy,teaching_abstraction
+172,esig-6-5-3,Older system versions,6,6.5.3,52,Trackside areas operated with system version number X = 3,version,,simple;medium;busy,teaching_abstraction
+173,esig-6-6,Older system versions,6,6.6,53,On-board requirements in relation to older system versions,version,,simple;medium;busy,teaching_abstraction
+174,esig-6-6-2,Older system versions,6,6.6.2,53,Specific requirements for on-board operating with system version number X = 1,version,,simple;medium;busy,teaching_abstraction
+175,esig-6-6-3,Older system versions,6,6.6.3,55,Handling of air gap data related to system version number X = 1,version,,simple;medium;busy,teaching_abstraction
+176,esig-6-6-4,Older system versions,6,6.6.4,70,Specific requirements for on-board operating with system version number X = 2,version,,simple;medium;busy,teaching_abstraction
+177,esig-6-6-5,Older system versions,6,6.6.5,71,Handling of air gap data related to system version number X = 2,version,,simple;medium;busy,teaching_abstraction
+178,esig-7-3-2,ETCS language and packets,7,7.3.2,7,Definition of Variables,packet,,simple;medium;busy,teaching_abstraction
+179,esig-7-3-3,ETCS language and packets,7,7.3.3,8,Definition of Packets,packet,,simple;medium;busy,teaching_abstraction
+180,esig-7-5,ETCS language and packets,7,7.5,46,Definitions of Variables,packet,,simple;medium;busy,teaching_abstraction
+181,esig-8-4-2,Eurobalise and radio messages,8,8.4.2,12,Rules for Eurobalise telegrams,message,,simple;medium;busy,teaching_abstraction
+182,esig-8-4-3,Eurobalise and radio messages,8,8.4.3,13,Rules for Euroloop messages,message,,simple;medium;busy,teaching_abstraction
+183,esig-8-4-4,Eurobalise and radio messages,8,8.4.4,14,Rules for Euroradio messages,message,,simple;medium;busy,teaching_abstraction
+184,esig-8-5,Eurobalise and radio messages,8,8.5,18,List of radio Messages,message,,simple;medium;busy,teaching_abstraction
+185,esig-8-5-2,Eurobalise and radio messages,8,8.5.2,18,Train to Track radio messages,message,,simple;medium;busy,teaching_abstraction
+186,esig-8-5-3,Eurobalise and radio messages,8,8.5.3,19,Track to Train radio messages,message,,simple;medium;busy,teaching_abstraction
+187,esig-8-6-1,Eurobalise and radio messages,8,8.6.1,20,Message 129: Validated Train Data,message,,simple;medium;busy,teaching_abstraction
+188,esig-8-6-2,Eurobalise and radio messages,8,8.6.2,20,Message 130: Request for Shunting,message,,simple;medium;busy,teaching_abstraction
+189,esig-8-6-2-1,Eurobalise and radio messages,8,8.6.2.1,20,Message 131: Request for Supervised Manoeuvre,message,,simple;medium;busy,teaching_abstraction
+190,esig-8-6-3,Eurobalise and radio messages,8,8.6.3,21,Message 132: MA Request,message,,simple;medium;busy,teaching_abstraction
+191,esig-8-6-3-1,Eurobalise and radio messages,8,8.6.3.1,21,Message 133: Safe consist length information for SM,message,,simple;medium;busy,teaching_abstraction
+192,esig-8-6-4,Eurobalise and radio messages,8,8.6.4,21,Message 136: Train Position Report,message,,simple;medium;busy,teaching_abstraction
+193,esig-8-6-5,Eurobalise and radio messages,8,8.6.5,22,Message 137: Request to Shorten MA is granted,message,,simple;medium;busy,teaching_abstraction
+194,esig-8-6-6,Eurobalise and radio messages,8,8.6.6,22,Message 138: Request to Shorten MA is rejected,message,,simple;medium;busy,teaching_abstraction
+195,esig-8-6-7,Eurobalise and radio messages,8,8.6.7,22,Message 146: Acknowledgement,message,,simple;medium;busy,teaching_abstraction
+196,esig-8-6-8,Eurobalise and radio messages,8,8.6.8,23,Message 147: Acknowledgement of Emergency Stop,message,,simple;medium;busy,teaching_abstraction
+197,esig-8-6-9,Eurobalise and radio messages,8,8.6.9,23,Message 149: Track Ahead Free Granted,message,,simple;medium;busy,teaching_abstraction
+198,esig-8-6-10,Eurobalise and radio messages,8,8.6.10,24,Message 150: End of Mission,message,,simple;medium;busy,teaching_abstraction
+199,esig-8-6-11,Eurobalise and radio messages,8,8.6.11,24,Message 153: Radio infill request,message,,simple;medium;busy,teaching_abstraction
+200,esig-8-6-12,Eurobalise and radio messages,8,8.6.12,24,Message 154: No compatible version supported,message,,simple;medium;busy,teaching_abstraction
+201,esig-8-6-13,Eurobalise and radio messages,8,8.6.13,25,Message 155: Initiation of a communication session,message,,simple;medium;busy,teaching_abstraction
+202,esig-8-6-14,Eurobalise and radio messages,8,8.6.14,25,Message 156: Termination of a communication session,message,,simple;medium;busy,teaching_abstraction
+203,esig-8-6-15,Eurobalise and radio messages,8,8.6.15,25,Message 157: SoM Position Report,message,,simple;medium;busy,teaching_abstraction
+204,esig-8-6-16,Eurobalise and radio messages,8,8.6.16,26,Message 158: Text Message Acknowledged by Driver,message,,simple;medium;busy,teaching_abstraction
+205,esig-8-6-17,Eurobalise and radio messages,8,8.6.17,26,Message 159: Session established,message,,simple;medium;busy,teaching_abstraction
+206,esig-8-7-1,Eurobalise and radio messages,8,8.7.1,27,Message 2: SR Authorisation,message,,simple;medium;busy,teaching_abstraction
+207,esig-8-7-2,Eurobalise and radio messages,8,8.7.2,27,Message 3: Movement Authority,message,,simple;medium;busy,teaching_abstraction
+208,esig-8-7-2-1,Eurobalise and radio messages,8,8.7.2.1,28,Message 4: SM Authorisation,message,,simple;medium;busy,teaching_abstraction
+209,esig-8-7-2-2,Eurobalise and radio messages,8,8.7.2.2,28,Message 5: SM Refused,message,,simple;medium;busy,teaching_abstraction
+210,esig-8-7-3,Eurobalise and radio messages,8,8.7.3,29,Message 6: Recognition of exit from TRIP mode,message,,simple;medium;busy,teaching_abstraction
+211,esig-8-7-3-1,Eurobalise and radio messages,8,8.7.3.1,29,Message 7: Acknowledgment of safe consist length info for SM,message,,simple;medium;busy,teaching_abstraction
+212,esig-8-7-4,Eurobalise and radio messages,8,8.7.4,29,Message 8: Acknowledgement of Train Data,message,,simple;medium;busy,teaching_abstraction
+213,esig-8-7-5,Eurobalise and radio messages,8,8.7.5,30,Message 9: Request to Shorten MA,message,,simple;medium;busy,teaching_abstraction
+214,esig-8-7-6,Eurobalise and radio messages,8,8.7.6,30,Message 15: Conditional Emergency Stop,message,,simple;medium;busy,teaching_abstraction
+215,esig-8-7-7,Eurobalise and radio messages,8,8.7.7,31,Message 16: Unconditional Emergency Stop,message,,simple;medium;busy,teaching_abstraction
+216,esig-8-7-8,Eurobalise and radio messages,8,8.7.8,31,Message 18: Revocation of Emergency Stop,message,,simple;medium;busy,teaching_abstraction
+217,esig-8-7-9,Eurobalise and radio messages,8,8.7.9,31,Message 24: General message,message,,simple;medium;busy,teaching_abstraction
+218,esig-8-7-10,Eurobalise and radio messages,8,8.7.10,32,Message 27: SH Refused,message,,simple;medium;busy,teaching_abstraction
+219,esig-8-7-11,Eurobalise and radio messages,8,8.7.11,32,Message 28: SH Authorised,message,,simple;medium;busy,teaching_abstraction
+220,esig-8-7-12,Eurobalise and radio messages,8,8.7.12,32,Message 32: RBC/RIU System Version,message,,simple;medium;busy,teaching_abstraction
+221,esig-8-7-13,Eurobalise and radio messages,8,8.7.13,33,Message 33: MA with Shifted Location Reference,message,,simple;medium;busy,teaching_abstraction
+222,esig-8-7-14,Eurobalise and radio messages,8,8.7.14,33,Message 34: Track Ahead Free Request,message,,simple;medium;busy,teaching_abstraction
+223,esig-8-7-15,Eurobalise and radio messages,8,8.7.15,34,Message 37: Infill MA,message,,simple;medium;busy,teaching_abstraction
+224,esig-8-7-16,Eurobalise and radio messages,8,8.7.16,34,Message 38: Acknowledgement of session establishment,message,,simple;medium;busy,teaching_abstraction
+225,esig-8-7-17,Eurobalise and radio messages,8,8.7.17,34,Message 39: Acknowledgement of termination of a communication session,message,,simple;medium;busy,teaching_abstraction
+226,esig-8-7-18,Eurobalise and radio messages,8,8.7.18,35,Message 40: Train Rejected,message,,simple;medium;busy,teaching_abstraction
+227,esig-8-7-19,Eurobalise and radio messages,8,8.7.19,35,Message 41: Train Accepted,message,,simple;medium;busy,teaching_abstraction
+228,esig-8-7-21,Eurobalise and radio messages,8,8.7.21,35,Message 43: SoM position report confirmed by RBC,message,,simple;medium;busy,teaching_abstraction
+229,esig-8-7-22,Eurobalise and radio messages,8,8.7.22,36,Message 45: Assignment of coordinate system,message,8:Fig:1,simple;medium;busy,teaching_abstraction
+230,esig-9-4,Clause classification,9,9.4,6,Classification of clauses,classification,,simple;medium;busy,teaching_abstraction
+231,esig-9-4-1,Clause classification,9,9.4.1,6,Chapter 1,classification,,simple;medium;busy,teaching_abstraction
+232,esig-9-4-2,Clause classification,9,9.4.2,8,Chapter 2,classification,,simple;medium;busy,teaching_abstraction
+233,esig-9-4-3,Clause classification,9,9.4.3,13,Chapter 3,classification,,simple;medium;busy,teaching_abstraction
+234,esig-9-4-4,Clause classification,9,9.4.4,74,Chapter 4,classification,,simple;medium;busy,teaching_abstraction
+235,esig-9-4-5,Clause classification,9,9.4.5,88,Chapter 5,classification,,simple;medium;busy,teaching_abstraction
+236,esig-9-4-6,Clause classification,9,9.4.6,112,Chapter 6,classification,,simple;medium;busy,teaching_abstraction
+237,esig-9-4-7,Clause classification,9,9.4.7,134,Chapter 7,classification,,simple;medium;busy,teaching_abstraction
+238,esig-9-4-8,Clause classification,9,9.4.8,144,Chapter 8,classification,,simple;medium;busy,teaching_abstraction
+239,esig-packet-7-4-2-0,ETCS language and packets,7,7.4.2.0,12,Packet 0: Virtual Balise Cover marker,packet,,simple;medium;busy,teaching_abstraction
+240,esig-packet-7-4-2-1,ETCS language and packets,7,7.4.2.1,12,Packet 2: System Version order,packet,,simple;medium;busy,teaching_abstraction
+241,esig-packet-7-4-2-1-1,ETCS language and packets,7,7.4.2.1.1,12,Packet 3: National Values,packet,,simple;medium;busy,teaching_abstraction
+242,esig-packet-7-4-2-2,ETCS language and packets,7,7.4.2.2,15,Packet 5: Linking,packet,,simple;medium;busy,teaching_abstraction
+243,esig-packet-7-4-2-2-1,ETCS language and packets,7,7.4.2.2.1,16,Packet 6: Virtual Balise Cover order,packet,,simple;medium;busy,teaching_abstraction
+244,esig-packet-7-4-2-3,ETCS language and packets,7,7.4.2.3,16,Packet 12: Level 1 Movement Authority,packet,,simple;medium;busy,teaching_abstraction
+245,esig-packet-7-4-2-3-1,ETCS language and packets,7,7.4.2.3.1,18,Packet 13: Staff Responsible distance Information from loop,packet,,simple;medium;busy,teaching_abstraction
+246,esig-packet-7-4-2-4,ETCS language and packets,7,7.4.2.4,18,Packet 15: Level 2 Movement Authority,packet,,simple;medium;busy,teaching_abstraction
+247,esig-packet-7-4-2-5,ETCS language and packets,7,7.4.2.5,19,Packet 16: Repositioning Information,packet,,simple;medium;busy,teaching_abstraction
+248,esig-packet-7-4-2-6,ETCS language and packets,7,7.4.2.6,19,Packet 21: Gradient Profile,packet,,simple;medium;busy,teaching_abstraction
+249,esig-packet-7-4-2-7,ETCS language and packets,7,7.4.2.7,20,Packet 27: International Static Speed Profile,packet,,simple;medium;busy,teaching_abstraction
+250,esig-packet-7-4-2-7-1,ETCS language and packets,7,7.4.2.7.1,20,Packet 31: RBC transition order for RBC interfaced to FRMCS only,packet,,simple;medium;busy,teaching_abstraction
+251,esig-packet-7-4-2-7-2,ETCS language and packets,7,7.4.2.7.2,21,Packet 32: Session Management for RBC interfaced to FRMCS only,packet,,simple;medium;busy,teaching_abstraction
+252,esig-packet-7-4-2-8,ETCS language and packets,7,7.4.2.8,21,Packet 39: Track Condition Change of traction system,packet,,simple;medium;busy,teaching_abstraction
+253,esig-packet-7-4-2-8-1,ETCS language and packets,7,7.4.2.8.1,21,Packet 40: Track Condition Change of allowed current consumption,packet,,simple;medium;busy,teaching_abstraction
+254,esig-packet-7-4-2-9,ETCS language and packets,7,7.4.2.9,22,Packet 41: Level Transition Order,packet,,simple;medium;busy,teaching_abstraction
+255,esig-packet-7-4-2-10,ETCS language and packets,7,7.4.2.10,22,Packet 42: Session Management for RBC interfaced to GSM-R,packet,,simple;medium;busy,teaching_abstraction
+256,esig-packet-7-4-2-11,ETCS language and packets,7,7.4.2.11,23,Packet 44: Data used by applications outside the ERTMS/ETCS system.,packet,,simple;medium;busy,teaching_abstraction
+257,esig-packet-7-4-2-11-1,ETCS language and packets,7,7.4.2.11.1,23,Packet 45: Radio Network transition order,packet,,simple;medium;busy,teaching_abstraction
+258,esig-packet-7-4-2-11-2,ETCS language and packets,7,7.4.2.11.2,23,Packet 46: Conditional Level Transition Order,packet,,simple;medium;busy,teaching_abstraction
+259,esig-packet-7-4-2-12,ETCS language and packets,7,7.4.2.12,24,Packet 49: List of Balise Groups for SH Area,packet,,simple;medium;busy,teaching_abstraction
+260,esig-packet-7-4-2-13,ETCS language and packets,7,7.4.2.13,24,Packet 51: Axle Load Speed Profile,packet,,simple;medium;busy,teaching_abstraction
+261,esig-packet-7-4-2-13-1,ETCS language and packets,7,7.4.2.13.1,25,Packet 52: Permitted Braking Distance Information,packet,,simple;medium;busy,teaching_abstraction
+262,esig-packet-7-4-2-14,ETCS language and packets,7,7.4.2.14,26,Packet 57: Movement Authority Request Parameters,packet,,simple;medium;busy,teaching_abstraction
+263,esig-packet-7-4-2-15,ETCS language and packets,7,7.4.2.15,26,Packet 58: Position Report Parameters,packet,,simple;medium;busy,teaching_abstraction
+264,esig-packet-7-4-2-16,ETCS language and packets,7,7.4.2.16,26,Packet 63: List of Balise Groups in SR Authority,packet,,simple;medium;busy,teaching_abstraction
+265,esig-packet-7-4-2-16-1,ETCS language and packets,7,7.4.2.16.1,27,Packet 64: Inhibition of revocable TSRs from balises in level 2,packet,,simple;medium;busy,teaching_abstraction
+266,esig-packet-7-4-2-17,ETCS language and packets,7,7.4.2.17,27,Packet 65: Temporary Speed Restriction,packet,,simple;medium;busy,teaching_abstraction
+267,esig-packet-7-4-2-18,ETCS language and packets,7,7.4.2.18,27,Packet 66: Temporary Speed Restriction Revocation,packet,,simple;medium;busy,teaching_abstraction
+268,esig-packet-7-4-2-19,ETCS language and packets,7,7.4.2.19,27,Packet 67: Track Condition Big Metal Masses,packet,,simple;medium;busy,teaching_abstraction
+269,esig-packet-7-4-2-20,ETCS language and packets,7,7.4.2.20,28,Packet 68: Track Condition,packet,,simple;medium;busy,teaching_abstraction
+270,esig-packet-7-4-2-20-1,ETCS language and packets,7,7.4.2.20.1,28,Packet 69: Track Condition Station Platforms,packet,,simple;medium;busy,teaching_abstraction
+271,esig-packet-7-4-2-21,ETCS language and packets,7,7.4.2.21,29,Packet 70: Route Suitability Data,packet,,simple;medium;busy,teaching_abstraction
+272,esig-packet-7-4-2-23,ETCS language and packets,7,7.4.2.23,30,Packet 73: Packet for sending plain text messages,packet,,simple;medium;busy,teaching_abstraction
+273,esig-packet-7-4-2-24,ETCS language and packets,7,7.4.2.24,31,Packet 74: Packet for sending fixed text messages,packet,,simple;medium;busy,teaching_abstraction
+274,esig-packet-7-4-2-25,ETCS language and packets,7,7.4.2.25,32,Packet 79: Geographical Position Information,packet,,simple;medium;busy,teaching_abstraction
+275,esig-packet-7-4-2-26,ETCS language and packets,7,7.4.2.26,33,Packet 80: Mode profile,packet,,simple;medium;busy,teaching_abstraction
+276,esig-packet-7-4-2-26-1,ETCS language and packets,7,7.4.2.26.1,33,Packet 88: Level Crossing information,packet,,simple;medium;busy,teaching_abstraction
+277,esig-packet-7-4-2-26-2,ETCS language and packets,7,7.4.2.26.2,34,Packet 90: Track Ahead Free up to level 2 transition location,packet,,simple;medium;busy,teaching_abstraction
+278,esig-packet-7-4-2-27,ETCS language and packets,7,7.4.2.27,34,Packet 131: RBC transition order for RBC interfaced to GSM-R,packet,,simple;medium;busy,teaching_abstraction
+279,esig-packet-7-4-2-28,ETCS language and packets,7,7.4.2.28,34,Packet 132: Danger for Shunting information,packet,,simple;medium;busy,teaching_abstraction
+280,esig-packet-7-4-2-29,ETCS language and packets,7,7.4.2.29,35,Packet 133: Radio infill area information,packet,,simple;medium;busy,teaching_abstraction
+281,esig-packet-7-4-2-30,ETCS language and packets,7,7.4.2.30,35,Packet 134: EOLM Packet,packet,,simple;medium;busy,teaching_abstraction
+282,esig-packet-7-4-2-31,ETCS language and packets,7,7.4.2.31,35,Packet 135: Stop Shunting on desk opening,packet,,simple;medium;busy,teaching_abstraction
+283,esig-packet-7-4-2-32,ETCS language and packets,7,7.4.2.32,36,Packet 136: Infill location reference,packet,,simple;medium;busy,teaching_abstraction
+284,esig-packet-7-4-2-33,ETCS language and packets,7,7.4.2.33,36,Packet 137: Stop if in Staff Responsible,packet,,simple;medium;busy,teaching_abstraction
+285,esig-packet-7-4-2-34,ETCS language and packets,7,7.4.2.34,36,Packet 138: Reversing area information,packet,,simple;medium;busy,teaching_abstraction
+286,esig-packet-7-4-2-35,ETCS language and packets,7,7.4.2.35,37,Packet 139: Reversing supervision information,packet,,simple;medium;busy,teaching_abstraction
+287,esig-packet-7-4-2-36,ETCS language and packets,7,7.4.2.36,37,Packet 140: Train running number from RBC,packet,,simple;medium;busy,teaching_abstraction
+288,esig-packet-7-4-2-37,ETCS language and packets,7,7.4.2.37,37,Packet 141: Default Gradient for Temporary Speed Restriction,packet,,simple;medium;busy,teaching_abstraction
+289,esig-packet-7-4-2-37-1,ETCS language and packets,7,7.4.2.37.1,37,Packet 143: Session Management with neighbouring Radio Infill Unit,packet,,simple;medium;busy,teaching_abstraction
+290,esig-packet-7-4-2-37-2,ETCS language and packets,7,7.4.2.37.2,38,Packet 145: Inhibition of balise group message consistency reaction,packet,,simple;medium;busy,teaching_abstraction
+291,esig-packet-7-4-2-37-3,ETCS language and packets,7,7.4.2.37.3,38,Packet 180: LSSMA display toggle order,packet,,simple;medium;busy,teaching_abstraction
+292,esig-packet-7-4-2-37-4,ETCS language and packets,7,7.4.2.37.4,38,Packet 181: Generic LS function marker,packet,,simple;medium;busy,teaching_abstraction
+293,esig-packet-7-4-2-38,ETCS language and packets,7,7.4.2.38,39,"Packet 254: Default balise, loop or RIU information",packet,,simple;medium;busy,teaching_abstraction
+294,esig-packet-7-4-2-39,ETCS language and packets,7,7.4.2.39,39,Packet 255: End of Information,packet,,simple;medium;busy,teaching_abstraction
+295,esig-packet-7-4-3-1,ETCS language and packets,7,7.4.3.1,40,Packet 0: Position Report,packet,,simple;medium;busy,teaching_abstraction
+296,esig-packet-7-4-3-2,ETCS language and packets,7,7.4.3.2,40,Packet 1: Position Report based on two balise groups,packet,,simple;medium;busy,teaching_abstraction
+297,esig-packet-7-4-3-3,ETCS language and packets,7,7.4.3.3,41,Packet 2: Onboard supported system versions,packet,,simple;medium;busy,teaching_abstraction
+298,esig-packet-7-4-3-4,ETCS language and packets,7,7.4.3.4,41,Packet 4: Error reporting,packet,,simple;medium;busy,teaching_abstraction
+299,esig-packet-7-4-3-4-1,ETCS language and packets,7,7.4.3.4.1,42,Packet 5: Train running number,packet,,simple;medium;busy,teaching_abstraction
+300,esig-packet-7-4-3-4-2,ETCS language and packets,7,7.4.3.4.2,42,Packet 9: Level 2 transition information,packet,,simple;medium;busy,teaching_abstraction
+301,esig-packet-7-4-3-4-3,ETCS language and packets,7,7.4.3.4.3,42,Packet 10: Safe consist length information for Supervised Manoeuvre,packet,,simple;medium;busy,teaching_abstraction
+302,esig-packet-7-4-3-5,ETCS language and packets,7,7.4.3.5,42,Packet 11: Validated train data,packet,,simple;medium;busy,teaching_abstraction
+303,esig-packet-7-4-3-5-1,ETCS language and packets,7,7.4.3.5.1,43,Packet 12: Default train data for Supervised Manoeuvre,packet,,simple;medium;busy,teaching_abstraction
+304,esig-packet-7-4-3-6,ETCS language and packets,7,7.4.3.6,44,Packet 44: Data used by applications outside the ERTMS/ETCS system.,packet,,simple;medium;busy,teaching_abstraction

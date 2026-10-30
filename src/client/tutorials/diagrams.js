@@ -97,3 +97,61 @@ export function speedLine(line,pulse=false){
   svg.append(svgEl('text',{x:25,y:73,class:'paper-svg-detail'},`${line.position} m front • permitted ${line.speed} km/h`));
   return svg;
 }
+
+/**
+ * Responsive learning re-expressions of indexed SRS figures.
+ * Deliberately NOT a redraw of the standard's engineering figure. A legend
+ * exposes source figure ID and original caption; the visual is a family-scale
+ * functional illustration driven by synthetic lesson measurements.
+ */
+export function figureDiagram(figure,snapshot){
+  const title=`SUBSET-026-${figure.chapter} Figure ${figure.figure}: ${figure.caption}`;
+  const svg=rootSvg('0 0 720 232',`Educational re-expression of ${title}; ${snapshot.phase}`);
+  defs(svg);
+  const words=figure.caption.toLowerCase();
+  const warning=/BLOCKED|REVIEW|STOP|DENIED|FAILED|LOST/.test(snapshot.phase);
+  const accent=warning?'#bd4c4b':'#438e61';
+  const heading=(text,y=23)=>svg.append(svgEl('text',{x:18,y,class:'paper-svg-label'},text));
+  const detail=(text,y)=>svg.append(svgEl('text',{x:18,y,class:'paper-svg-detail'},text));
+  heading(`Figure ${figure.figure} · ${(figure.caption.length>84?figure.caption.slice(0,81)+'…':figure.caption)}`);
+  if(/speed|curve|brak|gradient|profile|deceleration|traction|supervision|kv_int/i.test(words)){
+    arrow(svg,72,185,662,185);
+    arrow(svg,72,185,72,42);
+    svg.append(svgEl('path',{d:'M72 64 C168 76 221 92 299 120 S468 164 651 178',fill:'none',stroke:accent,'stroke-width':4,'stroke-dasharray':'0'}));
+    svg.append(svgEl('path',{d:'M72 104 C190 114 305 132 400 146 S540 177 651 183',fill:'none',stroke:'#507faf','stroke-width':3,'stroke-dasharray':'7 4'}));
+    svg.append(svgEl('line',{x1:310,y1:55,x2:310,y2:185,stroke:'#bda75e','stroke-width':3,'stroke-dasharray':'5 5'}));
+    svg.append(svgEl('circle',{cx:310,cy:121,r:9,fill:'#fff3b2',stroke:ink,'stroke-width':2}));
+    detail('Illustrative signal limits and target position · not an ETCS braking curve',214);
+  }else if(/balise|position|orientation|co-ordinate|location|linking|route|infill|lx|level crossing|track/i.test(words)){
+    svg.append(svgEl('line',{x1:40,y1:120,x2:682,y2:120,stroke:ink,'stroke-width':7}));
+    svg.append(svgEl('line',{x1:40,y1:151,x2:682,y2:151,stroke:ink,'stroke-width':7}));
+    for(let x=53;x<682;x+=35)svg.append(svgEl('line',{x1:x,y1:117,x2:x+15,y2:154,stroke:'#806e57','stroke-width':3}));
+    for(const x of [170,335,525]){
+      svg.append(svgEl('rect',{x,y:113,width:19,height:45,rx:3,fill:'#dfeafb',stroke:ink,'stroke-width':2}));
+      svg.append(svgEl('text',{x:x+9,y:102,'text-anchor':'middle',class:'paper-svg-detail'},`BG${[170,335,525].indexOf(x)+1}`));
+    }
+    const position=snapshot.speedline?.position??300;
+    const end=snapshot.speedline?.end??1000;
+    const x=55+Math.max(0,Math.min(1,position/Math.max(1,end)))*587;
+    svg.append(svgEl('rect',{x:x-22,y:74,width:44,height:34,rx:7,fill:'#d1e7d7',stroke:ink,'stroke-width':3}));
+    svg.append(svgEl('path',{d:`M${x-11} 110 v9 m22 -9 v9`,stroke:accent,'stroke-width':4}));
+    detail('Synthetic geometry · route/position labels are not surveyed infrastructure',215);
+  }else if(/message|packet|data|information|structure|radio|version/i.test(words)){
+    const labels=['Header','Condition','Payload','Receiver'];
+    for(let j=0;j<labels.length;j++){
+      const x=30+j*174;
+      rectNode(svg,x,75,146,70,labels[j],j===3?snapshot.phase:'value / status',j===3,!warning?'green':'red');
+      if(j<3)arrow(svg,x+148,108,x+169,108);
+    }
+    detail('Illustrative input validation and packet/message forwarding; not bit-accurate',215);
+  }else{
+    const phases=['Input condition','Decision','Output','Next event'];
+    for(let j=0;j<phases.length;j++){
+      const x=22+j*175;
+      rectNode(svg,x,84,147,65,phases[j],j===2?snapshot.phase:'teaching state',j===2,warning?'red':'green');
+      if(j<3)arrow(svg,x+148,116,x+171,116);
+    }
+    detail('Simplified state/condition flow, source diagram not reproduced to scale',215);
+  }
+  return svg;
+}

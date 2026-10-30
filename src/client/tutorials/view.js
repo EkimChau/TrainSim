@@ -1,7 +1,8 @@
 import {el} from '../api.js';
 import {LESSONS,lessonById,lessonIndex} from './lessons.js';
 import {createLessonState,stepLesson,lessonSnapshot} from './engine.js';
-import {flowDiagram,stateDiagram,speedLine} from './diagrams.js';
+import {flowDiagram,stateDiagram,speedLine,figureDiagram} from './diagrams.js';
+import {DIFFICULTIES,COURSE_META,COURSE_FIGURES} from './curriculum.js';
 
 const text=(tag,value,className)=>el(tag,className?{class:className}:{},String(value));
 const button=(label,attrs={})=>el('button',{type:'button',...attrs},label);
@@ -29,23 +30,44 @@ function input(field,current){
     el('span',{class:'paper-input-line'},control,field.unit?text('span',field.unit,'paper-unit'):null),
     text('small',field.from,'paper-input-from'));
 }
-function scenarioActions(lesson){
-  return el('div',{class:'paper-scenario-list'},...lesson.scenarios.map(s=>button(s.label,{
+function scenarioActions(lesson,tier){
+  const selected=lesson.scenarios.filter(s=>(s.tier??'simple')===tier);
+  return el('div',{class:'paper-scenario-list'},...selected.map(s=>button(s.label,{
     class:`paper-action paper-action-${s.kind==='alert'?'red':'green'} paper-scenario`,
     'data-scenario':s.id,title:`Replay ${s.label}`
   })));
 }
 function lessonDropdown(lesson){
+  // Module-aware lesson index: 308 lessons are searchable without changing the
+  // title controls. The menu is discoverable on hover, toggled on click.
+  const groups=new Map();
+  for(const item of LESSONS){
+    const title=item.moduleTitle??'Featured learning labs';
+    if(!groups.has(title))groups.set(title,[]);
+    groups.get(title).push(item);
+  }
   return el('div',{class:'paper-lesson-picker','data-picker':'1'},
-    button(`Lesson ${lesson.number} ▾`,{class:'paper-lesson-trigger',title:'Show all lessons; hover or click','aria-haspopup':'true','aria-expanded':'false','data-action':'toggle-menu'}),
-    el('div',{class:'paper-lesson-menu',role:'menu',hidden:true,'aria-label':'All tutorials'},
-      text('p','Choose a lesson','paper-menu-title'),
-      ...LESSONS.map(item=>button(`Lesson ${item.number}  ·  ${item.short}`,{
-        class:`paper-lesson-menu-item${item.id===lesson.id?' current':''}`,
-        'data-lesson':item.id,role:'menuitem','aria-current':item.id===lesson.id?'page':'false'
-      }))));
+    button(`Lesson ${lesson.number} ▾`,{class:'paper-lesson-trigger',title:'Browse all source-linked lessons; hover or click','aria-haspopup':'true','aria-expanded':'false','data-action':'toggle-menu'}),
+    el('div',{class:'paper-lesson-menu',role:'menu',hidden:true,'aria-label':'All ESIG tutorials'},
+      text('p',`${LESSONS.length} lessons · ${COURSE_FIGURES.filter(f=>!f.deleted).length} active source figures`,'paper-menu-title'),
+      el('label',{class:'paper-menu-search-label'},'Find a lesson, clause or module',
+        el('input',{class:'paper-menu-search',type:'search',placeholder:'Search 3.8, braking, packet, …','aria-label':'Search ESIG lessons'})),
+      el('div',{class:'paper-menu-results',role:'presentation'},
+        ...[...groups].map(([group,items])=>el('section',{class:'paper-menu-module','data-module':group},
+          el('h3',{class:'paper-menu-module-title'},`${group} · ${items.length}`),
+          ...items.map(item=>button(`Lesson ${item.number} · ${item.short}`,{
+            class:`paper-lesson-menu-item${item.id===lesson.id?' current':''}`,
+            'data-lesson':item.id,'data-search-text':`${item.short} ${item.title} ${item.clause??''} ${group} ${item.sourceFigures?.map(f=>`figure ${f.figure} ${f.caption}`).join(' ')??''}`.toLowerCase(),
+            role:'menuitem','aria-current':item.id===lesson.id?'page':'false'
+          }))))))));
 }
-function sectionHeader(lesson){
+function tierSelector(tier){
+  return el('div',{class:'paper-difficulty',role:'group','aria-label':'Scenario complexity'},
+    ...DIFFICULTIES.map(item=>button(item.label,{
+      class:`paper-tier${item.id===tier?' current':''}`,'data-tier':item.id,
+      'aria-pressed':String(item.id===tier),title:item.description})));
+}
+function sectionHeader(lesson,tier){
   return el('section',{class:'paper-hero'},
     el('div',{class:'paper-hero-main'},
       el('div',{class:'paper-title-row'},lessonDropdown(lesson),
@@ -56,11 +78,14 @@ function sectionHeader(lesson){
       text('p',lesson.summary,'paper-hero-summary'),
       el('div',{class:'paper-tags'},
         text('span','FICTITIOUS SIMWORLD','paper-tag'),text('span','Source-linked / not certified','paper-tag'),
-        text('span',`Lesson ${lesson.number} of ${String(LESSONS.length).padStart(2,'0')}`,'paper-tag'))),
+        text('span',`Lesson ${lesson.number} of ${LESSONS.length}`,'paper-tag'),
+        text('span',`${COURSE_META.counts.activeFigures} source figures indexed`,'paper-tag')), 
+      el('div',{class:'paper-tier-strip'},tierSelector(tier),
+        text('small',DIFFICULTIES.find(d=>d.id===tier)?.description??'','paper-tier-desc'))),
     el('aside',{class:'paper-sticky'},text('h2','✧ Learning goal'),text('p',lesson.goal),
       text('small','Observe → change one input → inspect the result','paper-small')));
 }
-function inputsPanel(lesson,state){
+function inputsPanel(lesson,state,tier){
   const numeric=lesson.inputs.filter(f=>f.kind!=='boolean');
   const toggles=lesson.inputs.filter(f=>f.kind==='boolean');
   return paperCard('⚙ Interactive simulator','Change one signal, then issue a command. All values are fictitious training fixtures.',
@@ -70,7 +95,10 @@ function inputsPanel(lesson,state){
     el('div',{class:'paper-buttons'},...lesson.actions.map(a=>button(a.label,{
       class:`paper-action paper-action-${a.tone}${a.tone==='red'?' paper-alarm-button':''}`,
       'data-command':a.id,title:a.help}))),
-    text('h3','↻ Replay a corpus fixture','paper-subhead'),scenarioActions(lesson));
+    text('h3',`↻ Replay ${tier.toUpperCase()} dataset`,'paper-subhead'),
+    text('p',tier==='busy'?'A busy dataset combines several independent signal vectors, explicit failures, and recovery.':
+      tier==='medium'?'Change parameters and observe successive state transitions.':'One normal and one single-failure case.','paper-small'),
+    scenarioActions(lesson,tier));
 }
 function iOTable(lesson){
   return paperCard('♧ Inputs & outputs','Each input has a named origin; outputs are derived from the same lesson state as the handheld.',
@@ -88,7 +116,7 @@ function outputPanel(snapshot){
       text('span',snapshot.reason,'paper-reason')),
     el('dl',{class:'paper-facts'},...snapshot.facts.map(s=>row(s.label,s.value))));
 }
-function diagramPanel(lesson,snapshot){
+function diagramPanel(lesson,snapshot,figureId){
   const speed=snapshot.speedline;
   const renderMermaid=(title,svg,source)=>el('div',{class:'paper-diagram'},
     text('h3',title),svg,
@@ -96,6 +124,14 @@ function diagramPanel(lesson,snapshot){
   return paperCard('✎ System & state diagrams','Ink-bordered graphs highlight the current functional condition.',
     el('div',{class:'paper-graph-grid'},renderMermaid('Who sends which signal?',flowDiagram(lesson,snapshot.phase),lesson.diagrams.flow),
       renderMermaid('How state changes',stateDiagram(lesson,snapshot.phase),lesson.diagrams.state)),
+    lesson.sourceFigures?.length?el('div',{class:'paper-figure-atlas'},
+      text('h3','Indexed ESIG source diagrams · interactive teaching re-expressions','paper-subhead'),
+      el('div',{class:'paper-figure-list'},...lesson.sourceFigures.map(f=>button(`Figure ${f.figure}: ${f.caption}`,{
+        class:`paper-figure-choice${f.id===figureId?' current':''}`,'data-figure':f.id,
+        title:`SUBSET-026-${f.chapter} page ${f.page}: ${f.caption}`}))),
+      el('div',{class:'paper-diagram paper-source-figure'},
+        figureDiagram(lesson.sourceFigures.find(f=>f.id===figureId)??lesson.sourceFigures[0],snapshot),
+        text('p','Illustrative functional re-expression of a source figure, NOT a facsimile or validated ETCS algorithm.','paper-small'))):null,
     speed?el('div',{class:'paper-speedline-box'},text('h3','✈ Train progress / green speed line'),
       speedLine(speed,snapshot.phase==='TRAIN_RUNNING')):null);
 }
@@ -103,7 +139,7 @@ function eventPanel(state){
   return paperCard('▤ Scenario log','Recorded steps are deterministic, ordered, and tied to this lesson only.',
     el('ol',{class:'paper-log',role:'log','aria-label':'Lesson event log'},
       ...state.events.map(entry=>el('li',{},
-        text('span',`#${String(entry.n).padStart(2,'0')} · ${entry.actor}`,'paper-log-meta'),
+        text('span',`#${String(entry.n).padStart(2,'0')}${entry.tick&&String(entry.tick).startsWith('B')?' / '+entry.tick:''} · ${entry.actor}`,'paper-log-meta'),
         text('span',entry.message,`paper-log-message paper-log-${entry.tone}`)))),
     button('Copy event log',{class:'paper-action paper-action-neutral','data-action':'copy-log'}));
 }
@@ -136,6 +172,7 @@ export class TutorialsView{
     if(!host)throw new Error('Tutorial view mount point missing');
     this.host=host;
     this.state=createLessonState('ma');
+    this.tier='simple';this.figureId='';
     this.replayToken=0;
     this.notice='Click a control to inspect how the result changes.';
     this.noticeTone='ink';
@@ -143,6 +180,9 @@ export class TutorialsView{
     this.hoverTimer=null;
     this.host.addEventListener('click',event=>this.click(event));
     this.host.addEventListener('change',event=>this.change(event));
+    this.host.addEventListener('input',event=>{
+      if(event.target.matches('.paper-menu-search'))this.filterLessons(event.target.value);
+    });
     this.host.addEventListener('pointerover',event=>{
       if(event.target.closest('[data-picker]'))this.menu(true);
     });
@@ -160,7 +200,23 @@ export class TutorialsView{
   }
   activate(params=new URLSearchParams()){
     const lesson=params.get('lesson');
+    const tier=params.get('tier');
+    if(DIFFICULTIES.some(d=>d.id===tier)&&tier!==this.tier)this.tier=tier;
     if(lesson&&LESSONS.some(l=>l.id===lesson)&&this.state.lessonId!==lesson)this.selectLesson(lesson,false);
+    const selected=lessonById(this.state.lessonId);
+    const fig=params.get('figure');
+    if(fig&&selected.sourceFigures?.some(f=>f.id===fig))this.figureId=fig;
+    this.render();
+  }
+  filterLessons(raw){
+    const q=String(raw??'').trim().toLowerCase();
+    for(const section of this.host.querySelectorAll('.paper-menu-module')){
+      let n=0;
+      for(const item of section.querySelectorAll('.paper-lesson-menu-item')){
+        item.hidden=!item.dataset.searchText.includes(q);if(!item.hidden)n++;
+      }
+      section.hidden=n===0;
+    }
   }
   menu(open){
     clearTimeout(this.hoverTimer);
@@ -177,11 +233,17 @@ export class TutorialsView{
     this.replayToken++;
     const lesson=lessonById(id);
     this.state=createLessonState(lesson.id);
+    this.figureId=lesson.sourceFigures?.[0]?.id??'';
     this.notice=`Opened Lesson ${lesson.number}: ${lesson.short}`;
     this.noticeTone='blue';this.flashCommand=trigger;
     this.render();
     this.host.scrollTop=0;
-    if(updateHash)location.hash=`#/tutorials?lesson=${lesson.id}`;
+    if(updateHash)this.syncHash();
+  }
+  syncHash(){
+    const parts=new URLSearchParams({lesson:this.state.lessonId,tier:this.tier});
+    if(this.figureId)parts.set('figure',this.figureId);
+    location.hash=`#/tutorials?${parts.toString()}`;
   }
   move(offset){
     const idx=lessonIndex(this.state.lessonId);
@@ -199,16 +261,18 @@ export class TutorialsView{
     for(const step of scenario.steps){
       await new Promise(resolve=>setTimeout(resolve,320));
       if(ticket!==this.replayToken)return;
-      const command=step.set?{type:'set',values:step.set}:{type:step.action};
+      const command=step.burst?{type:'burst',events:step.burst}:step.set?{type:'set',values:step.set}:{type:step.action};
       this.state=stepLesson(this.state,command);
       this.notice=this.state.feedback?.message??'Scenario step complete';
       this.noticeTone=this.state.feedback?.tone==='danger'?'danger':'ok';
-      this.flashCommand=step.action??'';
+      this.flashCommand=step.action??(step.burst?'disrupt':'');
       this.render();
     }
     if(ticket===this.replayToken){
-      this.notice=`${scenario.label} — completed. Compare the outputs with expected state: ${scenario.expect.phase}.`;
-      this.noticeTone='ok';this.render();
+      const result=scenario.expect;
+      const matches=this.state.phase===result.phase&&(result.mustVisit??[]).every(x=>this.state.seenPhases?.includes(x));
+      this.notice=`${matches?'PASS':'CHECK'} · ${scenario.label}: expected ${result.phase}, observed ${this.state.phase}.`;
+      this.noticeTone=matches?'ok':'danger';this.render();
     }
   }
   click(event){
@@ -227,6 +291,19 @@ export class TutorialsView{
       return;
     }
     if(lesson){this.selectLesson(lesson);return;}
+    if(target.dataset.tier){
+      const tier=target.dataset.tier;
+      if(DIFFICULTIES.some(d=>d.id===tier)){this.replayToken++;this.tier=tier;this.state=createLessonState(this.state.lessonId);
+        this.notice=`${tier.toUpperCase()} dataset activated — ${DIFFICULTIES.find(d=>d.id===tier).description}`;
+        this.noticeTone='blue';this.flashCommand=`tier:${tier}`;this.render();this.syncHash();}
+      return;
+    }
+    if(target.dataset.figure){
+      const id=target.dataset.figure;const source=lessonById(this.state.lessonId);
+      if(source.sourceFigures?.some(f=>f.id===id)){this.figureId=id;this.notice=`Source Figure ${id} selected — educational re-expression activated.`;
+        this.noticeTone='blue';this.flashCommand=`figure:${id}`;this.render();this.syncHash();}
+      return;
+    }
     if(action==='prev'||action==='next'){this.move(action==='prev'?-1:1);return;}
     if(action==='copy-log'){
       const content=this.state.events.map(e=>`#${e.n} [${e.actor}] ${e.message}`).join('\n');
@@ -261,17 +338,19 @@ export class TutorialsView{
   render(){
     const lesson=lessonById(this.state.lessonId);
     const snapshot=lessonSnapshot(this.state);
-    const outer=el('div',{class:'paper-book'},sectionHeader(lesson),
+    const outer=el('div',{class:'paper-book'},sectionHeader(lesson,this.tier),
       el('div',{class:'paper-main'},
-        el('div',{class:'paper-column paper-controls'},inputsPanel(lesson,this.state),iOTable(lesson)),
+        el('div',{class:'paper-column paper-controls'},inputsPanel(lesson,this.state,this.tier),iOTable(lesson)),
         el('div',{class:'paper-column paper-workbench'},
-          outputPanel(snapshot),diagramPanel(lesson,snapshot),eventPanel(this.state),footer(lesson)),
+          outputPanel(snapshot),diagramPanel(lesson,snapshot,this.figureId),eventPanel(this.state),footer(lesson)),
         handheld(snapshot,lesson)),
       el('div',{class:'paper-interaction-feedback','data-tone':this.noticeTone,role:'status','aria-live':'polite'},this.notice));
     this.host.replaceChildren(outer);
     // All dynamic values, including handheld and graphs, come from this snapshot.
     const key=this.flashCommand;
-    const selector=key.startsWith('scenario:')?`[data-scenario="${key.slice(9)}"]`:
+    const selector=key.startsWith('tier:')?`[data-tier="${key.slice(5)}"]`:
+      key.startsWith('figure:')?`[data-figure="${key.slice(7)}"]`:
+      key.startsWith('scenario:')?`[data-scenario="${key.slice(9)}"]`:
       key.startsWith('input:')?`[data-input="${key.slice(6)}"]`:
       ['prev','next','copy-log'].includes(key)?`[data-action="${key}"]`:`[data-command="${key}"]`;
     const selected=key&&this.host.querySelector(selector);
