@@ -35,7 +35,7 @@ expected = {
 seed_dir = root / "dataset-seeds" / "osmhpi"
 for filename, (sha, counts) in expected.items():
     data = (seed_dir / filename).read_bytes()
-    computed = hashlib.sha1(f"blob {len(data)}\\0".encode().replace(b"\\0", b"\x00") + data).hexdigest()
+    computed = hashlib.sha1(f"blob {len(data)}".encode("ascii") + bytes([0]) + data).hexdigest()
     assert computed == sha, f"{filename}: source Git blob SHA changed"
     obj = json.loads(data)
     for k, value in counts.items():
