@@ -14,6 +14,25 @@ This directory is intentionally separated from [SUBSET-026 ingestion](../../docs
 
 The catalogue is a **curated publication/version index**, **not** a certificate of conformance, proof of a complete national installation, or a claim that these materials can be freely rehosted.
 
+## Complete or near-complete example datasets (new)
+
+We have also identified **18 runnable, substantially complete, or research-grade railway scenario datasets**, separately catalogued from regulations and standards:
+
+- [Scenario selection, examples and fit/gap matrix](SCENARIO-DATASETS.md)
+- [Tabular scenario dataset inventory](scenario-datasets.csv)
+- [Machine-readable scenario dataset catalogue](scenario-datasets.json)
+- [Defensive local downloader](fetch_datasets.py) and [validation script](check_datasets.py)
+- [Two actually imported OSM Interlocking configuration datasets](dataset-seeds/osmhpi/README.md) — exact copied Git blobs with GPLv3 licence and provenance.
+
+The strongest complementary sources are **OSMHPI Interlocking** (executable train route logic), **OSRD small_infra** (70 routes / 106 signals / 17 points), **SBB MATSim** (stations, flat crossings, grade separation, reversing, block policies and operational demand), **DISPLIB** (delay recovery/dispatch) and **railML** (formal route/overlap/track-vacancy definitions). This gives multiple **functionally complete scenarios within their own subsystem boundaries** without falsely claiming an end-to-end production ETCS deployment. Third-party content beyond the two explicitly GPL-licensed seed configuration JSON files is referenced or fetched locally, not committed.
+
+```bash
+python3 public/internet-specs/check_datasets.py
+python3 public/internet-specs/fetch_datasets.py --list
+python3 public/internet-specs/fetch_datasets.py --id OSRD-SMALL-INFRA
+python3 public/internet-specs/fetch_datasets.py --id SBB-UC2 --id DISPLIB-NOR
+```
+
 ## Download and validate
 
 From repository root:

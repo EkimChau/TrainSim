@@ -4,3 +4,4 @@
 /download-lock.json
 *.partial
 __pycache__/
+/scenario-download-lock.json

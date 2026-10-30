@@ -1,0 +1,422 @@
+{
+  "schema_version": "1.0.0",
+  "as_of": "2026-10-31",
+  "goal": "Find independently runnable or substantially complete railway operational scenario datasets, not only specifications",
+  "qualification": "Complete means complete for the listed scenario boundary. None of these is a complete certified ETCS Level 2 TMS→IXL→RBC→OBU integration.",
+  "files_in_git": "For source material with confirmed GNU GPL-3.0 rights, two configuration seeds may be included unmodified, with original license and provenance. All other sources are links to be fetched under their own conditions.",
+  "datasources": [
+    {
+      "id": "OSMHPI-LOCKTABLE",
+      "title": "OSM Interlocking – locking table reference application",
+      "region": "generic",
+      "kind": "interlocking",
+      "source_url": "https://github.com/osmhpi/interlocking/tree/a0a93a14850689e44728234e38e33c0f57c62438/locking_table_interlocking",
+      "source_version": "a0a93a14850689e44728234e38e33c0f57c62438",
+      "download_url": "https://github.com/osmhpi/interlocking/archive/a0a93a14850689e44728234e38e33c0f57c62438.zip",
+      "licence": "GPL-3.0",
+      "coverage": [
+        "config: 2 routes, 2 points, 5 zones, 14 transits, 3 signals",
+        "locking-table model",
+        "approach locking",
+        "train-triggered and manual route release",
+        "ETCS/RBC approach locking input",
+        "web-based simulator"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "no ETCS OBU or actual RBC",
+        "no general-purpose train timetable/TMS"
+      ],
+      "scale": "small",
+      "confidence": "contents_inspected",
+      "status": "published_example_not_certified",
+      "notes": "Full repo ZIP includes design grammars, rules and simulator; source configuration JSON separately copied under dataset-seeds/."
+    },
+    {
+      "id": "OSMHPI-GEO",
+      "title": "OSM Interlocking – geographical interlocking reference application",
+      "region": "generic",
+      "kind": "interlocking",
+      "source_url": "https://github.com/osmhpi/interlocking/tree/a0a93a14850689e44728234e38e33c0f57c62438/geographical_interlocking",
+      "source_version": "a0a93a14850689e44728234e38e33c0f57c62438",
+      "download_url": "https://github.com/osmhpi/interlocking/archive/a0a93a14850689e44728234e38e33c0f57c62438.zip",
+      "licence": "GPL-3.0",
+      "coverage": [
+        "2 sample routes, 2 points, 5 track zones, 14 transits",
+        "geographical route generation",
+        "approach locking, partial/automatic release",
+        "simulator executable"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "no OBU/radio/RBC implementation",
+        "does not include operational timetable"
+      ],
+      "scale": "small",
+      "confidence": "contents_inspected",
+      "status": "published_example_not_certified",
+      "notes": "Shared repo with locking-table sample; one archive serves both."
+    },
+    {
+      "id": "OSRD-SMALL-INFRA",
+      "title": "OSRD small_infra RailJSON test infrastructure",
+      "region": "France / generic",
+      "kind": "infrastructure_signalling",
+      "source_url": "https://github.com/OpenRailAssociation/osrd/blob/f44947dbe86c860aa516fe3bd07cfe0ec7a86f73/tests/data/infras/small_infra/infra.json",
+      "source_version": "f44947dbe86c860aa516fe3bd07cfe0ec7a86f73",
+      "download_url": "https://raw.githubusercontent.com/OpenRailAssociation/osrd/f44947dbe86c860aa516fe3bd07cfe0ec7a86f73/tests/data/infras/small_infra/infra.json",
+      "licence": "LGPL-3.0 per project README",
+      "coverage": [
+        "31 track sections",
+        "17 switches",
+        "106 signals",
+        "92 detectors",
+        "70 routes",
+        "9 operating points",
+        "2 level crossings",
+        "8 buffer stops"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "stock and timetable must be paired from OSRD test resources",
+        "not a complete software interlocking state machine",
+        "no ETCS OBU/RBC"
+      ],
+      "scale": "station_multi_route",
+      "confidence": "contents_inspected",
+      "status": "published_example_not_certified",
+      "notes": "195092-byte source JSON inspected via GitHub; examples and stock import instructions in OSRD README."
+    },
+    {
+      "id": "SBB-UC0",
+      "title": "SBB MATSim railsim fixed block vs moving block",
+      "region": "Switzerland / generic",
+      "kind": "traffic_simulation",
+      "source_url": "https://github.com/SchweizerischeBundesbahnen/railsim-experiments/tree/21a2d6f080cb8dbc57a79a49956e97bc1f3721c5/src/main/resources/scenarios/use_case_0",
+      "source_version": "21a2d6f080cb8dbc57a79a49956e97bc1f3721c5",
+      "download_url": "https://github.com/SchweizerischeBundesbahnen/railsim-experiments/archive/21a2d6f080cb8dbc57a79a49956e97bc1f3721c5.zip",
+      "licence": "GPL-2.0-or-later",
+      "coverage": [
+        "two calibration layouts",
+        "physical network, template schedule, vehicles, operational plan"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "abstract simulated rail traffic, not a full IXL control table",
+        "no ETCS OBU or RBC protocol"
+      ],
+      "scale": "multi_scenario",
+      "confidence": "readme_and_config_inspected",
+      "status": "published_example_not_certified",
+      "notes": "Runnable with Java/Maven and MATSim railsim; package contents pinned to commit. One archive includes all four use cases."
+    },
+    {
+      "id": "SBB-UC1",
+      "title": "SBB MATSim railsim station capacity and routing",
+      "region": "Switzerland / generic",
+      "kind": "traffic_simulation",
+      "source_url": "https://github.com/SchweizerischeBundesbahnen/railsim-experiments/tree/21a2d6f080cb8dbc57a79a49956e97bc1f3721c5/src/main/resources/scenarios/use_case_1",
+      "source_version": "21a2d6f080cb8dbc57a79a49956e97bc1f3721c5",
+      "download_url": "https://github.com/SchweizerischeBundesbahnen/railsim-experiments/archive/21a2d6f080cb8dbc57a79a49956e97bc1f3721c5.zip",
+      "licence": "GPL-2.0-or-later",
+      "coverage": [
+        "three station platform layouts (1, 2 or 3 platforms plus through track)",
+        "network/schedule/vehicles with generated departures"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "abstract simulated rail traffic, not a full IXL control table",
+        "no ETCS OBU or RBC protocol"
+      ],
+      "scale": "multi_scenario",
+      "confidence": "readme_and_config_inspected",
+      "status": "published_example_not_certified",
+      "notes": "Runnable with Java/Maven and MATSim railsim; package contents pinned to commit. One archive includes all four use cases."
+    },
+    {
+      "id": "SBB-UC2",
+      "title": "SBB MATSim railsim conflicting junction / grade separation",
+      "region": "Switzerland / generic",
+      "kind": "traffic_simulation",
+      "source_url": "https://github.com/SchweizerischeBundesbahnen/railsim-experiments/tree/21a2d6f080cb8dbc57a79a49956e97bc1f3721c5/src/main/resources/scenarios/use_case_2",
+      "source_version": "21a2d6f080cb8dbc57a79a49956e97bc1f3721c5",
+      "download_url": "https://github.com/SchweizerischeBundesbahnen/railsim-experiments/archive/21a2d6f080cb8dbc57a79a49956e97bc1f3721c5.zip",
+      "licence": "GPL-2.0-or-later",
+      "coverage": [
+        "flat junction and grade-separated alternative",
+        "operational demand plan and delay/headway output"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "abstract simulated rail traffic, not a full IXL control table",
+        "no ETCS OBU or RBC protocol"
+      ],
+      "scale": "multi_scenario",
+      "confidence": "readme_and_config_inspected",
+      "status": "published_example_not_certified",
+      "notes": "Runnable with Java/Maven and MATSim railsim; package contents pinned to commit. One archive includes all four use cases."
+    },
+    {
+      "id": "SBB-UC3",
+      "title": "SBB MATSim railsim train reversing paths",
+      "region": "Switzerland / generic",
+      "kind": "traffic_simulation",
+      "source_url": "https://github.com/SchweizerischeBundesbahnen/railsim-experiments/tree/21a2d6f080cb8dbc57a79a49956e97bc1f3721c5/src/main/resources/scenarios/use_case_3",
+      "source_version": "21a2d6f080cb8dbc57a79a49956e97bc1f3721c5",
+      "download_url": "https://github.com/SchweizerischeBundesbahnen/railsim-experiments/archive/21a2d6f080cb8dbc57a79a49956e97bc1f3721c5.zip",
+      "licence": "GPL-2.0-or-later",
+      "coverage": [
+        "side and centre reversing-track layouts",
+        "operational demand plans, routes and train definitions"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "abstract simulated rail traffic, not a full IXL control table",
+        "no ETCS OBU or RBC protocol"
+      ],
+      "scale": "multi_scenario",
+      "confidence": "readme_and_config_inspected",
+      "status": "published_example_not_certified",
+      "notes": "Runnable with Java/Maven and MATSim railsim; package contents pinned to commit. One archive includes all four use cases."
+    },
+    {
+      "id": "DISPLIB-NOR",
+      "title": "DISPLIB Norwegian full-day dispatching problems",
+      "region": "Norway",
+      "kind": "dispatch_benchmark",
+      "source_url": "https://displib.github.io/",
+      "source_version": "2025-09-17",
+      "download_url": "https://displib.github.io/displib_problems_2025-09-17.zip",
+      "licence": "rights_not_confirmed",
+      "coverage": [
+        "Norwegian lines with timetable, resources, headways and delayed-train rescheduling problems",
+        "Jærbanen 120 km / 28 stations with full-day demand",
+        "test instances and independently verifiable dispatch solutions"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "no route-control interlocking circuits or signal hardware model",
+        "resource/operation graph is not a detailed physical track model",
+        "no ETCS"
+      ],
+      "scale": "corridor",
+      "confidence": "publisher_metadata_verified",
+      "status": "published_example_not_certified",
+      "notes": "Public test instances include smi and nor; source specifies all-scenarios archive and solution checker."
+    },
+    {
+      "id": "DISPLIB-SMI",
+      "title": "DISPLIB Siemens Mobility Italy dispatching problems",
+      "region": "Italy",
+      "kind": "dispatch_benchmark",
+      "source_url": "https://displib.github.io/",
+      "source_version": "2025-09-17",
+      "download_url": "https://displib.github.io/displib_problems_2025-09-17.zip",
+      "licence": "rights_not_confirmed",
+      "coverage": [
+        "freight-oriented dispatch conflicts",
+        "multiple routing alternatives",
+        "resources, train operations and best-known outcomes"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "no train dynamics and ETCS messages",
+        "no executable physical interlocking"
+      ],
+      "scale": "yard_or_corridor",
+      "confidence": "publisher_metadata_verified",
+      "status": "published_example_not_certified",
+      "notes": "Same archive as DISPLIB-NOR; variety of difficulties, 5-13 trains in listed examples."
+    },
+    {
+      "id": "RAILML-SIMPLE31",
+      "title": "railML.org Simple Example v11, interlocking included",
+      "region": "EU / synthetic",
+      "kind": "railml_interlocking",
+      "source_url": "https://development.railml.org/railml/version3/-/blob/railML-3.1-final/examples/railML.org_SimpleExample_v11_railML3-1_04.xml",
+      "source_version": "railML 3.1 example (2019-02-18)",
+      "download_url": "https://development.railml.org/railml/version3/-/raw/railML-3.1-final/examples/railML.org_SimpleExample_v11_railML3-1_04.xml",
+      "licence": "railML restricted CC BY-NC-ND 4.0 plus additional terms",
+      "coverage": [
+        "topology and station connections",
+        "signals, train vacancy detection sections",
+        "interlocking routes and overlaps, release groups",
+        "railML XML data"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "source notes file may contain errors",
+        "no complete timetable/physical OBU"
+      ],
+      "scale": "two_stations",
+      "confidence": "published_source_file_inspected",
+      "status": "published_example_not_certified",
+      "notes": "3 routes, 3 switches, 13 signals and 13 track-vacancy detection sections reported in published academic case study. Do not rehost."
+    },
+    {
+      "id": "DELFT-SANTPOORT",
+      "title": "Santpoort-Noord Dutch station formalised interlocking dataset",
+      "region": "Netherlands",
+      "kind": "railml_interlocking",
+      "source_url": "https://doi.org/10.4121/12681368",
+      "source_version": "2021-02-19 / DOI 10.4121/12681368",
+      "download_url": null,
+      "licence": "check_4TU_record_before_rehosting",
+      "coverage": [
+        "physical topology, signalling/interlocking logic in an example database",
+        "XSD and methodology documentation"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "no operational daily timetable",
+        "no full ETCS train/RBC stack"
+      ],
+      "scale": "real_station",
+      "confidence": "publisher_metadata_verified",
+      "status": "published_example_not_certified",
+      "notes": "4TU.ResearchData academic release; inspect downloadable files and licence on source landing page before ingestion."
+    },
+    {
+      "id": "GICSA-RAILML-EIGHT",
+      "title": "GICSAFePhD 8 railML layouts and auto-derived interlocking tables",
+      "region": "synthetic",
+      "kind": "interlocking_generator",
+      "source_url": "https://github.com/GICSAFePhD/RailML",
+      "source_version": "main (rolling, pin required)",
+      "download_url": null,
+      "licence": "licence_not_identified",
+      "coverage": [
+        "8 cases, example 3: 74 tracks / 21 switches / 78 signals / 87 routes",
+        "generator, produced control tables and validation summaries"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "no train timetable, RBC or full OBU",
+        "rights and precise files to validate"
+      ],
+      "scale": "multi_station",
+      "confidence": "readme_published_claims",
+      "status": "published_example_not_certified",
+      "notes": "Source README reports eight bidirectional examples and complete route coverage; code generation is marked under repair."
+    },
+    {
+      "id": "OPENRAILS-BNSF",
+      "title": "Open Rails BNSF Starter Route",
+      "region": "United States",
+      "kind": "train_operations",
+      "source_url": "https://github.com/openrails/content/blob/main/routes.json",
+      "source_version": "OpenRails catalogue Oct 2026",
+      "download_url": "https://ts-files.com/files/TS_STARTER_ROUTE.zip",
+      "licence": "free_to_download_no_redistribution_grant",
+      "coverage": [
+        "self-contained route and trains",
+        "track database and signals via Open Rails route",
+        "rollingstock and activities",
+        "operational scripted scenarios"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "North American signalling not ETCS/RBC",
+        "route data uses OpenRails/MSTS native format"
+      ],
+      "scale": "mainline",
+      "confidence": "official_content_manifest_verified",
+      "status": "published_example_not_certified",
+      "notes": "598,168,814 bytes per Open Rails catalog; manual large download only."
+    },
+    {
+      "id": "OPENRAILS-DEMO1",
+      "title": "Open Rails Demo Model 1 – Edinburgh to Linlithgow",
+      "region": "Scotland / UK",
+      "kind": "train_operations",
+      "source_url": "https://www.openrails.org/download/content/",
+      "source_version": "Open Rails official catalog listing",
+      "download_url": "https://static.openrails.org/files/DemoModel1.zip",
+      "licence": "free_to_download_no_redistribution_grant",
+      "coverage": [
+        "complete route, signals, train activity",
+        "Edinburgh–Linlithgow approximately 20 minute scenario"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "British legacy signalling not ETCS",
+        "not an RBC/OBU system"
+      ],
+      "scale": "short_route",
+      "confidence": "publisher_metadata_verified",
+      "status": "published_example_not_certified",
+      "notes": "Approx 272 MB archive, manual large download only."
+    },
+    {
+      "id": "IRFP-THURINGIA",
+      "title": "iRFP southern Thuringia railML timetable sample",
+      "region": "Germany",
+      "kind": "timetable",
+      "source_url": "https://www.en.support.irfp.de/documents-and-examples_railML.html",
+      "source_version": "railML 2.2.1",
+      "download_url": null,
+      "licence": "licence_not_identified",
+      "coverage": [
+        "real timetable sample with station stops and times"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "does not on its own supply approved interlocking control tables"
+      ],
+      "scale": "regional",
+      "confidence": "publisher_metadata_verified",
+      "status": "published_example_not_certified",
+      "notes": "Publisher offers downloadable ZIP on source page; actual URL should be resolved on download."
+    },
+    {
+      "id": "ZENODO-LUKS",
+      "title": "LUKS 2026 generic infrastructure/timetable variants",
+      "region": "Germany / synthetic",
+      "kind": "timetable_infrastructure",
+      "source_url": "https://zenodo.org/records/21759847",
+      "source_version": "Zenodo v1, published 2026-08-02",
+      "download_url": null,
+      "licence": "confirm_record_licence",
+      "coverage": [
+        "4 sets: ITF-Sz1, ITF-Sz2, ITF-Sz3 and non-ITF",
+        "infrastructure ISS and timetable KSS paired per scenario"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "LUKS-specific formats",
+        "no assured ETCS OBU/RBC or control tables"
+      ],
+      "scale": "corridor",
+      "confidence": "publisher_metadata_verified",
+      "status": "published_example_not_certified",
+      "notes": "Each provided as 2-2.5MB zip; separate scenarios can compare integrated/non-integrated timetable operation."
+    },
+    {
+      "id": "LOGIC-NAV-GENERIC",
+      "title": "Logic Navigator Generic Complete Railway Stations",
+      "region": "Australia / generic",
+      "kind": "signal_logic_sim",
+      "source_url": "https://www.logicnavigator.com/complete-railway-stations-generic.html",
+      "source_version": "publisher-maintained samples 2026",
+      "download_url": null,
+      "licence": "publisher_terms_require_review",
+      "coverage": [
+        "complete generic station signalling simulations using Logic Navigator",
+        "logic circuits, controls and mimic-panel demonstration"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "may require proprietary Windows .NET application",
+        "not an open/portable ETCS stack"
+      ],
+      "scale": "station",
+      "confidence": "publisher_general_examples_claim",
+      "status": "published_example_not_certified",
+      "notes": "Generic page intended for external users. QR/Aurizon site-specific projects are explicitly aimed at authorised employees/subcontractors, so they are NOT automatically copied."
+    },
+    {
+      "id": "MENDELEY-ELECTROLOGIX",
+      "title": "ElectroLogix interlocking simulation-based validation reports",
+      "region": "Indonesia / generic",
+      "kind": "testing_evidence",
+      "source_url": "https://data.mendeley.com/datasets/2s3t5rdsbb/1",
+      "source_version": "2026-05-23, v1 / DOI 10.17632/2s3t5rdsbb.1",
+      "download_url": null,
+      "licence": "CC BY 4.0 (publisher metadata)",
+      "coverage": [
+        "simulation test outcomes for track circuits, signals, routes, points",
+        "fault detection and validation report examples"
+      ],
+      "missing_for_complete_etcs_l2": [
+        "logs only; not a runnable complete physical layout and interlocking"
+      ],
+      "scale": "station",
+      "confidence": "publisher_metadata_verified",
+      "status": "published_example_not_certified",
+      "notes": "Useful for expected outputs and negative testing; not a standalone simulator dataset."
+    }
+  ]
+}
