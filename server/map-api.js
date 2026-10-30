@@ -2,8 +2,7 @@
  * Map API over the TrainSim world database. Every query runs through DbConsole.run
  * with source='api', so map traffic shows up in the query log with call counts.
  */
-import fs from 'node:fs';
-import path from 'node:path';
+import {SIMWORLD_DB,simworldReady} from './simworld.js';
 
 const num=v=>{const n=Number(v);if(!Number.isFinite(n))throw new Error('invalid number');return n;};
 const json=s=>{try{return s?JSON.parse(s):null;}catch{return null;}};
@@ -120,11 +119,12 @@ export function parseBbox(q){
 }
 
 export class MapApi{
-  constructor(dbConsole,root,dbId=process.env.TRAINSIM_DB||'data/trainsim.sqlite'){
+  constructor(dbConsole,root,dbId=SIMWORLD_DB){
+    if(dbId!==SIMWORLD_DB)throw new Error('Runtime database must be the isolated SimWorld database');
     this.c=dbConsole;this.root=root;this.id=dbId;this.shapeCache=new Map();
     this.shapeMeasureCache=new Map();this.stopChainageCache=new Map();
   }
-  available(){return fs.existsSync(path.join(this.root,this.id));}
+  available(){return simworldReady(this.root);}
   q(sql,args=[],opts={}){return this.c.run(this.id,sql,args,{source:'api',maxRows:50000,...opts}).rows;}
   withDb(fn){const db=this.c.open(this.id);try{return fn((sql,args=[])=>this.q(sql,args,{db}));}finally{db.close();}}
 

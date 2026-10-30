@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS saved_query(
   preset         INTEGER NOT NULL DEFAULT 0,
   call_count     INTEGER NOT NULL DEFAULT 0,
   last_called_at TEXT,
+  last_call_id   INTEGER NOT NULL DEFAULT 0,
   last_source    TEXT,
   last_ms        REAL,
   last_error     TEXT,
@@ -28,14 +29,13 @@ CREATE TABLE IF NOT EXISTS saved_query(
 );
 CREATE INDEX IF NOT EXISTS saved_query_recent ON saved_query(last_called_at DESC);
 CREATE TABLE IF NOT EXISTS query_call(
-  call_id     INTEGER PRIMARY KEY,
+  call_id     INTEGER PRIMARY KEY AUTOINCREMENT,
   query_id    INTEGER NOT NULL REFERENCES saved_query(query_id) ON DELETE CASCADE,
   called_at   TEXT NOT NULL,
   source      TEXT NOT NULL,
   duration_ms REAL,
   row_count   INTEGER,
-  error       TEXT,
-  UNIQUE(query_id, called_at, source)
+  error       TEXT
 );
 CREATE INDEX IF NOT EXISTS query_call_recent ON query_call(called_at DESC);
 `;
@@ -52,22 +52,38 @@ export class QueryLog{
     this.db=new DatabaseSync(file,{timeout:3000});
     this.db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;');
     this.db.exec(SCHEMA);
+    if(!this.db.prepare('PRAGMA table_info(saved_query)').all().some(c=>c.name==='last_call_id'))this.db.exec('ALTER TABLE saved_query ADD COLUMN last_call_id INTEGER NOT NULL DEFAULT 0');
+    const old=this.db.prepare("SELECT sql FROM sqlite_master WHERE name='query_call'").get()?.sql??'';
+    if(/UNIQUE\s*\(query_id,\s*called_at,\s*source\)/i.test(old)){
+      this.db.exec(`BEGIN IMMEDIATE;
+        CREATE TABLE query_call_migration(call_id INTEGER PRIMARY KEY AUTOINCREMENT,query_id INTEGER NOT NULL REFERENCES saved_query(query_id) ON DELETE CASCADE,called_at TEXT NOT NULL,source TEXT NOT NULL,duration_ms REAL,row_count INTEGER,error TEXT);
+        INSERT INTO query_call_migration SELECT * FROM query_call;
+        DROP TABLE query_call;
+        ALTER TABLE query_call_migration RENAME TO query_call;
+        CREATE INDEX query_call_recent ON query_call(called_at DESC);
+        COMMIT;`);
+    }
+    this.db.exec('UPDATE saved_query SET last_call_id=COALESCE((SELECT max(call_id) FROM query_call WHERE query_call.query_id=saved_query.query_id),0) WHERE last_call_id=0');
     this.upsert=this.db.prepare(`INSERT INTO saved_query(database,sql,sql_hash,name,call_count,last_called_at,last_source,last_ms,last_error,created_at)
       VALUES(?,?,?,?,1,?,?,?,?,?)
       ON CONFLICT(database,sql_hash) DO UPDATE SET call_count=call_count+1,last_called_at=excluded.last_called_at,
         last_source=excluded.last_source,last_ms=excluded.last_ms,last_error=excluded.last_error
       RETURNING query_id`);
-    this.call=this.db.prepare('INSERT OR IGNORE INTO query_call(query_id,called_at,source,duration_ms,row_count,error) VALUES(?,?,?,?,?,?)');
+    this.call=this.db.prepare('INSERT INTO query_call(query_id,called_at,source,duration_ms,row_count,error) VALUES(?,?,?,?,?,?)');
     this.inserts=0;
   }
   /** Record one execution; returns the saved query id. */
   record(database,sql,{source='console',ms=null,rows=null,error=null}={}){
     const now=new Date().toISOString();
     const text=normaliseSql(sql);
-    const {query_id}=this.upsert.get(database,text,sqlHash(database,text),label(text),now,source,ms,error,now);
-    this.call.run(query_id,now,source,ms,rows,error);
-    if(++this.inserts%500===0)this.db.prepare('DELETE FROM query_call WHERE call_id <= (SELECT max(call_id) FROM query_call) - ?').run(KEEP_CALLS);
-    return Number(query_id);
+    this.db.exec('BEGIN IMMEDIATE');
+    try{
+      const {query_id}=this.upsert.get(database,text,sqlHash(database,text),label(text),now,source,ms,error,now);
+      const call=this.call.run(query_id,now,source,ms,rows,error);
+      this.db.prepare('UPDATE saved_query SET last_call_id=? WHERE query_id=?').run(call.lastInsertRowid,query_id);
+      if(++this.inserts%500===0)this.db.prepare('DELETE FROM query_call WHERE call_id <= (SELECT max(call_id) FROM query_call) - ?').run(KEEP_CALLS);
+      this.db.exec('COMMIT');return Number(query_id);
+    }catch(error){this.db.exec('ROLLBACK');throw error;}
   }
   /** Saved queries, most recently called first; presets never called sort by name at the end. */
   list({database,source,limit=500}={}){
@@ -78,7 +94,7 @@ export class QueryLog{
     return this.db.prepare(`SELECT query_id AS id,database,sql,name,preset,call_count AS count,last_called_at AS lastCalled,
         last_source AS lastSource,last_ms AS lastMs,last_error AS lastError FROM saved_query
         ${where.length?'WHERE '+where.join(' AND '):''}
-        ORDER BY last_called_at IS NULL, last_called_at DESC, name LIMIT ?`).all(...args,limit);
+        ORDER BY last_call_id DESC, last_called_at IS NULL, last_called_at DESC, name LIMIT ?`).all(...args,limit);
   }
   get(id){return this.db.prepare('SELECT query_id AS id,database,sql,name,preset,call_count AS count,last_called_at AS lastCalled FROM saved_query WHERE query_id=?').get(Number(id));}
   calls(id,limit=50){return this.db.prepare('SELECT called_at AS calledAt,source,duration_ms AS ms,row_count AS rows,error FROM query_call WHERE query_id=? ORDER BY call_id DESC LIMIT ?').all(Number(id),limit);}
@@ -105,6 +121,7 @@ export class QueryLog{
   seed(file){
     if(!fs.existsSync(file))return 0;
     const presets=JSON.parse(fs.readFileSync(file,'utf8'));
+    if(presets.some(p=>p.database==='data/simworld/simworld.sqlite'))this.db.exec("UPDATE saved_query SET preset=0 WHERE database='data/trainsim.sqlite' AND preset=1");
     const stmt=this.db.prepare(`INSERT INTO saved_query(database,sql,sql_hash,name,preset,created_at) VALUES(?,?,?,?,1,?)
       ON CONFLICT(database,sql_hash) DO UPDATE SET name=excluded.name, preset=1`);
     const now=new Date().toISOString();

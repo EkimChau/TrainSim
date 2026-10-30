@@ -80,7 +80,7 @@ export class MapView{
     this.status=await api('/map/status').catch(()=>({available:false}));
     if(!this.status.available){
       const b=$('map-banner');b.hidden=false;
-      b.replaceChildren('No world database yet. Run ',el('code',{},'npm run ingest'),' (or ',el('code',{},'python3 scripts/ingest_osm.py'),') to populate ',el('code',{},this.config.worldDb),'.');
+      b.replaceChildren('No world database yet. Run ',el('code',{},'npm run build:simworld'),' to populate ',el('code',{},this.config.worldDb),'.');
     }else if(this.status.extent&&!parseHashView()){
       const {w,s,e,n}=this.status.extent;this.map.fit([w,s,e,n]);
     }

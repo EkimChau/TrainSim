@@ -16,6 +16,7 @@ const quote=s=>'"'+String(s).replaceAll('"','""')+'"';
 const plain=rows=>rows.map(row=>Object.fromEntries(Object.entries(row).map(([k,v])=>[k,
   typeof v==='bigint'?(Number.isSafeInteger(Number(v))?Number(v):v.toString()):v instanceof Uint8Array?`base64:${Buffer.from(v).toString('base64')}`:v])));
 const OPS={'=':'=','!=':'<>','<':'<','<=':'<=','>':'>','>=':'>=','like':'LIKE','is null':'IS NULL','not null':'IS NOT NULL'};
+const protectedInput=id=>['data/esig/esig.sqlite','data/corpus/corpus.sqlite','data/trainsim.sqlite'].includes(id)||id.startsWith('data/local/backups/')||id.startsWith('data/current/');
 
 /** SQLite's prepare() silently ignores trailing statements: refuse more than one. */
 export function singleStatement(sql){
@@ -63,14 +64,14 @@ export class DbConsole{
   describe(){
     return this.databases().map(id=>{
       const s=fs.statSync(path.join(this.root,id));
-      return {id,bytes:s.size,modified:s.mtime.toISOString()};
+      return {id,bytes:s.size,modified:s.mtime.toISOString(),readOnly:protectedInput(id),role:id==='data/simworld/simworld.sqlite'?'fictitious_simworld':protectedInput(id)?'reference_input':'local_tooling'};
     });
   }
   open(id){
     if(typeof id!=='string'||!this.databases().includes(id))throw new Error(`Database not found inside the project: ${id}`);
-    const db=new DatabaseSync(path.resolve(this.root,id),{timeout:5000});
+    const db=new DatabaseSync(path.resolve(this.root,id),{timeout:5000,readOnly:protectedInput(id)});
     db.exec('PRAGMA foreign_keys=ON');
-    this.guards(db);
+    if(!protectedInput(id))this.guards(db);
     return db;
   }
   /**
@@ -127,7 +128,10 @@ export class DbConsole{
     }
   }
   /** Query editor: one statement exactly as typed. */
-  execute(id,sql){return this.run(id,sql,[],{source:'editor'});}
+  execute(id,sql){
+    if(/^(?:\s|--[^\n]*(?:\n|$)|\/\*[\s\S]*?\*\/)*(?:ATTACH|DETACH)\b/i.test(sql))throw new Error('Database attachments are unsupported; select a database instead');
+    return this.run(id,sql,[],{source:'editor'});
+  }
 
   tables(id){
     const db=this.open(id);
@@ -167,7 +171,8 @@ export class DbConsole{
       const sql=`SELECT ${includeRowid?'rowid AS "__rowid", ':''}* FROM ${quote(table)}${w}${order} LIMIT ? OFFSET ?`;
       const data=this.run(id,sql,[...args,PAGE_SIZE+1,page*PAGE_SIZE],{db,maxRows:PAGE_SIZE+1,source:'console'});
       const total=Number(this.run(id,`SELECT count(*) AS n FROM ${quote(table)}${w}`,args,{db,source:'console'}).rows[0].n);
-      return {table,...meta,includeRowid,rows:data.rows.slice(0,PAGE_SIZE),hasMore:data.rows.length>PAGE_SIZE,page,total,pageSize:PAGE_SIZE};
+      const referenceSnapshot=!!db.prepare("SELECT 1 FROM sqlite_master WHERE type='trigger' AND tbl_name=? AND name LIKE 'simworld_reference_guard_%' LIMIT 1").get(table);
+      return {table,...meta,readOnly:protectedInput(id)||referenceSnapshot,includeRowid,rows:data.rows.slice(0,PAGE_SIZE),hasMore:data.rows.length>PAGE_SIZE,page,total,pageSize:PAGE_SIZE};
     }finally{db.close();}
   }
   _editable(db,table){

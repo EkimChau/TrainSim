@@ -69,7 +69,8 @@ export class DataView{
       if(this.sort)Object.assign(query,{sort:this.sort.column,dir:this.sort.dir});
       const info=await api('/db/table',{query});
       this.info=info;
-      const editable=info.type==='table'&&!info.virtual;
+      const editable=info.type==='table'&&!info.virtual&&!info.readOnly;
+      $('table-hint').textContent=info.readOnly?'Reference data is read-only. Edit simulation instances and parameters instead.':'SimWorld/local data: edits save immediately. Click a cell to edit.';
       $('table-title').textContent=this.table;
       $('table-total').textContent=`${fmt(info.total)} rows${this.filter?' (filtered)':''} · ${info.type}${info.pk.length?` · key: ${info.pk.join(', ')}`:''}`;
       $('row-add').disabled=!editable;$('row-delete').disabled=true;

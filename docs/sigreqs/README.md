@@ -217,7 +217,7 @@ The build-time catalogue step discovers `docs/sigreqs/**/*.js` requirement
 records and ESIG/simulation guides, validates them and emits
 `public/assets/docs-catalogue.json` containing metadata, source paths, guide content
 and a deterministic catalogue hash. The live `/api/docs` endpoint uses the same
-loader and reads files again on each request.
+catalogue from the database; the Ingest files action reimports source files.
 Validate JSON compatibility before serialization; never silently drop invalid values.
 Sort records by ID and revision before hashing. Keep executable exports out of
 the JSON payload. The loader statically parses the JSON object following
