@@ -96,6 +96,7 @@ function maAction(s,action){
 function interlockingAction(s,action){
   const i=s.inputs;
   if(action==='request'){
+    if(s.routeLocked){event(s,action,'R_AB remains locked; release or clear the train before requesting again','warn','IXL');return;}
     const missing=routeGuards(i);
     if(missing.length){s.phase='ROUTE_DENIED';event(s,action,'Route R_AB refused: '+missing.join('; '),'danger','IXL');}
     else{s.routeLocked=true;s.occupied=false;s.phase='ROUTE_LOCKED';event(s,action,'R_AB proved and locked; conflict R_CONFLICT excluded','ok','IXL');}
@@ -175,7 +176,7 @@ export function lessonSnapshot(s){
       source:lessonById(s.lessonId).source};
   }
   if(s.lessonId==='interlocking'){
-    const valid=s.routeLocked&&s.phase!=='REVIEW'&&s.phase!=='APPROACH_HELD';
+    const valid=s.routeLocked&&['ROUTE_LOCKED','TRAIN_OCCUPYING'].includes(s.phase);
     const facts=[stat('Point P1 detected',yes(i.pointProved)),stat('Track T1 clear',yes(i.trackClear&&!s.occupied)),
       stat('Overlap clear',yes(i.overlapClear)),stat('Flank protection',yes(i.flankLocked)),
       stat('Conflicting route free',yes(i.conflictFree)),stat('Approach occupied',yes(i.approachOccupied))];
