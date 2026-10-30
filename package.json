@@ -10,6 +10,8 @@
   "scripts": {
     "build": "npm run ingest:docs && bun build ./src/client/app.js --target browser --format esm --minify --sourcemap=linked --outdir ./public/assets --entry-naming app.[ext]",
     "ingest:docs": "node scripts/docs/ingest.js",
+    "ingest:functional": "node scripts/docs/ingest.js",
+    "build:simworld": "node scripts/simworld/build.js",
     "dev": "npm run build && node --env-file-if-exists=.env --watch ./server/index.js",
     "start": "node --env-file-if-exists=.env ./server/index.js",
     "test": "node --test tests/*.test.js && npm run test:py",
@@ -21,7 +23,7 @@
     "ingest:caboolture": "python3 scripts/ingest_osm.py --lines \"Caboolture Line\"",
     "ingest:geofabrik": "python3 scripts/ingest_osm.py --source geofabrik",
     "ingest:fixture": "python3 scripts/ingest_osm.py --source file data/fixtures/osm-seq-fixture.osm",
-    "ingest:etcs": "python3 scripts/esig/ingest.py",
+    "ingest:etcs": "python3 scripts/esig/ingest.py && npm run ingest:functional",
     "check:etcs": "python3 scripts/esig/verify.py",
     "test:esig": "python3 -m unittest discover -s tests -p test_esig_ingest.py"
   },

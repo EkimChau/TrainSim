@@ -196,7 +196,7 @@ def extract_artifacts(conn: sqlite3.Connection, doc_id: str, ch: int,
             else:
                 continue
             count+=1
-            conn.execute("INSERT INTO source_artifact VALUES(?,?,?,?,?,?,?)",
+            conn.execute("INSERT INTO source_artifact(id,document_id,page_no,kind,caption_or_anchor,extraction_state) VALUES(?,?,?,?,?,?)",
                          (f"{doc_id}:{pn}:{count}", doc_id, pn, kind, anchor, "needs_review"))
             if proto:
                 conn.execute("INSERT INTO protocol_element(id,document_id,element_kind,official_name,raw_definition) "
@@ -218,8 +218,9 @@ def extract_semantic_catalog(conn: sqlite3.Connection, doc_id: str, ch: int) -> 
     for cid,no,body in rows:
         heading = body.splitlines()[0].strip() if body else ""
         kind, official, number = None, None, None
-        if ch == 7 and no.startswith("7.5.") and re.fullmatch(r"[A-Z][A-Z0-9_]+",heading):
-            kind, official = "variable",heading
+        variable_heading=re.fullmatch(r"([A-Z][A-Z0-9_]+)(?:\s+\(.*\))?",heading)
+        if ch == 7 and no.startswith("7.5.") and variable_heading:
+            kind, official = "variable",variable_heading.group(1)
         elif ch == 7 and no.startswith("7.4."):
             match = re.search(r"Packet Number\s+(\d+)",heading,re.I)
             if match:
@@ -247,6 +248,37 @@ def extract_semantic_catalog(conn: sqlite3.Connection, doc_id: str, ch: int) -> 
                                   "etcs_mode" if ch==4 else "etcs_procedure",body[:400],cid,
                                   "draft"))
     return count
+
+def preserve_relational_data(conn: sqlite3.Connection, previous: Path) -> dict:
+    """Keep authored contracts and FK links when refreshing identical source PDFs."""
+    if not previous.exists():
+        return {}
+    source_owned={"document","source_page","clause","classification_row",
+                  "clause_classification","source_artifact","protocol_element","terminology"}
+    kept={}
+    with sqlite3.connect(previous.resolve().as_uri()+"?mode=ro",uri=True) as old:
+        prior_tables={row[0] for row in old.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")}
+        if "document" in prior_tables:
+            for doc,digest in old.execute("SELECT id,sha256 FROM document"):
+                current=conn.execute("SELECT sha256 FROM document WHERE id=?",(doc,)).fetchone()
+                if current is None or current[0]!=digest:
+                    raise ValueError("Existing source identity differs; use a separate staging database: "+doc)
+        available={row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        conn.execute("PRAGMA defer_foreign_keys=ON")
+        for table in sorted(prior_tables-source_owned):
+            quoted='"'+table.replace('"','""')+'"'
+            if table not in available:
+                raise ValueError("Cannot preserve unknown table without a schema migration: "+table)
+            columns=[row[1] for row in old.execute(f"PRAGMA table_info({quoted})")]
+            names=','.join('"'+name.replace('"','""')+'"' for name in columns)
+            placeholders=','.join('?' for _ in columns)
+            rows=old.execute(f"SELECT {names} FROM {quoted}").fetchall()
+            if rows:
+                verb="INSERT OR IGNORE" if table=="schema_info" else "INSERT"
+                conn.executemany(f"{verb} INTO {quoted}({names}) VALUES({placeholders})",rows)
+            kept[table]=len(rows)
+    return kept
+
 
 def ingest(manifest: dict, source_dir: Path, db: Path, report: Path,
            schema: Path, allow_modified: bool = False) -> dict:
@@ -299,6 +331,7 @@ def ingest(manifest: dict, source_dir: Path, db: Path, report: Path,
                     totals["classification_rows"] += extract_classification(con,doc,pages,warnings)
                 totals["artifact_candidates"] += extract_artifacts(con,doc,ch,pages)
                 totals["protocol_candidates"] += extract_semantic_catalog(con,doc,ch)
+            preserved=preserve_relational_data(con,db)
             con.execute("INSERT INTO ingestion_audit(imported_utc,manifest_sha256,page_count,"
                         "clause_candidates,classification_rows,artifact_candidates,warnings_json)"
                         " VALUES(?,?,?,?,?,?,?)",
@@ -318,7 +351,7 @@ def ingest(manifest: dict, source_dir: Path, db: Path, report: Path,
             Path(tmp.name).unlink()
     result = {
         "baseline": manifest["issue"], "source_documents": len(prepared),
-        **totals, "warnings":warnings, "database":str(db),
+        **totals, "warnings":warnings, "database":str(db), "preserved_rows":preserved,
         "source_scope":"entire 9-volume SUBSET-026 text, not proven semantic rule coverage",
         "assurance":"unverified source staging; visual tables, diagrams and equations need review"
     }

@@ -1,5 +1,8 @@
 # Ingestion and data model
 
+This builds source staging data. TrainSim runs on the separate fictitious
+[SimWorld](sim/simworld.md), constructed with `npm run build:simworld`.
+
 `scripts/ingest_osm.py` builds `data/trainsim.sqlite` from OpenStreetMap. It uses the
 Python standard library only (osmium-tool is needed just for the PBF sources).
 

@@ -8,6 +8,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {DbConsole,singleStatement} from '../server/db/console.js';
 import {QueryLog} from '../server/db/query-log.js';
 import {MapApi,simplify,parseBbox} from '../server/map-api.js';
+import {buildSimWorld} from '../server/simworld.js';
 import {createApp} from '../server/app.js';
 
 const ROOT=path.resolve(import.meta.dirname,'..');
@@ -26,6 +27,7 @@ function project(t,{world=false}={}){
   d.close();
   if(world)execFileSync('python3',[path.join(ROOT,'scripts/ingest_osm.py'),'--source','file',path.join(ROOT,'data/fixtures/osm-seq-fixture.osm'),
     '--db',path.join(root,'data/trainsim.sqlite')],{stdio:'pipe'});
+  if(world)buildSimWorld(root);
   const log=new QueryLog(path.join(root,'data/local/console.sqlite'));
   log.seed(path.join(root,'db/trainsim/saved-queries.json'));
   t.after(()=>log.close());
@@ -87,6 +89,34 @@ test('presaved queries are unique and idempotently seeded',t=>{
   assert.equal(log.save('data/esig/demo.sqlite','SELECT 2','renamed'),id);
 });
 
+test('same-millisecond executions retain every history row and sort by durable call sequence',t=>{
+  const {id,log}=project(t);
+  t.mock.method(Date.prototype,'toISOString',()=> '2026-10-31T00:00:00.000Z');
+  const first=log.record(id,'SELECT 1');log.record(id,'SELECT 2');log.record(id,'SELECT 1');
+  assert.equal(log.calls(first).length,2);
+  assert.equal(log.get(first).count,2);
+  assert.equal(log.list()[0].sql,'SELECT 1');
+});
+
+test('query-log migration preserves existing calls and enables repeated calls at the same timestamp',t=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'trainsim-log-migration-'));
+  t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+  const file=path.join(dir,'log.sqlite');
+  const initial=new QueryLog(file);const id=initial.record('fixture.sqlite','SELECT 1');initial.close();
+  const old=new DatabaseSync(file);
+  old.exec(`ALTER TABLE query_call RENAME TO query_call_previous;
+    CREATE TABLE query_call(call_id INTEGER PRIMARY KEY,query_id INTEGER NOT NULL REFERENCES saved_query(query_id) ON DELETE CASCADE,called_at TEXT NOT NULL,source TEXT NOT NULL,duration_ms REAL,row_count INTEGER,error TEXT,UNIQUE(query_id,called_at,source));
+    INSERT INTO query_call SELECT * FROM query_call_previous;
+    DROP TABLE query_call_previous;
+    ALTER TABLE saved_query DROP COLUMN last_call_id;`);
+  old.close();
+  const migrated=new QueryLog(file);t.after(()=>migrated.close());
+  const timestamp=migrated.calls(id)[0].calledAt;
+  t.mock.method(Date.prototype,'toISOString',()=>timestamp);
+  migrated.record('fixture.sqlite','SELECT 1');
+  assert.equal(migrated.calls(id).length,2);assert.equal(migrated.get(id).count,2);
+});
+
 test('map API serves the ingested world by viewport and logs as api calls',t=>{
   const {root,store,log}=project(t,{world:true});
   const map=new MapApi(store,root);
@@ -123,7 +153,7 @@ test('helpers: bbox parsing and line simplification',()=>{
 
 test('calendar API extrapolates weekly GTFS service and applies holiday/exception rules',t=>{
   const {root,store}=project(t,{world:true});
-  const db=new DatabaseSync(path.join(root,'data/trainsim.sqlite'));
+  const db=new DatabaseSync(path.join(root,'data/simworld/simworld.sqlite'));
   db.exec(`INSERT INTO translink_feed VALUES(1,'test','2026-10-25T00:00:00Z','abc','20261024','20261223','test');
     INSERT INTO translink_route VALUES('rail-route','T1','Central - North',NULL,2,NULL,NULL,NULL);
     INSERT INTO translink_service VALUES('sunday',0,0,0,0,0,0,1,'20261024','20261223');
@@ -156,7 +186,7 @@ test('calendar API extrapolates weekly GTFS service and applies holiday/exceptio
     'trains remain at a scheduled intermediate stop during dwell time');
   assert.ok(holiday.trains[0].bearing<1||holiday.trains[0].bearing>359);
 
-  const edit=new DatabaseSync(path.join(root,'data/trainsim.sqlite'));
+  const edit=new DatabaseSync(path.join(root,'data/simworld/simworld.sqlite'));
   edit.prepare('INSERT INTO translink_service_date VALUES(?, ?, ?)').run('sunday','2026-10-05',2);
   edit.prepare('INSERT INTO translink_service_date VALUES(?, ?, ?)').run('sunday','2026-10-26',1);
   edit.close();

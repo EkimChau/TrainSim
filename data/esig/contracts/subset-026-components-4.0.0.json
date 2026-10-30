@@ -1,0 +1,38 @@
+{
+  "issue": "4.0.0",
+  "origin": "source_anchored_component_mapping",
+  "reviewState": "draft",
+  "components": [
+    {"id":"ETCS_OB","name":"ETCS on-board","scope":"onboard","clause":"2.5.2.2.1"},
+    {"id":"ETCS_TRACKSIDE","name":"ETCS trackside subsystem","scope":"trackside","clause":"2.5.1.1"},
+    {"id":"RBC","name":"Radio Block Centre","scope":"trackside","clause":"2.5.1.5.1"},
+    {"id":"EUROBALISE","name":"Eurobalise","scope":"trackside","clause":"2.5.1.2.1"},
+    {"id":"LEU","name":"Lineside electronic unit","scope":"trackside","clause":"2.5.1.3.1"},
+    {"id":"GSMR_TRACKSIDE","name":"GSM-R trackside radio network","scope":"trackside","clause":"2.5.1.4.1"},
+    {"id":"FRMCS_TRACKSIDE","name":"FRMCS trackside radio network","scope":"trackside","clause":"2.5.1.4.2"},
+    {"id":"GSMR_ONBOARD","name":"GSM-R on-board radio system","scope":"onboard","clause":"2.5.2.3.1"},
+    {"id":"FRMCS_ONBOARD","name":"FRMCS on-board radio system","scope":"onboard","clause":"2.5.2.3.2"},
+    {"id":"EUROLOOP","name":"Euroloop","scope":"trackside","clause":"2.5.1.6.1"},
+    {"id":"RIU","name":"Radio infill unit","scope":"trackside","clause":"2.5.1.7.1"},
+    {"id":"KMC","name":"Key Management Centre","scope":"trackside","clause":"2.5.1.8.1"},
+    {"id":"PKI","name":"Public Key Infrastructure","scope":"trackside","clause":"2.5.1.9.1"},
+    {"id":"ATO_OB","name":"ERTMS/ATO on-board equipment","scope":"onboard","clause":"2.5.2.4.1"},
+    {"id":"TRAIN","name":"Train","scope":"external","clause":"2.4.1.3","role":"environment"},
+    {"id":"DRIVER","name":"Driver","scope":"external","clause":"2.4.1.3","role":"environment"},
+    {"id":"INTERLOCKING","name":"Interlocking","scope":"external","clause":"2.4.1.3","role":"external_scope"},
+    {"id":"TMS","name":"Control centre / TMS","scope":"external","clause":"2.4.1.3","role":"external_scope"},
+    {"id":"DMI","name":"DMI function","scope":"onboard","clause":"2.5.3","role":"architecture_figure"},
+    {"id":"ODOMETRY","name":"Odometry","scope":"onboard","clause":"2.5.3","role":"architecture_figure"},
+    {"id":"TIU","name":"Train interface unit","scope":"onboard","clause":"2.5.3","role":"architecture_figure"},
+    {"id":"BIU","name":"Brake interface unit","scope":"onboard","clause":"2.5.3","role":"architecture_figure"}
+  ],
+  "interfaces": [
+    {"id":"train-to-track-radio","from":"ETCS_OB","to":"ETCS_TRACKSIDE","clause":"8.6","name":"Train-to-track radio messages"},
+    {"id":"track-to-train-radio","from":"ETCS_TRACKSIDE","to":"ETCS_OB","clause":"8.7","name":"Track-to-train radio messages"}
+  ],
+  "notes": [
+    "Architecture-figure references identify component presence, not a complete device specification.",
+    "Radio contracts use the generic trackside endpoint; binding it to an RBC for a Level 2 scenario requires reviewed configuration.",
+    "SUBSET-026 does not specify interlocking/control-centre implementation or manufacturer-specific component behavior."
+  ]
+}

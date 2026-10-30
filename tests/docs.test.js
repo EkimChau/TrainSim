@@ -94,8 +94,8 @@ test('reviewed evidence must reconcile with the local registry, drafts show mism
   Object.assign(r,{sourceSha256:'a'.repeat(64),startPage:1,endPage:2,classificationRowIds:['classification-1'],visualReview:'reviewed',classificationReview:'reviewed'});
   write(m);
   assert.throws(()=>loadDocsCatalogue(root),/registry unavailable/);
-  fs.mkdirSync(path.join(root,'data/esig'),{recursive:true});
-  const db=new DatabaseSync(path.join(root,'data/esig/esig.sqlite'));
+  fs.mkdirSync(path.join(root,'data/corpus'),{recursive:true});
+  const db=new DatabaseSync(path.join(root,'data/corpus/corpus.sqlite'));
   db.exec('CREATE TABLE document(id TEXT,sha256 TEXT); CREATE TABLE clause(id TEXT,document_id TEXT,clause_no TEXT,start_page INTEGER,end_page INTEGER); CREATE TABLE classification_row(id TEXT,referenced_clause TEXT);');
   db.prepare('INSERT INTO document VALUES(?,?)').run(r.documentId,r.sourceSha256);
   db.prepare('INSERT INTO clause VALUES(?,?,?,?,?)').run(r.clauseId,r.documentId,r.clauseNo,1,2);
@@ -116,13 +116,14 @@ test('filters requirement metadata by module, source, level, mode, status and cl
   assert.equal(matchesRecord(record,{},'No such function'),false);
 });
 
-test('keeps repository README and tooling outside Sim Docs, with cross-tab guide targets',t=>{
+test('combines repository README, ESIG and simulation guides in one documentation catalogue',t=>{
   const {root}=project(t);
   fs.writeFileSync(path.join(root,'readme.md'),'# TrainSim\n\nRepository setup');
   fs.writeFileSync(path.join(root,'docs/development.md'),'# Development\n\nBuild the UI');
   fs.writeFileSync(path.join(root,'docs/esig-ingestion.md'),'# ESIG evidence');
   const sim=loadDocsCatalogue(root),repo=loadRepositoryDocs(root);
-  assert.deepEqual(sim.documents.map(d=>d.id),['docs/esig-ingestion.md','docs/sim/guide.md']);
+  assert.deepEqual(sim.documents.map(d=>d.id),['readme.md','docs/development.md','docs/esig-ingestion.md','docs/sim/guide.md']);
+  assert.equal(sim.documents[0].category,'Repository');
   assert.deepEqual(repo.documents.map(d=>d.id),['readme.md','docs/development.md']);
   assert.equal(repo.documents[0].content,'# TrainSim\n\nRepository setup');
   assert.equal(sim.repositoryLinks[0].content,undefined);
@@ -152,7 +153,7 @@ test('ingests source manifests and synthetic scenarios, rejecting malformed data
   assert.throws(()=>loadDocsCatalogue(root),/Invalid docs catalogue/);
 });
 
-test('docs API reads file changes and fails without returning a partial catalogue',async t=>{
+test('docs API reads persisted data and explicitly ingests changes without publishing partial data',async t=>{
   const {root}=project(t);
   const log=new QueryLog(path.join(root,'console.sqlite'));
   t.after(()=>log.close());
@@ -163,10 +164,12 @@ test('docs API reads file changes and fails without returning a partial catalogu
   const first=await fetch(url);assert.equal(first.status,200);
   const data=await first.json();assert.equal(data.records.length,1);
   fs.appendFileSync(path.join(root,'docs/sim/guide.md'),'\nAPI reload');
-  assert.notEqual((await (await fetch(url)).json()).hash,data.hash);
+  assert.equal((await (await fetch(url)).json()).hash,data.hash);
+  assert.notEqual((await (await fetch(url+'/ingest',{method:'POST'})).json()).hash,data.hash);
   fs.writeFileSync(path.join(root,SOURCE),'export const metadata = {};');
-  const invalid=await fetch(url);assert.equal(invalid.status,400);
+  const invalid=await fetch(url+'/ingest',{method:'POST'});assert.equal(invalid.status,400);
   const body=await invalid.json();assert.match(body.error,/schemaVersion/);assert.equal(body.records,undefined);
+  assert.equal((await (await fetch(url)).json()).records.length,1);
   const repo=await fetch(url.replace('/api/docs','/api/readme'));
   assert.equal(repo.status,200);assert.deepEqual((await repo.json()).documents,[]);
 });

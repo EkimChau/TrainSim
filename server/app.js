@@ -4,7 +4,9 @@ import {fileURLToPath} from 'node:url';
 import {DbConsole} from './db/console.js';
 import {QueryLog} from './db/query-log.js';
 import {MapApi} from './map-api.js';
-import {loadDocsCatalogue,loadRepositoryDocs} from './docs-catalogue.js';
+import {readFunctionalCatalogue,ingestFunctionalData} from './functional-ingest.js';
+import {technicalData} from './technical-api.js';
+import {buildSimWorld,SIMWORLD_DB,simworldReady} from './simworld.js';
 
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
 const LOOPBACK=new Set(['127.0.0.1','::1','::ffff:127.0.0.1']);
@@ -18,6 +20,7 @@ export function createApp(options={}){
   const log=options.log??new QueryLog(options.logFile??path.join(root,'data/local/console.sqlite'));
   log.seed(path.join(root,'db/trainsim/saved-queries.json'));
   const store=new DbConsole(root,log);
+  if(!simworldReady(root))buildSimWorld(root);
   const map=new MapApi(store,root,options.worldDb);
   if(map.available())map.ensureTrainFleet();
   const config={mapsApiKey:options.mapsApiKey??process.env.GOOGLE_MAPS_API_KEY??'',mapId:options.mapId??process.env.GOOGLE_MAPS_MAP_ID??''};
@@ -40,9 +43,13 @@ export function createApp(options={}){
   };
 
   app.get('/api/health',(_req,res)=>res.json({ok:true,app:'TrainSim'}));
-  app.get('/api/config',use(()=>({mapsApiKey:config.mapsApiKey,mapId:config.mapId,worldDb:map.id,worldAvailable:map.available()})));
-  app.get('/api/docs',use(()=>loadDocsCatalogue(root)));
-  app.get('/api/readme',use(()=>loadRepositoryDocs(root)));
+  const importReferences=()=>{ingestFunctionalData(root);buildSimWorld(root);return readFunctionalCatalogue(root,SIMWORLD_DB);};
+  const docs=()=>readFunctionalCatalogue(root,SIMWORLD_DB)??importReferences();
+  app.get('/api/config',use(()=>({mapsApiKey:config.mapsApiKey,mapId:config.mapId,worldDb:map.id,worldAvailable:map.available(),worldClassification:'fictitious'})));
+  app.get('/api/docs',use(docs));
+  app.post('/api/docs/ingest',use(importReferences));
+  app.get('/api/docs/technical',use(req=>technicalData(root,req.query,SIMWORLD_DB)));
+  app.get('/api/readme',use(()=>{const snapshot=docs();return {documents:snapshot.documents.filter(d=>d.category==='Repository'),simulationLinks:snapshot.documents.filter(d=>d.category!=='Repository').map(({id,title})=>({id,title}))};}));
 
   const db=express.Router();
   db.get('/databases',use(()=>({databases:store.describe()})));

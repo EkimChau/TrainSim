@@ -14,15 +14,14 @@
     <a class="brand" href="#/map" aria-label="TrainSim home">
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7"/><path d="M9 6v20M23 6v20M9 10h14M9 16h14M9 22h14"/></svg>
       <span class="brand-name">TrainSim</span>
-      <span class="brand-sub">OpenRailwayMap data · South East Queensland</span>
+      <span class="brand-sub">Fictitious SimWorld · derived from source data</span>
     </a>
     <div class="topbar-right">
       <nav class="global-nav" aria-label="Global navigation">
         <a href="#/map" data-route="map">Map</a>
         <a href="#/data" data-route="data">Data</a>
         <a href="#/query" data-route="query">Query</a>
-        <a href="#/docs" data-route="docs">Sim Docs</a>
-        <a href="#/readme" data-route="readme">README</a>
+        <a href="#/docs" data-route="docs">Docs</a>
       </nav>
       <label class="db-switch" title="Database used by the Data and Query pages">
         <span>Database</span>
@@ -33,25 +32,14 @@
   </header>
 
   <main class="views">
-    <section id="view-readme" class="view" aria-label="TrainSim repository README" hidden>
+    <section id="view-docs" class="view" aria-label="Repository, ESIG and simulation documentation" hidden>
       <aside class="docs-side">
-        <h1>TrainSim repository</h1>
-        <p class="muted">Setup, development and data tooling</p>
-        <label class="field"><span>Search repository guides</span><input id="readme-search" type="search" placeholder="Setup, commands, architecture…"></label>
-        <div class="docs-actions"><button id="readme-refresh">Reload files</button></div>
-        <p id="readme-status" role="status" class="muted"></p>
-        <nav id="readme-list" aria-label="Repository guides"></nav>
-        <div id="readme-toc"></div>
-      </aside>
-      <article id="readme-detail" class="docs-detail" aria-label="Repository guide"></article>
-    </section>
-    <section id="view-docs" class="view" aria-label="ESIG and simulation documentation" hidden>
-      <aside class="docs-side">
-        <h1>Sim Docs</h1>
-        <a href="#/docs" class="docs-home">Overview</a>
+        <h1>TrainSim Docs</h1>
+        <a href="#/docs?overview=1" class="docs-home">Overview</a>
+        <a href="#/docs?technical=1" class="docs-home">Technical corpus</a>
         <label class="field"><span>Search guides and requirements</span><input id="docs-search" type="search" placeholder="Function, purpose, clause…"></label>
         <div id="docs-filters" class="docs-filters"></div>
-        <div class="docs-actions"><button id="docs-clear">Clear filters</button><button id="docs-refresh">Reload files</button></div>
+        <div class="docs-actions"><button id="docs-clear">Clear filters</button><button id="docs-refresh">Refresh references</button></div>
         <p id="docs-status" role="status" class="muted">Loading documentation…</p>
         <nav id="docs-list" aria-label="Documentation files"></nav>
         <div id="docs-toc"></div>

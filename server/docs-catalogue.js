@@ -120,7 +120,7 @@ function validatePath(root,rel,check){
 }
 
 function evidenceWarnings(root,records){
-  const file=path.join(root,'data/esig/esig.sqlite');
+  const file=path.join(root,'data/corpus/corpus.sqlite');
   const db=fs.existsSync(file)?new DatabaseSync(file,{readOnly:true}):null;
   const warnings=[];
   try{
@@ -198,7 +198,7 @@ function validateDataset(data,kind,file){
 
 export function loadDocsCatalogue(root){
   const all=files(root,'docs');
-  const documents=all.filter(f=>f.endsWith('.md')&&isSimulationDocument(f)).map(sourcePath=>({...readDocument(root,sourcePath),category:sourcePath.startsWith('docs/sim/')?'Simulation':'ESIG'}));
+  const documents=[...repositoryDocuments(root,all).map(d=>({...d,category:'Repository'})),...all.filter(f=>f.endsWith('.md')&&isSimulationDocument(f)).map(sourcePath=>({...readDocument(root,sourcePath),category:sourcePath.startsWith('docs/sim/')?'Simulation':'ESIG'}))];
   const records=all.filter(f=>f.startsWith('docs/sigreqs/')&&f.endsWith('.js')).map(sourcePath=>{
     const m=parseMetadata(fs.readFileSync(path.join(root,sourcePath),'utf8'),sourcePath);
     canonical(m);validateRecord(m,sourcePath,root);

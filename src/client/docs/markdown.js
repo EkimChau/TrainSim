@@ -1,7 +1,7 @@
 import {el} from '../api.js';
 
 export const docHref=(id,anchor='')=>`#/docs?doc=${encodeURIComponent(id)}${anchor?`&section=${encodeURIComponent(anchor)}`:''}`;
-export const readmeHref=(id,anchor='')=>`#/readme?doc=${encodeURIComponent(id)}${anchor?`&section=${encodeURIComponent(anchor)}`:''}`;
+export const readmeHref=docHref;
 export function documentLinks(simulation,repository){
   return new Map([...simulation.map(d=>[d.id,docHref(d.id)]),...repository.map(d=>[d.id,readmeHref(d.id)])]);
 }

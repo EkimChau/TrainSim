@@ -14,8 +14,11 @@ data/cache/
 
 # ESIG source PDFs and generated evidence DB / audit artefacts (local only)
 data/esig/sources/
+data/reference/sources/
 data/esig/esig.sqlite
 data/esig/esig.sqlite-*
+data/corpus/
+data/simworld/
 data/esig/reports/
 
 # Local query log (data/local/console.sqlite)

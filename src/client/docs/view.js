@@ -1,6 +1,7 @@
 import {api,el} from '../api.js';
 import {docHref,documentLinks,renderMarkdown} from './markdown.js';
 import {renderDataset} from './datasets.js';
+import {renderTechnical} from './technical.js';
 
 const $=id=>document.getElementById(id);
 const recordHref=id=>`#/docs?id=${encodeURIComponent(id)}`;
@@ -18,24 +19,26 @@ export function matchesRecord(record,filters,query){
 }
 
 export class DocsView{
-  constructor(){
+  constructor({onIngest=()=>{}}={}){
+    this.onIngest=onIngest;
     this.catalogue=null;this.params=new URLSearchParams();this.filters={};this.request=0;
     $('docs-search').addEventListener('input',()=>this.list());
-    $('docs-refresh').addEventListener('click',()=>this.load());
+    $('docs-refresh').addEventListener('click',()=>this.load(true));
     $('docs-clear').addEventListener('click',()=>{
       this.filters={};$('docs-search').value='';this.populateFilters();this.list();
     });
   }
   async activate(params){this.params=params;if(!this.catalogue)await this.load();else{this.list();this.detail();}}
-  async load(){
+  async load(ingest=false){
     const request=++this.request;
     $('docs-status').textContent='Reading documentation files…';
     $('docs-detail').replaceChildren(el('p',{},'Loading documentation…'));
     $('docs-list').replaceChildren();
     try{
-      const data=await api('/docs');
+      const data=await api(ingest?'/docs/ingest':'/docs',ingest?{method:'POST'}:{});
       if(request!==this.request)return;
       this.catalogue=data;this.populateFilters();this.list();this.detail();
+      await this.onIngest();
     }catch(error){
       if(request!==this.request)return;
       this.catalogue=null;
@@ -65,7 +68,7 @@ export class DocsView{
     const datasets=filtered?[]:this.catalogue.datasets.filter(d=>JSON.stringify(d).toLowerCase().includes(q));
     const host=$('docs-list');host.replaceChildren();
     const item=(href,title,sub,selected)=>el('a',{href,...(selected?{'aria-current':'page'}:{})},el('strong',{},title),el('small',{},sub));
-    for(const category of ['ESIG','Simulation']){
+    for(const category of ['Repository','ESIG','Simulation']){
       const guides=docs.filter(d=>d.category===category);
       if(guides.length)host.append(el('h2',{},`${category} guides`),...guides.map(d=>item(docHref(d.id),d.title,d.sourcePath,this.params.get('doc')===d.id)));
     }
@@ -85,9 +88,14 @@ export class DocsView{
     $('docs-status').textContent=`${docs.length} guides · ${datasets.length} data files · ${records.length} requirements · ${this.catalogue.warnings.length} records with review gaps`;
   }
   detail(){
+    const generation=this.detailGeneration=(this.detailGeneration??0)+1;
     const host=$('docs-detail');host.replaceChildren();
     host.scrollTop=0;$('docs-toc').replaceChildren();
     const c=this.catalogue;
+    if(this.params.has('technical')||this.params.has('corpus')){
+      renderTechnical(host,this.params,()=>generation===this.detailGeneration);return;
+    }
+    if(![...this.params.keys()].length){const readme=c.documents.find(d=>/^readme\.md$/i.test(d.id));if(readme){this.params.set('doc',readme.id);this.list();}}
     if(this.params.has('doc')){
       const doc=c.documents.find(d=>d.id===this.params.get('doc'));
       if(!doc){host.append(el('h1',{},'Document not found'));return;}
@@ -119,14 +127,19 @@ export class DocsView{
       const sources=c.datasets.filter(d=>d.kind==='source'),scenarios=c.datasets.filter(d=>d.kind==='scenario');
       const implemented=c.records.filter(r=>r.implementation.state==='implemented').length;
       const verified=c.records.filter(r=>r.status==='verified').length;
-      host.append(el('p',{class:'docs-eyebrow'},'ESIG / simulation knowledge base'),el('h1',{},'Sim Docs'),el('p',{class:'docs-lead'},'Trace source requirements through module contracts, simulation scenarios and implementation evidence.'),el('div',{class:'docs-stats'},...[[c.documents.length,'Guides'],[sources.length,'Source catalogues'],[scenarios.length,'Scenarios'],[c.records.length,'Function requirements'],[implemented,'Implemented'],[verified,'Verified']].map(([value,label])=>el('div',{},el('strong',{},value),el('span',{},label)))),el('p',{class:'docs-gaps'},`${c.warnings.length} requirement records have review gaps. Draft documentation and synthetic scenarios do not establish ETCS compliance.`));
+      host.append(el('p',{class:'docs-eyebrow'},'Repository / ESIG / simulation'),el('h1',{},'TrainSim Docs'),el('p',{class:'docs-lead'},'Repository guides, source requirements, module contracts and simulation data.'),el('div',{class:'docs-stats'},...[[c.documents.length,'Guides'],[sources.length,'Source catalogues'],[scenarios.length,'Scenarios'],[c.records.length,'Function requirements'],[implemented,'Implemented'],[verified,'Verified']].map(([value,label])=>el('div',{},el('strong',{},value),el('span',{},label)))),el('p',{class:'docs-gaps'},`${c.warnings.length} requirement records have review gaps. Draft documentation and synthetic scenarios do not establish ETCS compliance.`));
+      if(c.storage){
+        const e=c.storage.extraction;
+        host.append(section('Database ingestion',el('p',{},`Corpus input: ${c.storage.database} · runtime snapshot: ${c.storage.runtimeDatabase??'not published'} · fictitious SimWorld`),el('p',{},`${e.counts.source_page}/${e.expectedPages} source pages extracted · ${e.counts.clause} clause candidates · ${e.counts.classification_row} classification rows`),el('p',{},`${e.missingSources.length} missing PDF files · missing tools: ${e.missingTools.join(', ')||'none'}`),...['functional_function','source_page','clause','classification_row','protocol_element'].map(table=>el('p',{},el('a',{href:`#/data?db=data%2Fsimworld%2Fsimworld.sqlite&table=${table}`},`Browse ${table}`)))));
+        if(c.storage.technical)host.append(section('Technical corpus',el('p',{},`${c.storage.technical.technical_variable} variable definitions · ${c.storage.technical.component_io_function} component I/O contracts · ${c.storage.technical.component_io_parameter} parameters`),el('a',{href:'#/docs?technical=1'},'Browse standards and technical references')));
+      }
       host.append(section('Start here',...c.documents.map(d=>el('p',{},el('a',{href:docHref(d.id)},d.title)))),section('ESIG source data',...sources.map(d=>el('p',{},el('a',{href:dataHref(d.id)},d.title)))),section('Simulation scenarios',...scenarios.map(d=>el('p',{},el('a',{href:dataHref(d.id)},d.title)))));
       host.append(section('Modules',el('div',{class:'docs-cards'},...Object.values(c.modules).map(name=>el('a',{href:moduleHref(name),class:'docs-card'},el('h3',{},name),el('p',{},OWNERSHIP[name]),el('small',{},`${c.records.filter(r=>r.module===name).length} function requirements`))))),el('p',{class:'muted'},`Catalogue SHA256: ${c.hash}`));return;
     }
     host.append(el('p',{class:'muted'},`${r.module} / ${r.capability} / revision ${r.revision}`),el('h1',{},r.title),el('div',{class:'docs-badges'},badge(r.status),badge(r.implementation.state),badge(r.origin)),el('p',{class:'docs-lead'},r.purpose),el('p',{},el('code',{},r.functionName)),el('p',{class:'muted'},r.sourcePath));
     const gaps=c.warnings.find(w=>w.id===r.id)?.messages??[];
     if(gaps.length)host.append(section('Review gaps',el('ul',{class:'docs-gaps'},...gaps.map(g=>el('li',{},g)))));
-    host.append(section('Requirements',...r.requirements.map(req=>el('div',{class:'docs-requirement'},el('h3',{},`${req.refcode}${req.primary?' · primary':''}`),el('p',{},req.implementationRequirement),el('p',{class:'muted'},`${req.role} · ${req.documentId??'Internal'} · clause ${req.clauseNo??'—'} · pages ${req.startPage??'?'}–${req.endPage??'?'}`),el('code',{},req.clauseId??'No source clause'),el('p',{class:'muted'},`Visual review: ${req.visualReview} · classification: ${req.classificationReview}`)))));
+    host.append(section('Requirements',...r.requirements.map(req=>el('div',{class:'docs-requirement'},el('h3',{},`${req.refcode}${req.primary?' · primary':''}`),el('p',{},req.implementationRequirement),el('p',{class:'muted'},`${req.role} · ${req.documentId??'Internal'} · clause ${req.clauseNo??'—'} · pages ${req.startPage??'?'}–${req.endPage??'?'}`),req.clauseId?el('a',{href:`#/data?db=data%2Fsimworld%2Fsimworld.sqlite&table=clause&col=id&val=${encodeURIComponent(req.clauseId)}`},req.clauseId):'No source clause',el('p',{class:'muted'},`Visual review: ${req.visualReview} · classification: ${req.classificationReview}`)))));
     host.append(section('Relationships',...Object.entries(r.relationships).map(([key,value])=>{
       const ids=Array.isArray(value)?value:value?[value]:[];
       return el('p',{},el('strong',{},`${key}: `),...(ids.length?ids.flatMap(id=>[el('a',{href:recordHref(id)},c.records.find(x=>x.id===id)?.title??id),' ']):['None declared']));

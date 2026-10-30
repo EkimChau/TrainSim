@@ -49,7 +49,7 @@ def seed(db:Path, example_path:Path)->None:
 
 def main():
     p=argparse.ArgumentParser()
-    p.add_argument("--db",type=Path,default=ROOT/"data/esig/esig.sqlite")
+    p.add_argument("--db",type=Path,default=ROOT/"data/corpus/corpus.sqlite")
     p.add_argument("--example",type=Path,default=ROOT/"data/esig/examples/mixed-l0-l2-no-ma.json")
     a=p.parse_args()
     seed(a.db,a.example)

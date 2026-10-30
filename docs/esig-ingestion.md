@@ -19,7 +19,9 @@ Keep `etcsLevel`, `etcsMode`, `etcsSystemVersion` and `srsIssue` independent.
 | `data/esig/catalog/subset-026-4.0.0.json` | Pinned nine-volume manifest with 848 source pages and original SHA256 hashes |
 | `data/esig/catalog/application-levels.json` | Versioned level vocabulary, with non-existent levels explicitly excluded |
 | `data/esig/sources/subset-026/4.0.0/` | Local original PDFs **not committed**; the existing nine filenames must match the manifest |
-| `db/esig/schema.sql` | Reviewed database schema, committed and versioned |
+| `db/esig/schema.sql` | Official source-evidence schema |
+| `db/corpus/schema.sql` | Isolated corpus, source snapshots and local interpretations |
+| `db/simworld/schema.sql` | Fictitious runtime instances and parameter overrides |
 | `scripts/esig/ingest.py` | All-page source extraction, clause candidates, visual artifacts, Chapter 9 classification |
 | `scripts/esig/verify.py` | Manifest, pages, database integrity, extraction-presence checks |
 | `scripts/esig/seed_example.py` | Optional draft rule and synthetic GA/SA seed; never production compliant |
@@ -114,8 +116,11 @@ negative and fault-injection tests. The checker confirms **ingestion integrity o
 
 ## TrainSim integration
 
-For module folders, function filenames and JSON metadata requirements feeding a future
+For module folders, function filenames and JSON metadata requirements feeding the
 web-app catalogue, see [Signalling implementation requirements](sigreqs/README.md).
+`npm run ingest:functional` populates the isolated corpus and publishes a SimWorld snapshot with authored function contracts, source-catalogue
+expectations and draft synthetic GA/SA records without creating extracted evidence.
+See [database ingestion](docs-app.md#populated-database-tables) for the table mapping.
 
 Preserve existing module ownership: ESIG source and executable rules are inputs to
 `SimSpec`; `BaseModels` defines component types; `SimWorld` holds deployed

@@ -6,6 +6,15 @@ The main canvas is Google Maps with a SimAdaptor providing all map rendering cal
 
 `SimSpec` will eventually compile a regional track topology into configured signalling components according to selected regional laws and ETCS/UNISIG profiles. `BaseModels` define unconfigured component types. `SimWorld` owns deployed instances, tracks, stations, trackside devices, trains and command/schedule state. `SimScene` specifies a scenario. `SimRun` advances the scenario against the world, produces observable `SimStates` and supplies an overlay renderer. The view never owns train motion rules or compiler outputs.
 
+## Runtime data authority
+
+All running app features use `data/simworld/simworld.sqlite`, a fictitious world.
+The isolated corpus (`data/corpus/corpus.sqlite`) and official source registry
+(`data/esig/esig.sqlite`) are ingestion/reference inputs. The geography/timetable
+database is also staging input. Runtime does not fall back to any input database.
+Publication copies pinned reference snapshots and preserves SimWorld overrides.
+See [SimWorld isolation](sim/simworld.md).
+
 ## Module ownership
 
 ```text
@@ -18,7 +27,7 @@ scripts/ingest_osm.py + scripts/ingest/   (Python, stdlib)
  ├─ topology.py  topo_* track graph, switch legs, linear referencing
  └─ report.py    measured coverage
         ↓
-data/trainsim.sqlite  (schema: db/trainsim/schema.sql)
+data/trainsim.sqlite  (staging input only; schema: db/trainsim/schema.sql)
 
 Node.js Express (server/*), loopback only, no sign-in
  ├─ db/console.js    every project SQLite DB: browse, filter, live CRUD, one-statement SQL
@@ -83,12 +92,11 @@ Details and commands: [ESIG ingestion](esig-ingestion.md).
 
 ## Database console boundary
 
-The Data and Query pages work on every SQLite file in the project (world, ESIG, query log)
+The Data and Query pages default to SimWorld and inspect source/corpus files read-only
 through one adapter, `server/db/console.js`. The API has no sign-in or roles by design and
-rejects non-loopback clients; never expose it through a tunnel or reverse proxy. Edits change
-the live files immediately. Every statement the app runs (grid, editor and map API) is logged
+rejects non-loopback clients; never expose it through a tunnel or reverse proxy. Runtime edits change SimWorld immediately. Reference snapshot tables are read-only. Every statement the app runs (grid, editor and map API) is logged
 in `data/local/console.sqlite`. Databases built from TrainSim's schemas declare
 `schema_info.natural_keys='all'`: every table is keyed by OSM or natural ids, so the console adds
-no triggers there. Other databases get a duplicate-payload insert trigger per table, and every
+no duplicate-protection triggers there. SimWorld reference snapshots have separate read-only guards. Other databases get a duplicate-payload insert trigger per table, and every
 row added from the grid is checked against identical rows first. Editing ESIG rows is not a
 verified rule-authoring path.
