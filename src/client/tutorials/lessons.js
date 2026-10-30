@@ -30,7 +30,7 @@ export const LESSONS = [
     ],
     diagrams:{
       flow:`flowchart LR\n  IXL[Interlocking] -->|Route proved| RBC[RBC]\n  TRACK[Train detection] -->|Section clear| RBC\n  OBU[OBU] -->|Position report| RBC\n  RBC -->|MA message 3| OBU\n  OBU --> DMI[Driver interface]`,
-      state:`stateDiagram-v2\n  [*] --> WAITING\n  WAITING --> MA_GRANTED: inputs accepted / issue MA\n  WAITING --> WITHHELD: preconditions fail\n  MA_GRANTED --> TRAIN_RUNNING: advance train\n  TRAIN_RUNNING --> AT_BOUNDARY: reaches MA end\n  MA_GRANTED --> REVIEW: evidence changed\n  REVIEW --> MA_GRANTED: recheck & reissue\n  TRAIN_RUNNING --> STOP_REQUIRED: emergency delivered`,
+      state:`stateDiagram-v2\n  [*] --> WAITING\n  WAITING --> READY: valid inputs\n  READY --> MA_GRANTED: issue MA\n  WAITING --> WITHHELD: preconditions fail\n  WITHHELD --> READY: inputs restored\n  MA_GRANTED --> TRAIN_RUNNING: advance train\n  TRAIN_RUNNING --> AT_BOUNDARY: reaches MA end\n  MA_GRANTED --> REVIEW: evidence changed\n  REVIEW --> MA_GRANTED: recheck & reissue\n  TRAIN_RUNNING --> STOP_REQUIRED: emergency delivered`,
       actors:[
         {id:'ixl',text:'Interlocking',tag:'route proved',x:6,y:30},
         {id:'track',text:'Detection',tag:'track clear',x:6,y:108},
@@ -72,7 +72,7 @@ export const LESSONS = [
     ],
     diagrams:{
       flow:`flowchart LR\n  P[Point detection] --> IXL[Interlocking]\n  T[Track circuits] --> IXL\n  O[Overlap and flank] --> IXL\n  C[Conflict table] --> IXL\n  IXL -->|Route proved / refused| RBC[RBC boundary]`,
-      state:`stateDiagram-v2\n  [*] --> IDLE\n  IDLE --> ROUTE_LOCKED: all checks pass\n  IDLE --> ROUTE_DENIED: check fails\n  ROUTE_LOCKED --> TRAIN_OCCUPYING: train enters\n  TRAIN_OCCUPYING --> RELEASED: train clears\n  ROUTE_LOCKED --> APPROACH_HELD: cancel while approach occupied\n  ROUTE_LOCKED --> RELEASED: cancel / no approach`,
+      state:`stateDiagram-v2\n  [*] --> IDLE\n  IDLE --> ROUTE_LOCKED: all checks pass\n  IDLE --> ROUTE_DENIED: check fails\n  ROUTE_LOCKED --> TRAIN_OCCUPYING: train enters\n  TRAIN_OCCUPYING --> RELEASED: train clears\n  ROUTE_LOCKED --> APPROACH_HELD: cancel while approach occupied\n  ROUTE_LOCKED --> REVIEW: protection changed\n  ROUTE_DENIED --> IDLE: conditions restored\n  ROUTE_LOCKED --> RELEASED: cancel / no approach`,
       actors:[
         {id:'point',text:'Point P1',tag:'detected',x:6,y:30},
         {id:'track',text:'Track T1',tag:'clear',x:6,y:108},
@@ -111,7 +111,7 @@ export const LESSONS = [
     ],
     diagrams:{
       flow:`flowchart LR\n  BAL[Balise / odometry] --> OBU[OBU]\n  OBU -->|Session request| RBC[RBC]\n  RBC -->|Session response| OBU\n  OBU -->|Position report| RBC\n  RBC -->|Report acceptance| OBU`,
-      state:`stateDiagram-v2\n  [*] --> DISCONNECTED\n  DISCONNECTED --> CONNECTED: compatible / bearer available\n  DISCONNECTED --> REFUSED: connection failed\n  CONNECTED --> REPORT_RECEIVED: position report\n  CONNECTED --> RADIO_LOST: bearer lost\n  REPORT_RECEIVED --> RADIO_LOST: bearer lost\n  RADIO_LOST --> CONNECTED: reconnect`,
+      state:`stateDiagram-v2\n  [*] --> DISCONNECTED\n  DISCONNECTED --> CONNECTED: compatible / bearer available\n  DISCONNECTED --> REFUSED: connection failed\n  CONNECTED --> REPORT_RECEIVED: position report\n  CONNECTED --> REPORT_BLOCKED: missing position reference\n  REPORT_BLOCKED --> REPORT_RECEIVED: valid report\n  CONNECTED --> RADIO_LOST: bearer lost\n  REPORT_RECEIVED --> RADIO_LOST: bearer lost\n  RADIO_LOST --> CONNECTED: reconnect`,
       actors:[
         {id:'balise',text:'Balise / odometry',tag:'location reference',x:6,y:70},
         {id:'obu',text:'OBU',tag:'session / report',x:220,y:70},
