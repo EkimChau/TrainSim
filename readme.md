@@ -77,6 +77,15 @@ One top bar with the global navigation and database switch at the top right.
 - **Query**: CodeMirror SQL editor with table/column autocomplete and ▶ Play
   (Ctrl/⌘+Enter). The list shows presaved queries and **every call the app made to any
   database**, unique per SQL text, most recent first, with a call count.
+- **Sim Docs**: ESIG evidence guides, source catalogues, synthetic scenarios and
+  simulation function requirements, ingested from repository files. Reload files
+  to see local edits. Module pages distinguish draft requirements from implemented
+  and verified records.
+- **README**: this repository README and development guides, with search and an
+  on-page contents list. Repository setup and tooling are kept separate from Sim Docs.
+
+Run `npm run ingest:docs` to validate and export the documentation catalogue;
+`npm run build` also runs ingestion. Details: [Docs app and file ingestion](docs/docs-app.md).
 
 No sign-in and no permissions by design. The API only answers loopback clients, so keep
 `HOST=127.0.0.1` and never expose the app through a proxy or tunnel. Edits change the live files.
