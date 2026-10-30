@@ -39,7 +39,7 @@ export const LESSONS = [
         {id:'dmi',text:'DMI',tag:'driver display',x:554,y:68},
       ],
       arrows:[['ixl','rbc'],['track','rbc'],['rbc','obu'],['obu','dmi']],
-      stages:['WAITING','MA_GRANTED','TRAIN_RUNNING','REVIEW','STOP_REQUIRED'],
+      stages:['WAITING','READY','MA_GRANTED','TRAIN_RUNNING','AT_BOUNDARY','WITHHELD','REVIEW','STOP_REQUIRED'],
     },
     scenarios:[
       {id:'happy',label:'Happy path',kind:'ok',steps:[{action:'issue'},{action:'advance'},{action:'advance'}],expect:{phase:'TRAIN_RUNNING',front:500,remaining:400}},
@@ -80,7 +80,7 @@ export const LESSONS = [
         {id:'rbc',text:'RBC boundary',tag:'safe route input',x:392,y:68},
       ],
       arrows:[['point','ixl'],['track','ixl'],['ixl','rbc']],
-      stages:['IDLE','ROUTE_LOCKED','TRAIN_OCCUPYING','APPROACH_HELD','RELEASED'],
+      stages:['IDLE','ROUTE_LOCKED','TRAIN_OCCUPYING','RELEASED','ROUTE_DENIED','REVIEW','APPROACH_HELD'],
     },
     scenarios:[
       {id:'prove',label:'Route proves',kind:'ok',steps:[{action:'request'}],expect:{phase:'ROUTE_LOCKED',routeLocked:true}},
@@ -118,7 +118,7 @@ export const LESSONS = [
         {id:'rbc',text:'RBC',tag:'accept / reply',x:445,y:70},
       ],
       arrows:[['balise','obu'],['obu','rbc']],
-      stages:['DISCONNECTED','CONNECTED','REPORT_RECEIVED','RADIO_LOST','REFUSED'],
+      stages:['DISCONNECTED','CONNECTED','REPORT_RECEIVED','REPORT_BLOCKED','RADIO_LOST','REFUSED'],
     },
     scenarios:[
       {id:'session',label:'Session + report',kind:'ok',steps:[{action:'connect'},{action:'report'}],expect:{phase:'REPORT_RECEIVED',session:true}},
