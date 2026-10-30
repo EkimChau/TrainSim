@@ -173,12 +173,12 @@ export class TutorialsView{
     this.notice=message;this.noticeTone=tone;this.flashCommand=command;
     this.render();
   }
-  selectLesson(id,updateHash=true){
+  selectLesson(id,updateHash=true,trigger=""){
     this.replayToken++;
     const lesson=lessonById(id);
     this.state=createLessonState(lesson.id);
     this.notice=`Opened Lesson ${lesson.number}: ${lesson.short}`;
-    this.noticeTone='blue';this.flashCommand='';
+    this.noticeTone='blue';this.flashCommand=trigger;
     this.render();
     this.host.scrollTop=0;
     if(updateHash)location.hash=`#/tutorials?lesson=${lesson.id}`;
@@ -186,7 +186,7 @@ export class TutorialsView{
   move(offset){
     const idx=lessonIndex(this.state.lessonId);
     const next=(idx+offset+LESSONS.length)%LESSONS.length;
-    this.selectLesson(LESSONS[next].id);
+    this.selectLesson(LESSONS[next].id,true,offset>0?'next':'prev');
   }
   async replay(id){
     const lesson=lessonById(this.state.lessonId);
@@ -195,7 +195,7 @@ export class TutorialsView{
     const ticket=++this.replayToken;
     this.state=createLessonState(lesson.id);
     this.notice=`Replaying: ${scenario.label}`;this.noticeTone=scenario.kind==='alert'?'danger':'ok';
-    this.flashCommand='';this.render();
+    this.flashCommand=`scenario:${id}`;this.render();
     for(const step of scenario.steps){
       await new Promise(resolve=>setTimeout(resolve,320));
       if(ticket!==this.replayToken)return;
@@ -253,9 +253,9 @@ export class TutorialsView{
     try{
       this.state=stepLesson(this.state,{type:'set',values:{[id]:raw}});
       this.notice=`Input updated: ${event.target.closest('label')?.textContent?.trim()?.split('\n')[0]||id}`;
-      this.noticeTone='blue';this.flashCommand='';this.render();
+      this.noticeTone='blue';this.flashCommand=`input:${id}`;this.render();
     }catch(error){
-      this.notice=`Invalid input: ${error.message}`;this.noticeTone='danger';this.flashCommand='';this.render();
+      this.notice=`Invalid input: ${error.message}`;this.noticeTone='danger';this.flashCommand=`input:${id}`;this.render();
     }
   }
   render(){
@@ -270,7 +270,11 @@ export class TutorialsView{
       el('div',{class:'paper-interaction-feedback','data-tone':this.noticeTone,role:'status','aria-live':'polite'},this.notice));
     this.host.replaceChildren(outer);
     // All dynamic values, including handheld and graphs, come from this snapshot.
-    const selected=this.flashCommand&&this.host.querySelector(`[data-command="${this.flashCommand}"]`);
+    const key=this.flashCommand;
+    const selector=key.startsWith('scenario:')?`[data-scenario="${key.slice(9)}"]`:
+      key.startsWith('input:')?`[data-input="${key.slice(6)}"]`:
+      ['prev','next','copy-log'].includes(key)?`[data-action="${key}"]`:`[data-command="${key}"]`;
+    const selected=key&&this.host.querySelector(selector);
     if(selected){selected.classList.add('paper-click-flash');
       if(this.flashCommand==='advance')this.host.querySelector('.paper-speedline-box')?.classList.add('paper-speedline-flash');}
   }
