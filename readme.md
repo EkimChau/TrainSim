@@ -77,7 +77,9 @@ One top bar with the global navigation and database switch at the top right.
   set `carriage_count` to 6 in Data to use two units. The saved Sketchfab MHTML contains
   the page and preview images, not mesh/texture files, so these are custom vector
   approximations rather than extracted 3D models.
-- **Data**: SimWorld is editable; official/source/corpus inputs are read-only. Browse, filter, sort and edit runtime cells live,
+- **Databases**: browse System, SimWorld and Corpus separately, with file metadata,
+  table/view navigation, row filters and a Structure view for keys, columns and
+  indexes. SimWorld instances are editable; reference inputs remain read-only. Browse, filter, sort and edit runtime cells live,
   add rows (duplicates are rejected) and delete rows. Uses Tabulator.
 - **Query**: CodeMirror SQL editor with table/column autocomplete and ▶ Play
   (Ctrl/⌘+Enter). The list shows presaved queries and **every call the app made to any
@@ -101,7 +103,7 @@ The map opens in **Time** mode; **Single** retains the hand-selected OSM route s
 Time mode reads Translink's official [SEQ GTFS feed](https://gtfsrt.api.translink.com.au/GTFS/SEQ_GTFS.zip),
 licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), and uses its
 train routes, trips, stop times, stops, service calendars, date exceptions and shapes.
-Run `npm run ingest:translink` to download and refresh these tables in `data/trainsim.sqlite`;
+Run `npm run ingest:translink` to download and refresh these tables in `data/corpus/geography.sqlite`;
 use `python3 scripts/ingest_translink_gtfs.py --feed PATH --db PATH` to import a saved ZIP
 or a different database.
 
@@ -129,7 +131,7 @@ Select a service or train icon to focus the train, follow its position, and open
 | Path | Role |
 |---|---|
 | `scripts/ingest_osm.py`, `scripts/ingest/` | Ingestion: sheet scope, sources, upserts, typed layers, topology, coverage |
-| `db/trainsim/schema.sql` | World database schema |
+| `db/corpus/geography-schema.sql` | Geography/timetable corpus schema (system code) |
 | `db/trainsim/saved-queries.json` | Presaved queries for the Query page |
 | `server/` | Express API: database console, query log, map API |
 | `src/client/` | UI (bundled by Bun to `public/assets/`) |
@@ -137,7 +139,7 @@ Select a service or train icon to focus the train, follow its position, and open
 | `data/fixtures/osm-seq-fixture.osm` | Synthetic OSM test network (approximate positions) |
 | `scripts/esig/`, `db/esig/` | ETCS SUBSET-026 source registry ([details](docs/esig-ingestion.md)) |
 
-Generated and git-ignored: `data/trainsim.sqlite`, `data/cache/` (raw OSM snapshots), `data/local/console.sqlite` (query log).
+Generated and git-ignored: `data/corpus/geography.sqlite`, `data/cache/` (raw OSM snapshots), `data/local/console.sqlite` (query log).
 
 ## ESIG / SUBSET-026 registry
 

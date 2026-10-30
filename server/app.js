@@ -55,6 +55,7 @@ export function createApp(options={}){
   db.get('/databases',use(()=>({databases:store.describe()})));
   db.get('/tables',use(req=>({tables:store.tables(req.query.database)})));
   db.get('/table',use(req=>store.browse(req.query.database,req.query.table,req.query)));
+  db.get('/schema',use(req=>store.schema(req.query.database,req.query.table)));
   db.post('/rows',use(req=>store.add(req.body?.database,req.body?.table,req.body?.record)));
   db.patch('/rows',use(req=>store.edit(req.body?.database,req.body?.table,req.body?.original,req.body?.changes)));
   db.delete('/rows',use(req=>store.delete(req.body?.database,req.body?.table,req.body?.originals??req.body?.original)));

@@ -4,6 +4,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {createHash} from 'node:crypto';
 import {attachReadOnly,copyTables,tableNames} from './sqlite-copy.js';
 import {CORPUS_DB} from './functional-ingest.js';
+import {GEOGRAPHY_DB,LEGACY_GEOGRAPHY_DB} from './geography.js';
 
 export const SIMWORLD_DB='data/simworld/simworld.sqlite';
 const digest=value=>createHash('sha256').update(value).digest('hex');
@@ -23,10 +24,11 @@ export function buildSimWorld(root){
   const attached=[];
   try{
     db.exec('PRAGMA foreign_keys=ON');
-    db.exec(schema('../db/trainsim/schema.sql'));
+    db.exec(schema('../db/corpus/geography-schema.sql'));
     db.exec(schema('../db/corpus/schema.sql'));
     db.exec(schema('../db/simworld/schema.sql'));
-    const corpus=path.join(root,CORPUS_DB),worldSource=path.join(root,'data/trainsim.sqlite');
+    const corpus=path.join(root,CORPUS_DB),worldSource=path.join(root,GEOGRAPHY_DB);
+    if(!exists&&fs.existsSync(path.join(root,LEGACY_GEOGRAPHY_DB)))throw new Error('Legacy geography input found; run npm run migrate:geography');
     if(fs.existsSync(corpus)){attachReadOnly(db,corpus,'corpus');attached.push('corpus');}
     if(!exists&&fs.existsSync(worldSource)){attachReadOnly(db,worldSource,'world_input');attached.push('world_input');}
     db.exec('BEGIN IMMEDIATE; PRAGMA defer_foreign_keys=ON');
@@ -35,7 +37,7 @@ export function buildSimWorld(root){
       const now=new Date().toISOString();
       if(attached.includes('world_input')){
         copyTables(db,'world_input',tableNames(db,'world_input'));
-        db.prepare('INSERT OR REPLACE INTO simworld_source VALUES(?,?,?,?,?,?)').run('world-input','geography_and_timetable', 'data/trainsim.sqlite',digest(fs.readFileSync(worldSource)),now,JSON.stringify({classification:'fictitious',geometry:'derived_from_source_snapshot',operationalFidelity:'unverified'}));
+        db.prepare('INSERT OR REPLACE INTO simworld_source VALUES(?,?,?,?,?,?)').run('world-input','geography_and_timetable',GEOGRAPHY_DB,digest(fs.readFileSync(worldSource)),now,JSON.stringify({classification:'fictitious',inputRole:'corpus_geography_and_timetable',geometry:'derived_from_source_snapshot',operationalFidelity:'unverified'}));
       }
       if(attached.includes('corpus')){
         copyTables(db,'corpus',tableNames(db,'corpus'),{clear:true});
