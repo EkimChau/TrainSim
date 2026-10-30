@@ -50,16 +50,33 @@ export function flowDiagram(lesson,phase){
   return svg;
 }
 export function stateDiagram(lesson,phase){
-  const svg=rootSvg('0 0 430 264',`Lesson state path for ${lesson.short}; active ${phase}`);
-  defs(svg);
   const nodes=lesson.diagrams.stages;
-  const positions=nodes.map((n,index)=>({x:index<3?20:224,y:index<3?20+index*80:60+(index-3)*100}));
-  for(let index=0;index<2;index++)arrow(svg,positions[index].x+89,positions[index].y+49,positions[index+1].x+89,positions[index+1].y-4);
-  for(const idx of [3,4])arrow(svg,positions[2].x+182,positions[2].y+24,positions[idx].x-3,positions[idx].y+24,true);
-  nodes.forEach((n,index)=>{
-    let {x,y}=positions[index];
-    rectNode(svg,x,y,180,49,n.replaceAll('_',' '),index===0?'initial':index===1?'state transition':index===2?'normal movement':'fault / stop',n===phase,
-      /REVIEW|STOP|DENIED|HELD|LOST/.test(n)?'red':'green');
+  const rows=Math.ceil(nodes.length/2);
+  const height=Math.max(265,rows*65+38);
+  const svg=rootSvg(`0 0 442 ${height}`,`Lesson state path for ${lesson.short}; active ${phase}`);
+  defs(svg);
+  const pos=new Map(nodes.map((name,index)=>[name,{
+    x:index<rows?17:242,
+    y:18+(index%rows)*65,
+    col:index<rows?0:1,
+  }]));
+  // An arrow is drawn from each Mermaid transition, so the source list and graph
+  // share the same declared transitions instead of maintaining two edge registries.
+  const re=/^\s*([A-Z][A-Z_0-9]*)\s*-->\s*([A-Z][A-Z_0-9]*)/;
+  for(const line of lesson.diagrams.state.split('\n')){
+    const match=line.match(re);if(!match)continue;
+    const a=pos.get(match[1]),b=pos.get(match[2]);if(!a||!b)continue;
+    if(a.col===b.col){
+      const down=b.y>a.y;
+      arrow(svg,a.x+(down?87:165),a.y+(down?48:0),b.x+(down?87:165),b.y+(down?0:48),!down);
+    }else{
+      arrow(svg,a.x+173,a.y+25,b.x-4,b.y+25,true);
+    }
+  }
+  nodes.forEach(name=>{
+    const {x,y}=pos.get(name);
+    const caution=/REVIEW|STOP|DENIED|HELD|LOST|WITHHELD|BLOCKED/.test(name);
+    rectNode(svg,x,y,174,47,name.replaceAll('_',' '),name===phase?'active now':'',name===phase,caution?'red':'green');
   });
   return svg;
 }
