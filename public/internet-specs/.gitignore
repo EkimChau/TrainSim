@@ -1,0 +1,6 @@
+# Downloaded source files are public-access references, not necessarily licensed for redistribution.
+# Preserve these locally only until each rightsholder's terms have been reviewed.
+/downloads/
+/download-lock.json
+*.partial
+__pycache__/
