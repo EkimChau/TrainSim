@@ -59,7 +59,7 @@ function lessonDropdown(lesson){
             class:`paper-lesson-menu-item${item.id===lesson.id?' current':''}`,
             'data-lesson':item.id,'data-search-text':`${item.short} ${item.title} ${item.clause??''} ${group} ${item.sourceFigures?.map(f=>`figure ${f.figure} ${f.caption}`).join(' ')??''}`.toLowerCase(),
             role:'menuitem','aria-current':item.id===lesson.id?'page':'false'
-          }))))))));
+          })))))));
 }
 function tierSelector(tier){
   return el('div',{class:'paper-difficulty',role:'group','aria-label':'Scenario complexity'},
