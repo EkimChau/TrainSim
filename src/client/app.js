@@ -1,7 +1,8 @@
 // TrainSim shell: one top nav bar, global navigation and database switch (top right),
-// hash routes #/map, #/data, #/query, #/docs and #/tutorials.
+// hash routes #/map, #/data, #/query, #/docs and #/tutorials (legacy #/readme redirects).
 import 'tabulator-tables/dist/css/tabulator_simple.min.css';
 import {api,el,store,toast} from './api.js';
+import {DATABASE_CATEGORIES} from '../shared/database-categories.js';
 import {MapView} from './map/view.js';
 import {DataView} from './data/view.js';
 import {QueryView} from './query/view.js';
@@ -16,7 +17,7 @@ let mapView,dataView,queryView,docsView,tutorialsView;
 async function boot(){
   try{state.config=await api('/config');}
   catch(e){document.body.prepend(el('div',{class:'map-banner',style:'position:static;transform:none;margin:12px auto'},`TrainSim API unavailable: ${e.message}. Start it with npm start.`));return;}
-  dataView=new DataView();
+  dataView=new DataView({onSelectDatabase:(id,refresh)=>selectDatabase(id,refresh),onRefreshDatabases:()=>loadDatabases()});
   queryView=new QueryView({getDatabase:()=>state.database,setDatabase:id=>selectDatabase(id)});
   docsView=new DocsView({onIngest:()=>loadDatabases()});
   tutorialsView=new TutorialsView();
@@ -32,7 +33,8 @@ async function loadDatabases(){
   try{
     state.databases=(await api('/db/databases')).databases;
     const sel=$('global-db');
-    sel.replaceChildren(...state.databases.map(d=>el('option',{value:d.id},d.id+(d.readOnly?' · reference (read-only)':''))));
+    sel.replaceChildren(...Object.entries(DATABASE_CATEGORIES).map(([category,meta])=>el('optgroup',{label:meta.label},...state.databases.filter(d=>d.category===category).map(d=>el('option',{value:d.id,title:d.id},d.title+(d.archived?' · archive':'')+(d.readOnly?' · read-only':''))))));
+    dataView.setDatabases(state.databases);
     const preferred=state.config.worldDb;
     const id=state.databases.some(d=>d.id===preferred)?preferred:(state.databases.find(d=>d.id===state.config.worldDb)?.id??state.databases[0]?.id??'');
     selectDatabase(id,false);
@@ -44,7 +46,7 @@ function selectDatabase(id,refresh=true){
   state.database=id;$('global-db').value=id;store.set('database',id);
   if(!refresh)return;
   const r=current();
-  if(r==='data')dataView.setDatabase(id);
+  if(r==='data')dataView.navigate(id);
   if(r==='query')queryView.activate();
 }
 
@@ -56,7 +58,7 @@ function route(){
   document.body.classList.toggle('tutorial-active',r==='tutorials');
   document.querySelector('.brand-name').textContent=r==='tutorials'?'SimWorld':'TrainSim';
   document.querySelector('.brand-sub').textContent=r==='tutorials'?'Rail system simulation · Tutorials':'Fictitious SimWorld · derived from source data';
-  document.querySelector('.db-switch').hidden=r==='docs'||r==='tutorials';
+  document.querySelector('.db-switch').hidden=r!=='query';
   $('world-status').hidden=r==='docs'||r==='tutorials';
   for(const name of ROUTES){$(`view-${name}`).hidden=name!==r;}
   for(const a of document.querySelectorAll('.global-nav a')){if(a.dataset.route===r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');}
@@ -65,10 +67,7 @@ function route(){
   else if(r==='data'){
     const db=params.get('db');
     if(db&&state.databases.some(d=>d.id===db))selectDatabase(db,false);
-    dataView.setDatabase(state.database).then(()=>{
-      const table=params.get('table');
-      if(table)dataView.open(table,params.get('col')?{column:params.get('col'),value:params.get('val')}:null);
-    });
+    dataView.activate(state.database,params);
   }else if(r==='query')queryView.activate();
   else if(r==='docs')docsView.activate(params);
   else if(r==='tutorials')tutorialsView.activate(params);

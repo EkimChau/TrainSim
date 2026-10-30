@@ -7,7 +7,7 @@ coverage/
 __pycache__/
 *.pyc
 
-# Generated world database and raw OSM snapshot cache (rebuild with npm run ingest)
+# Legacy geography input (npm run migrate:geography) and raw OSM cache
 data/trainsim.sqlite
 data/trainsim.sqlite-*
 data/cache/

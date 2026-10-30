@@ -25,3 +25,14 @@ test('paper theme is scoped and supports feedback, graph and motion accessibilit
   assert.match(css,/\.paper-speed-streak/);
   assert.match(css,/prefers-reduced-motion/);
 });
+
+test('merging tutorials preserves the existing Databases shell and category navigation',()=>{
+  const html=read('public/index.html');
+  const app=read('src/client/app.js');
+  assert.match(html,/data-route="data">Databases<\/a>/);
+  assert.match(app,/DATABASE_CATEGORIES/);
+  assert.match(app,/dataView\.setDatabases\(state\.databases\)/);
+  assert.match(app,/dataView\.navigate\(id\)/);
+  assert.match(app,/dataView\.activate\(state\.database,params\)/);
+  assert.match(app,/document\.querySelector\('\.db-switch'\)\.hidden=r!=='query'/);
+});

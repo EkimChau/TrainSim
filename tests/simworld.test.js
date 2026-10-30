@@ -18,13 +18,14 @@ function project(t){
   t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
   for(const rel of ['docs','data/esig/catalog','data/esig/examples','data/esig/contracts','public/internet-specs'])fs.cpSync(path.join(ROOT,rel),path.join(root,rel),{recursive:true});
   fs.copyFileSync(path.join(ROOT,'readme.md'),path.join(root,'readme.md'));
-  const source=new DatabaseSync(path.join(root,'data/trainsim.sqlite'));
-  source.exec(fs.readFileSync(path.join(ROOT,'db/trainsim/schema.sql'),'utf8'));source.close();
+  fs.mkdirSync(path.join(root,'data/corpus'),{recursive:true});
+  const source=new DatabaseSync(path.join(root,'data/corpus/geography.sqlite'));
+  source.exec(fs.readFileSync(path.join(ROOT,'db/corpus/geography-schema.sql'),'utf8'));source.close();
   return root;
 }
 
 test('corpus and world are separate; runtime overrides survive reference publication',t=>{
-  const root=project(t),input=path.join(root,'data/trainsim.sqlite');
+  const root=project(t),input=path.join(root,'data/corpus/geography.sqlite');
   const inputHash=hash(input);
   ingestFunctionalData(root);const corpusHash=hash(path.join(root,CORPUS_DB));
   const result=buildSimWorld(root);
@@ -62,7 +63,7 @@ test('reference databases are read-only in data/query tools; runtime cannot targ
   const root=project(t);ingestFunctionalData(root);buildSimWorld(root);
   const console=new DbConsole(root,{record(){}});
   assert.throws(()=>console.execute(CORPUS_DB,"UPDATE functional_catalogue SET sha256='changed'"),/readonly|read.only/i);
-  assert.throws(()=>console.execute('data/trainsim.sqlite','DELETE FROM rail_emu_train'),/readonly|read.only/i);
+  assert.throws(()=>console.execute('data/corpus/geography.sqlite','DELETE FROM rail_emu_train'),/readonly|read.only/i);
   assert.throws(()=>console.execute(SIMWORLD_DB,"/* comment */ ATTACH DATABASE 'other.sqlite' AS other"),/attachments/);
   assert.equal(console.browse(CORPUS_DB,'functional_function').readOnly,true);
   assert.equal(console.browse(SIMWORLD_DB,'rail_emu_train').readOnly,false);

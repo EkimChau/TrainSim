@@ -26,7 +26,7 @@ function project(t,{world=false}={}){
           INSERT INTO item VALUES('one','Station',1); INSERT INTO pair VALUES('A','B');`);
   d.close();
   if(world)execFileSync('python3',[path.join(ROOT,'scripts/ingest_osm.py'),'--source','file',path.join(ROOT,'data/fixtures/osm-seq-fixture.osm'),
-    '--db',path.join(root,'data/trainsim.sqlite')],{stdio:'pipe'});
+    '--db',path.join(root,'data/corpus/geography.sqlite')],{stdio:'pipe'});
   if(world)buildSimWorld(root);
   const log=new QueryLog(path.join(root,'data/local/console.sqlite'));
   log.seed(path.join(root,'db/trainsim/saved-queries.json'));
@@ -207,6 +207,8 @@ test('API rejects non-loopback clients',async t=>{
   const base=`http://127.0.0.1:${server.address().port}`;
   const ok=await (await fetch(base+'/api/db/databases')).json();
   assert.ok(ok.databases.some(d=>d.id==='data/esig/demo.sqlite'));
+  const schema=await fetch(base+'/api/db/schema?database=data%2Fesig%2Fdemo.sqlite&table=item');
+  assert.equal(schema.status,200);assert.deepEqual((await schema.json()).pk,['id']);
   const remote=createApp({root,log});
   const req={socket:{remoteAddress:'10.0.0.5'}};
   let status=0;

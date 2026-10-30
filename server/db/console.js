@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
+import {databaseIdentity} from '../../src/shared/database-categories.js';
 
 const DB_FILE=/\.(?:sqlite|sqlite3|db)$/i;
 const IGNORED=new Set(['.git','node_modules','.venv','venv','dist','build','cache']);
@@ -16,7 +17,7 @@ const quote=s=>'"'+String(s).replaceAll('"','""')+'"';
 const plain=rows=>rows.map(row=>Object.fromEntries(Object.entries(row).map(([k,v])=>[k,
   typeof v==='bigint'?(Number.isSafeInteger(Number(v))?Number(v):v.toString()):v instanceof Uint8Array?`base64:${Buffer.from(v).toString('base64')}`:v])));
 const OPS={'=':'=','!=':'<>','<':'<','<=':'<=','>':'>','>=':'>=','like':'LIKE','is null':'IS NULL','not null':'IS NOT NULL'};
-const protectedInput=id=>['data/esig/esig.sqlite','data/corpus/corpus.sqlite','data/trainsim.sqlite'].includes(id)||id.startsWith('data/local/backups/')||id.startsWith('data/current/');
+const protectedInput=id=>['data/esig/esig.sqlite','data/trainsim.sqlite'].includes(id)||id.startsWith('data/corpus/')||id.startsWith('data/local/backups/')||id.startsWith('data/current/');
 
 /** SQLite's prepare() silently ignores trailing statements: refuse more than one. */
 export function singleStatement(sql){
@@ -64,7 +65,7 @@ export class DbConsole{
   describe(){
     return this.databases().map(id=>{
       const s=fs.statSync(path.join(this.root,id));
-      return {id,bytes:s.size,modified:s.mtime.toISOString(),readOnly:protectedInput(id),role:id==='data/simworld/simworld.sqlite'?'fictitious_simworld':protectedInput(id)?'reference_input':'local_tooling'};
+      return {id,...databaseIdentity(id),bytes:s.size,modified:s.mtime.toISOString(),readOnly:protectedInput(id),role:id==='data/simworld/simworld.sqlite'?'fictitious_simworld':protectedInput(id)?'reference_input':'local_tooling'};
     });
   }
   open(id){
@@ -139,6 +140,8 @@ export class DbConsole{
       const rows=this.run(id,"SELECT name, type FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY type, name",[],{db,source:'console'}).rows;
       for(const t of rows){
         try{t.rows=Number(db.prepare(`SELECT count(*) AS n FROM ${quote(t.name)}`).get().n);}catch{t.rows=null;}
+        t.readOnly=protectedInput(id)||t.type==='view'||this.referenceSnapshot(db,t.name);
+        t.internal=/^rtree_.*_(node|parent|rowid)$/.test(t.name);
       }
       return rows;
     }finally{db.close();}
@@ -148,6 +151,16 @@ export class DbConsole{
     if(!known)throw new Error(`Unknown table or view: ${table}`);
     const cols=db.prepare('SELECT name, type, "notnull" AS required, dflt_value AS defaultValue, pk, hidden FROM pragma_table_xinfo(?)').all(table).filter(c=>!c.hidden).map(c=>({...c,pk:Number(c.pk),required:Number(c.required)}));
     return {type:known.type,columns:cols,pk:cols.filter(c=>c.pk).sort((a,b)=>a.pk-b.pk).map(c=>c.name),virtual:/^CREATE\s+VIRTUAL/i.test(db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(table)?.sql??'')};
+  }
+  referenceSnapshot(db,table){return !!db.prepare("SELECT 1 FROM sqlite_master WHERE type='trigger' AND tbl_name=? AND name LIKE 'simworld_reference_guard_%' LIMIT 1").get(table);}
+  schema(id,table){
+    const db=this.open(id);
+    try{
+      const meta=this.columns(db,table);
+      const foreignKeys=db.prepare('SELECT * FROM pragma_foreign_key_list(?) ORDER BY id,seq').all(table);
+      const indexes=db.prepare('SELECT name,"unique",origin,partial FROM pragma_index_list(?)').all(table).map(index=>({...index,columns:db.prepare('SELECT name FROM pragma_index_info(?) ORDER BY seqno').all(index.name).map(c=>c.name)}));
+      return {table,...meta,readOnly:protectedInput(id)||meta.type==='view'||meta.virtual||this.referenceSnapshot(db,table),foreignKeys,indexes,sql:db.prepare('SELECT sql FROM sqlite_master WHERE name=?').get(table)?.sql??''};
+    }finally{db.close();}
   }
   /** One page of a table with optional filter (column op value) and sort. */
   browse(id,table,{page=0,filterColumn,filterOp='=',filterValue,sort,dir='asc'}={}){
@@ -171,8 +184,8 @@ export class DbConsole{
       const sql=`SELECT ${includeRowid?'rowid AS "__rowid", ':''}* FROM ${quote(table)}${w}${order} LIMIT ? OFFSET ?`;
       const data=this.run(id,sql,[...args,PAGE_SIZE+1,page*PAGE_SIZE],{db,maxRows:PAGE_SIZE+1,source:'console'});
       const total=Number(this.run(id,`SELECT count(*) AS n FROM ${quote(table)}${w}`,args,{db,source:'console'}).rows[0].n);
-      const referenceSnapshot=!!db.prepare("SELECT 1 FROM sqlite_master WHERE type='trigger' AND tbl_name=? AND name LIKE 'simworld_reference_guard_%' LIMIT 1").get(table);
-      return {table,...meta,readOnly:protectedInput(id)||referenceSnapshot,includeRowid,rows:data.rows.slice(0,PAGE_SIZE),hasMore:data.rows.length>PAGE_SIZE,page,total,pageSize:PAGE_SIZE};
+      const referenceSnapshot=this.referenceSnapshot(db,table);
+      return {table,...meta,readOnly:protectedInput(id)||referenceSnapshot||meta.type==='view'||meta.virtual,includeRowid,rows:data.rows.slice(0,PAGE_SIZE),hasMore:data.rows.length>PAGE_SIZE,page,total,pageSize:PAGE_SIZE};
     }finally{db.close();}
   }
   _editable(db,table){

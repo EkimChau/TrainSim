@@ -13,11 +13,17 @@ official or engineering-grade.
 
 ## Separate stores
 
+Geography and timetable staging values are **corpus input**, so their database is
+`data/corpus/geography.sqlite`. A schema `.sql` file is system code rather than a
+data store; its domain-specific definition lives at `db/corpus/geography-schema.sql`.
+System bookkeeping, such as the query log in `data/local/console.sqlite`, remains
+separate from corpus inputs and fictitious runtime values.
+
 | Store | Role | Runtime access |
 | --- | --- | --- |
 | `data/esig/esig.sqlite` | Official PDF evidence, hashes, pages and extracted candidates | Ingestion input; read-only inspection |
 | `data/corpus/corpus.sqlite` | Isolated corpus: pinned evidence snapshots, local contracts, dataset references and source seeds | Explicit publication input; read-only inspection |
-| `data/trainsim.sqlite` | Ingested geography and timetable staging data | Input to initial SimWorld construction; read-only inspection |
+| `data/corpus/geography.sqlite` | Ingested geography and timetable staging data | Input to initial SimWorld construction; read-only inspection |
 | `data/simworld/simworld.sqlite` | Fictitious instances, runtime values and selected reference snapshots | Sole runtime database |
 
 Corpus records use local `corpus-id:` identifiers. Official standard names, issues,
@@ -27,6 +33,11 @@ modify the official source registry. SimWorld receives another explicit snapshot
 there are no live cross-database joins during a simulation step.
 
 ## Build and publish
+
+For older checkouts, run `npm run migrate:geography` once. It moves the former
+`data/trainsim.sqlite`, checks integrity, and updates the existing SimWorld source
+path while retaining its fingerprint and relocation history. It refuses to overwrite
+an existing destination. No SimWorld instance values are rebuilt by this migration.
 
 ```bash
 npm run build:simworld

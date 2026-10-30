@@ -243,3 +243,60 @@ dialog menu{display:flex;justify-content:flex-end;gap:8px;margin:6px 0 0;padding
   #view-data,#view-query{grid-template-columns:1fr}
   .side{display:none}
 }
+
+/* Database browser: domain navigation, table navigation, records/structure. */
+#view-data{grid-template-columns:250px 230px minmax(0,1fr)}
+.database-tree,.database-tables{display:flex;flex-direction:column;min-height:0;min-width:0;background:#fff;border-right:1px solid var(--line);padding:14px;gap:10px;overflow:hidden}
+.database-tree-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.database-tree-heading h1{font-size:18px;margin:0}
+.database-categories{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.database-categories button{display:flex;justify-content:space-between;gap:8px;padding:7px 8px;font-size:12px}
+.database-categories button[aria-pressed=true]{background:var(--sel);border-color:var(--accent);color:var(--accent-ink)}
+.database-categories small{color:var(--muted)}
+.database-archives{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:11px}
+#database-list{min-height:0;overflow:auto;flex:1}
+#database-list h2{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 7px}
+.database-file{display:flex;flex-direction:column;width:100%;gap:6px;text-align:left;white-space:normal;padding:10px;border:1px solid transparent;margin-bottom:5px}
+.database-file:hover{background:var(--bg)}
+.database-file.active{background:var(--sel);border-color:#ffc38a;box-shadow:inset 3px 0 var(--accent)}
+.database-file-title{display:flex;align-items:center;justify-content:space-between;gap:6px;font-weight:600}
+.database-file small,.database-file-purpose{font-size:11px;color:var(--muted);font-weight:400}
+.database-file code{font:10px/1.5 var(--mono);overflow-wrap:anywhere;color:var(--muted)}
+.database-file-title small{border:1px solid var(--line);border-radius:12px;padding:1px 5px;white-space:nowrap;background:#fff;font-size:9px}
+.database-tables>p{margin:0;font-size:11px}
+.database-tables>.table-list{font-size:12px}
+.database-tables>.table-list button{overflow-wrap:anywhere;white-space:normal;align-items:flex-start}
+.database-tables .table-list small{white-space:nowrap;font-size:10px}
+.database-tables .table-list button>span{min-width:0;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.database-summary{padding:0 0 13px;border-bottom:1px solid var(--line)}
+.database-breadcrumb{font-size:12px;font-weight:600;margin-bottom:7px}
+.database-summary-facts{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:11px}
+.database-summary code{overflow-wrap:anywhere;font:11px var(--mono)}
+.database-access{padding:3px 8px;border-radius:12px;background:var(--bg)}
+.database-access.readonly{background:#eef3f8;color:#385a7c}
+.database-access.editable{background:#edf7ee;color:#276339}
+.database-content{line-height:1.6;overflow:auto;flex:1;min-height:0}
+.database-content h2{font-size:18px;margin:12px 0}
+.database-overview-description{color:var(--muted);max-width:720px}
+.database-statistics{display:flex;gap:12px;margin:22px 0;flex-wrap:wrap}
+.database-statistics>div{background:#fff;border:1px solid var(--line);border-radius:7px;padding:14px 20px;display:flex;flex-direction:column;min-width:130px}
+.database-statistics strong{font-size:24px;line-height:1.4}
+.database-statistics span{font-size:12px;color:var(--muted)}
+.database-schema-table{overflow:auto;margin:12px 0 24px}
+.database-schema-table table{width:100%;border-collapse:collapse;background:#fff;font-size:12px}
+.database-schema-table th,.database-schema-table td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.database-schema-table th{background:#f0f2f4;color:var(--muted);font-size:11px}
+.database-content pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#fff;border:1px solid var(--line);border-radius:6px;padding:16px;font:12px/1.6 var(--mono)}
+#view-data .grid{min-height:220px}
+@media(max-width:1100px) and (min-width:821px){#view-data{grid-template-columns:215px 190px minmax(0,1fr)}.database-tree,.database-tables{padding:10px}}
+@media(max-width:820px){
+  #view-data{grid-template-columns:1fr 1fr;grid-template-rows:minmax(170px,32vh) minmax(0,1fr)}
+  .database-tree,.database-tables{padding:10px;border-bottom:1px solid var(--line)}
+  #view-data>.main{grid-column:1/-1;padding:12px}
+  .database-file-purpose,.database-file>code,.database-file>small{display:none}
+  .database-file{padding:7px}
+  .database-file-title{flex-wrap:wrap;font-size:11px}
+  .database-archives{font-size:10px}
+  .database-categories button{padding:4px;font-size:10px}
+  #database-list h2{margin:7px 0}
+}
