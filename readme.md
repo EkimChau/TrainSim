@@ -82,7 +82,7 @@ One top bar with the global navigation and database switch at the top right.
 - **Query**: CodeMirror SQL editor with table/column autocomplete and ▶ Play
   (Ctrl/⌘+Enter). The list shows presaved queries and **every call the app made to any
   database**, unique per SQL text, most recent first, with a call count.
-- **Docs**: this README, development guides, ESIG source catalogues, synthetic
+- **Tutorials**: three self-contained, version-referenced SimWorld training lessons in paper-and-ink notebook styling. Open `#/tutorials?lesson=ma`; use the `‹ ›` arrows or hover/click Lesson index. Live inputs, offline Mermaid-source visualisations, trigger feedback and the handheld reader share one deterministic state. See [Tutorials design contract](docs/sim/tutorials.md).\n- **Docs**: this README, development guides, ESIG source catalogues, synthetic
   scenarios and simulation function requirements in one documentation area.
   **Refresh references** imports isolated corpus data and publishes a SimWorld snapshot. Module pages
   distinguish draft requirements from implemented and verified records.
