@@ -21,6 +21,8 @@
         <a href="#/map" data-route="map">Map</a>
         <a href="#/data" data-route="data">Data</a>
         <a href="#/query" data-route="query">Query</a>
+        <a href="#/docs" data-route="docs">Sim Docs</a>
+        <a href="#/readme" data-route="readme">README</a>
       </nav>
       <label class="db-switch" title="Database used by the Data and Query pages">
         <span>Database</span>
@@ -31,6 +33,31 @@
   </header>
 
   <main class="views">
+    <section id="view-readme" class="view" aria-label="TrainSim repository README" hidden>
+      <aside class="docs-side">
+        <h1>TrainSim repository</h1>
+        <p class="muted">Setup, development and data tooling</p>
+        <label class="field"><span>Search repository guides</span><input id="readme-search" type="search" placeholder="Setup, commands, architecture…"></label>
+        <div class="docs-actions"><button id="readme-refresh">Reload files</button></div>
+        <p id="readme-status" role="status" class="muted"></p>
+        <nav id="readme-list" aria-label="Repository guides"></nav>
+        <div id="readme-toc"></div>
+      </aside>
+      <article id="readme-detail" class="docs-detail" aria-label="Repository guide"></article>
+    </section>
+    <section id="view-docs" class="view" aria-label="ESIG and simulation documentation" hidden>
+      <aside class="docs-side">
+        <h1>Sim Docs</h1>
+        <a href="#/docs" class="docs-home">Overview</a>
+        <label class="field"><span>Search guides and requirements</span><input id="docs-search" type="search" placeholder="Function, purpose, clause…"></label>
+        <div id="docs-filters" class="docs-filters"></div>
+        <div class="docs-actions"><button id="docs-clear">Clear filters</button><button id="docs-refresh">Reload files</button></div>
+        <p id="docs-status" role="status" class="muted">Loading documentation…</p>
+        <nav id="docs-list" aria-label="Documentation files"></nav>
+        <div id="docs-toc"></div>
+      </aside>
+      <article id="docs-detail" class="docs-detail" aria-label="Document detail"></article>
+    </section>
     <!-- MAP ------------------------------------------------------------- -->
     <section id="view-map" class="view" aria-label="Map">
       <div id="map" class="map-canvas"></div>

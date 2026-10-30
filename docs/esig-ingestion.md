@@ -114,6 +114,9 @@ negative and fault-injection tests. The checker confirms **ingestion integrity o
 
 ## TrainSim integration
 
+For module folders, function filenames and JSON metadata requirements feeding a future
+web-app catalogue, see [Signalling implementation requirements](sigreqs/README.md).
+
 Preserve existing module ownership: ESIG source and executable rules are inputs to
 `SimSpec`; `BaseModels` defines component types; `SimWorld` holds deployed
 infrastructure/trains; `SimScene` defines stimuli; `SimRun` must evolve into

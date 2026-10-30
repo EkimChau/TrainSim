@@ -4,6 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {DbConsole} from './db/console.js';
 import {QueryLog} from './db/query-log.js';
 import {MapApi} from './map-api.js';
+import {loadDocsCatalogue,loadRepositoryDocs} from './docs-catalogue.js';
 
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
 const LOOPBACK=new Set(['127.0.0.1','::1','::ffff:127.0.0.1']);
@@ -40,6 +41,8 @@ export function createApp(options={}){
 
   app.get('/api/health',(_req,res)=>res.json({ok:true,app:'TrainSim'}));
   app.get('/api/config',use(()=>({mapsApiKey:config.mapsApiKey,mapId:config.mapId,worldDb:map.id,worldAvailable:map.available()})));
+  app.get('/api/docs',use(()=>loadDocsCatalogue(root)));
+  app.get('/api/readme',use(()=>loadRepositoryDocs(root)));
 
   const db=express.Router();
   db.get('/databases',use(()=>({databases:store.describe()})));
