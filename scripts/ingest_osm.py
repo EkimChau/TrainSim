@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ingest OpenStreetMap / OpenRailwayMap railway data into the TrainSim world database.
+"""Ingest OpenStreetMap / OpenRailwayMap into the geography/timetable corpus input.
 
 Scope: every station in docs/stations.xlsx (or the --lines you pick), located in OSM,
 plus everything within --radius-km (default 20 km) of those stations.
@@ -33,7 +33,7 @@ from ingest.scope import build_scope, candidate_index, match_stations  # noqa: E
 from ingest.xlsx import read_scope  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DB = ROOT / 'data/trainsim.sqlite'
+DEFAULT_DB = ROOT / 'data/corpus/geography.sqlite'
 DEFAULT_STATIONS = ROOT / 'docs/stations.xlsx'
 DEFAULT_CACHE = ROOT / 'data/cache/osm'
 # South East Queensland envelope used to look up station names (S, W, N, E).
@@ -68,6 +68,8 @@ def sha256(raw):
 
 def main(argv=None):
     args = parse_args(argv)
+    if args.db.resolve()==DEFAULT_DB.resolve() and (ROOT/'data/trainsim.sqlite').exists():
+        raise SystemExit('Legacy geography database found; run npm run migrate:geography before importing')
     t0 = time.time()
     envelope = tuple(float(x) for x in args.envelope.split(',')) if args.envelope else SEQ_ENVELOPE
     sheet = read_scope(args.stations)

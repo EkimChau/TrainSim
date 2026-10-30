@@ -19,7 +19,7 @@
     <div class="topbar-right">
       <nav class="global-nav" aria-label="Global navigation">
         <a href="#/map" data-route="map">Map</a>
-        <a href="#/data" data-route="data">Data</a>
+        <a href="#/data" data-route="data">Databases</a>
         <a href="#/query" data-route="query">Query</a>
         <a href="#/docs" data-route="docs">Docs</a>
       </nav>
@@ -137,16 +137,29 @@
     </section>
 
     <!-- DATA ------------------------------------------------------------ -->
-    <section id="view-data" class="view" aria-label="Data" hidden>
-      <aside class="side">
+    <section id="view-data" class="view" aria-label="Database browser" hidden>
+      <aside class="database-tree">
+        <div class="database-tree-heading"><h1>Databases</h1><button id="database-refresh" title="Refresh database files" aria-label="Refresh database files">↻</button></div>
+        <div id="database-categories" class="database-categories" aria-label="Database categories"></div>
+        <input id="database-search" type="search" placeholder="Find a database…" aria-label="Find a database">
+        <label class="database-archives"><input id="database-archives" type="checkbox"> Show backups and legacy inputs</label>
+        <nav id="database-list" aria-label="Database files"></nav>
+      </aside>
+      <aside class="database-tables">
+        <button id="database-overview">Database overview</button>
+        <p id="database-table-count" class="muted" role="status"></p>
         <input id="table-filter" type="search" placeholder="Filter tables" aria-label="Filter tables">
+        <label class="database-archives"><input id="table-internals" type="checkbox"> Internal tables</label>
         <div id="table-list" class="table-list"></div>
       </aside>
       <div class="main">
+        <div id="database-summary" class="database-summary"></div>
         <div class="toolbar">
-          <h1 id="table-title">Select a table</h1>
+          <h1 id="table-title">Database overview</h1>
           <span class="muted" id="table-total"></span>
           <div class="spacer"></div>
+          <div id="database-table-modes" class="tabs" aria-label="Table view" hidden><button id="table-rows" aria-pressed="true">Rows</button><button id="table-structure" aria-pressed="false">Structure</button></div>
+          <button id="database-query">Open Query</button>
           <button id="row-add" disabled>+ Add row</button>
           <button id="row-delete" class="danger" disabled>Delete selected</button>
           <button id="table-refresh">Refresh</button>
@@ -166,6 +179,7 @@
           <span id="page-label" class="muted">Page 1</span>
           <button type="button" id="page-next">Next ›</button>
         </form>
+        <div id="database-content" class="database-content"></div>
         <div id="table-grid" class="grid"></div>
         <p class="hint" id="table-hint">Live data: edits save immediately. Click a cell to edit · select rows to delete · rows you add must be unique.</p>
       </div>

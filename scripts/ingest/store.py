@@ -5,7 +5,7 @@ import sqlite3
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SCHEMA = ROOT / 'db/trainsim/schema.sql'
+SCHEMA = ROOT / 'db/corpus/geography-schema.sql'
 
 
 def now():

@@ -13,7 +13,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_DB = ROOT / 'data/trainsim.sqlite'
+DEFAULT_DB = ROOT / 'data/corpus/geography.sqlite'
 FEED_URL = 'https://gtfsrt.api.translink.com.au/GTFS/SEQ_GTFS.zip'
 HOLIDAY_URL = 'https://www.qld.gov.au/recreation/travel/holidays/public'
 ATTRIBUTION = 'Translink SEQ GTFS, licensed under CC BY 4.0'
@@ -108,7 +108,7 @@ def qld_holidays(year):
 
 
 def ensure_schema(con):
-    con.executescript((ROOT / 'db/trainsim/schema.sql').read_text())
+    con.executescript((ROOT / 'db/corpus/geography-schema.sql').read_text())
 
 
 def ingest_archive(con, archive_path, *, fetched_at=None, source_url=FEED_URL):
@@ -251,6 +251,8 @@ def main(argv=None):
     parser.add_argument('--source-url', default=FEED_URL,
                         help='URL to record as the source for a supplied feed archive')
     args = parser.parse_args(argv)
+    if args.db.resolve()==DEFAULT_DB.resolve() and (ROOT/'data/trainsim.sqlite').exists():
+        raise SystemExit('Legacy geography database found; run npm run migrate:geography before importing')
     args.db.parent.mkdir(parents=True, exist_ok=True)
     feed_path = args.feed
     source_url = FEED_URL

@@ -27,7 +27,7 @@ scripts/ingest_osm.py + scripts/ingest/   (Python, stdlib)
  ├─ topology.py  topo_* track graph, switch legs, linear referencing
  └─ report.py    measured coverage
         ↓
-data/trainsim.sqlite  (staging input only; schema: db/trainsim/schema.sql)
+data/corpus/geography.sqlite  (staging input only; schema: db/corpus/geography-schema.sql)
 
 Node.js Express (server/*), loopback only, no sign-in
  ├─ db/console.js    every project SQLite DB: browse, filter, live CRUD, one-statement SQL

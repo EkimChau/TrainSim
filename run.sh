@@ -11,6 +11,6 @@ command -v python3 >/dev/null || { echo 'Python 3.10+ is required for ingestion.
 command -v bun >/dev/null || { echo 'Bun is required to bundle the UI: https://bun.sh/docs/installation' >&2; exit 1; }
 [[ -d node_modules/@deck.gl/core && -d node_modules/tabulator-tables ]] || npm install
 if [[ "${1:-}" == '--ingest' ]]; then shift; python3 scripts/ingest_osm.py "$@"; fi
-[[ -f data/trainsim.sqlite ]] || echo 'Note: no data/trainsim.sqlite yet. Run ./run.sh --ingest (or npm run ingest) to populate the world.' >&2
+[[ -f data/corpus/geography.sqlite ]] || echo 'Note: no data/corpus/geography.sqlite yet. Run ./run.sh --ingest (or npm run ingest) to populate the geography corpus input.' >&2
 npm run build
 exec npm start

@@ -1,3 +1,4 @@
+-- Geography/timetable corpus input schema; reused when constructing SimWorld tables.
 -- TrainSim world database (SQLite 3.38+ with JSON1 and R*Tree; both ship with
 -- Python 3.10+ and Node 22's node:sqlite).
 --

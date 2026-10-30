@@ -3,7 +3,7 @@
 This builds source staging data. TrainSim runs on the separate fictitious
 [SimWorld](sim/simworld.md), constructed with `npm run build:simworld`.
 
-`scripts/ingest_osm.py` builds `data/trainsim.sqlite` from OpenStreetMap. It uses the
+`scripts/ingest_osm.py` builds `data/corpus/geography.sqlite` from OpenStreetMap. It uses the
 Python standard library only (osmium-tool is needed just for the PBF sources).
 
 ## Scope
@@ -101,4 +101,4 @@ junctions”, “Sheet stations not matched to OSM”) show where.
 ## Licence
 
 OSM data is © OpenStreetMap contributors under ODbL 1.0. Keep the attribution; a shared copy
-of `trainsim.sqlite` is a derivative database under ODbL's share-alike terms.
+of `geography.sqlite` is a derivative database under ODbL's share-alike terms.
