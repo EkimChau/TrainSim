@@ -1,16 +1,17 @@
 // TrainSim shell: one top nav bar, global navigation and database switch (top right),
-// hash routes #/map, #/data, #/query and #/docs (legacy #/readme redirects).
+// hash routes #/map, #/data, #/query, #/docs and #/tutorials.
 import 'tabulator-tables/dist/css/tabulator_simple.min.css';
 import {api,el,store,toast} from './api.js';
 import {MapView} from './map/view.js';
 import {DataView} from './data/view.js';
 import {QueryView} from './query/view.js';
 import {DocsView} from './docs/view.js';
+import {TutorialsView} from './tutorials/view.js';
 
 const $=id=>document.getElementById(id);
-const ROUTES=['map','data','query','docs'];
+const ROUTES=['map','data','query','docs','tutorials'];
 const state={config:null,databases:[],database:''};
-let mapView,dataView,queryView,docsView;
+let mapView,dataView,queryView,docsView,tutorialsView;
 
 async function boot(){
   try{state.config=await api('/config');}
@@ -18,6 +19,7 @@ async function boot(){
   dataView=new DataView();
   queryView=new QueryView({getDatabase:()=>state.database,setDatabase:id=>selectDatabase(id)});
   docsView=new DocsView({onIngest:()=>loadDatabases()});
+  tutorialsView=new TutorialsView();
   mapView=new MapView({config:state.config,onOpenData:(db,table,filter)=>{selectDatabase(db,false);location.hash=`#/data?db=${encodeURIComponent(db)}&table=${encodeURIComponent(table)}${filter?`&col=${encodeURIComponent(filter.column)}&val=${encodeURIComponent(filter.value)}`:''}`;}});
   await loadDatabases();
   $('global-db').addEventListener('change',e=>selectDatabase(e.target.value));
@@ -51,8 +53,11 @@ const current=()=>{const r=(location.hash.match(/^#\/(\w+)/)||[])[1];return ROUT
 function route(){
   if(location.hash.startsWith('#/readme')){location.replace(location.hash.replace('#/readme','#/docs'));return;}
   const r=current();
-  document.querySelector('.db-switch').hidden=r==='docs';
-  $('world-status').hidden=r==='docs';
+  document.body.classList.toggle('tutorial-active',r==='tutorials');
+  document.querySelector('.brand-name').textContent=r==='tutorials'?'SimWorld':'TrainSim';
+  document.querySelector('.brand-sub').textContent=r==='tutorials'?'Rail system simulation · Tutorials':'Fictitious SimWorld · derived from source data';
+  document.querySelector('.db-switch').hidden=r==='docs'||r==='tutorials';
+  $('world-status').hidden=r==='docs'||r==='tutorials';
   for(const name of ROUTES){$(`view-${name}`).hidden=name!==r;}
   for(const a of document.querySelectorAll('.global-nav a')){if(a.dataset.route===r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');}
   const params=new URLSearchParams(location.hash.split('?')[1]??'');
@@ -66,6 +71,7 @@ function route(){
     });
   }else if(r==='query')queryView.activate();
   else if(r==='docs')docsView.activate(params);
+  else if(r==='tutorials')tutorialsView.activate(params);
 }
 
 async function worldStatus(){
