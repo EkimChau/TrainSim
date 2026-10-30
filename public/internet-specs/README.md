@@ -6,7 +6,7 @@ This directory is intentionally separated from [SUBSET-026 ingestion](../../docs
 
 ## Files and source control
 
-- [catalog.json](catalog.json): 43 separately versioned, official/reference records. Each document has an authority, scope, issue, source URL, expected download URL where discovered, status and integration priority.
+- [catalog.json](catalog.json) and [sources.csv](sources.csv): 43 separately versioned, official/reference records. Each document has an authority, scope, issue, source URL, expected download URL where discovered, status and integration priority.
 - [fetch_specs.py](fetch_specs.py): standard-library downloader; checks actual PDF/ZIP signatures, checks ZIP CRC, records SHA-256, handles transient rate-limits, refuses unexpected redirects.
 - [SCENARIO-ETCS-L2.md](SCENARIO-ETCS-L2.md): one contiguous demonstration from path planning through an interlocked route, RBC authority, OBU supervision and release, with explicitly identified gaps.
 - [check_catalog.py](check_catalog.py): local catalogue and URL sanity checks.
