@@ -34,7 +34,7 @@ export function motionThresholds(before,after){
       if(fraction>=0&&fraction<=1)events.push({fraction,type,id,trainId:next.id,metres});
     };
     for(const bg of TRACK_WORLD.balises){
-      if(touchesBalise(next,bg))push(bg.metres,'balise',bg.id);
+      if(touchesBalise(next,bg))push(bg.metres+next.direction*TRACK_WORLD.antennaOffset,'balise',bg.id);
     }
     for(const section of TRACK_WORLD.sections){
       // A section changes state at train front entry and rear clearance.
@@ -70,7 +70,8 @@ export function motionFrame(before,after,fraction){
     const target=after.trains.find(t=>touchesBalise(t,bg));
     const old=target&&before.trains.find(t=>t.id===target.id);
     const current=target&&trains.find(t=>t.id===target.id);
-    if(!old||!current||!crossed(old.position,current.position,bg.metres))continue;
+    if(!old||!current||!crossed(old.position,current.position,
+      bg.metres+target.direction*TRACK_WORLD.antennaOffset))continue;
     balises[bg.id]={...after.balises[bg.id]};
     if(target.id==='A')current.lrbg=bg.id;
     const matching=after.events.slice(before.events.length).filter(event=>
