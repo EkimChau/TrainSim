@@ -221,7 +221,8 @@ export function simulateNextStep(previous,lesson){
       if(moving.id==='A'&&command.to>384&&!accepted()){
         blocked('Train movement beyond fixture approach refused: route not locked');break;
       }
-      if(command.to<moving.position){blocked('Reverse/teleport movement not supported in this fixture');break;}
+      const movingForward=moving.id==='B'?command.to<=moving.position:command.to>=moving.position;
+      if(!movingForward){blocked('Unexpected movement direction in this scenario');break;}
       const old=moving.position;
       moving.position=command.to;
       for(const bg of balisesPassed(moving,old,moving.position)){
