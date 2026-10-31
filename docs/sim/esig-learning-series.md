@@ -7,7 +7,7 @@
 ## What is complete and what is not
 
 - **Complete document inventory:** all nine source chapters, 316 table-of-contents headings, 116 identified figure labels (112 active, four `Intentionally deleted`), and 66 explicitly numbered Chapter 7 packets. Sections and figures are checked into [esig-learning-index.json](../../public/internet-specs/esig-learning-index.json), with page anchors, source version, coverage state, and lesson IDs.
-- **Complete curriculum mapping:** 305 generated concept lessons, plus the three hand-tuned pilot labs (308 navigable lessons), arranged into 19 functional modules. A section may map to its own lesson or to its nearest substantive child; deleted/editorial sections are not misrepresented as executable railway functions.
+- **Complete curriculum mapping:** 305 generated concept scaffolds, plus three hand-tuned pilots and twelve individually authored function labs (320 navigable entries, 15 individually authored), arranged into 19 functional modules. A section may map to its own lesson or to its nearest substantive child; deleted/editorial sections are not misrepresented as executable railway functions.
 - **Self-contained executable teaching scaffolding:** each generated lesson has typed inputs and their origins, projected outputs, state and system Mermaid source, source-figure selection where relevant, synthetic state changes, two scenarios per level (Simple/Medium/Busy), deterministic event traces, an expected phase, and a handheld reading derived from the identical state projection. The source PDFs, GitHub, network APIs, and third-party code are NOT needed at tutorial runtime.
 - **Not complete engineering fidelity:** neither the generic state machines, educational re-expression diagrams, toy stopping-distance math, synthetic input values, nor simplified communication/version guards are transcriptions of the requirements' full normative behaviour. Actual SRS-specific algorithms, precise figure geometry, SUBSET-076 test-case execution, national operational rules, interlocking control tables, supplier-dependent RBC logic, braking safety assessment, and external TMS operations remain **outside this deliverable**. Treat these as **teaching models**, not acceptance evidence.
 
@@ -76,7 +76,7 @@ python3 scripts/tutorials/generate_course.py /path/to/source-pdfs
 
 The generated `course-source.js` and figure/index JSON are committed so the browser never depends on the user's PDFs or online reference APIs. The generator does not copy or rehost upstream figures or substantive text. It deliberately extracts only section names, figure labels, packet names and source-page identifiers.
 
-The test harness verifies all 305 generated lessons × 6 scenarios = **1,830 generated scenario executions**, with deterministic replay and expected phases, every indexed active figure link, typed inputs and licence-safe source metadata. The three original hand-tuned lessons have their own additional replay and safety-boundary tests.
+The test harness verifies all 305 generated lessons × 6 scenarios = **1,830 generated scenario executions**, with deterministic replay and expected phases, every indexed active figure link, typed inputs and licence-safe source metadata. The three original pilot lessons and the twelve individually authored labs have their own source-specific replay and functional-boundary tests. See [authored ESIG wave 01](authored-learning-wave.md).
 
 ## What to implement before any fidelity claim
 
