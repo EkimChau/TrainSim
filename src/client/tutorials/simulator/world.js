@@ -139,7 +139,8 @@ function balisesPassed(train,oldPosition,newPosition){
 }
 function copy(world){return {
   ...world,inputs:{...world.inputs},trains:world.trains.map(t=>({...t})),
-  balises:{...world.balises},rbc:{...world.rbc,report:world.rbc.report?{...world.rbc.report}:null},
+  balises:Object.fromEntries(Object.entries(world.balises).map(([id,reading])=>[id,{...reading}])),
+  rbc:{...world.rbc,report:world.rbc.report?{...world.rbc.report}:null},
   route:{...world.route},point:{...world.point},ma:{...world.ma},
   events:[...world.events],lessonState:world.lessonState
 };}
