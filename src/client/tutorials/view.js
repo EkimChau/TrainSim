@@ -1,5 +1,5 @@
 import {el} from '../api.js';
-import {LESSONS,lessonById,lessonIndex} from './lessons.js';
+import {LESSONS,LESSON_COUNTS,lessonById,lessonIndex} from './lessons.js';
 import {createLessonState,stepLesson,lessonSnapshot} from './engine.js';
 import {flowDiagram,stateDiagram,speedLine,figureDiagram} from './diagrams.js';
 import {DIFFICULTIES,COURSE_META,COURSE_FIGURES} from './curriculum.js';
@@ -38,28 +38,36 @@ function scenarioActions(lesson,tier){
   })));
 }
 function lessonDropdown(lesson){
-  // Module-aware lesson index: 308 lessons are searchable without changing the
-  // title controls. The menu is discoverable on hover, toggled on click.
-  const groups=new Map();
-  for(const item of LESSONS){
-    const title=item.moduleTitle??'Featured learning labs';
-    if(!groups.has(title))groups.set(title,[]);
-    groups.get(title).push(item);
-  }
+  // Prioritise executable authored labs. Generated metadata scaffolds remain
+  // explicitly labelled and available from a separate, searchable catalogue.
+  const groups=items=>{
+    const byModule=new Map();
+    for(const item of items){
+      const key=item.moduleTitle??'Other lessons';
+      if(!byModule.has(key))byModule.set(key,[]);
+      byModule.get(key).push(item);
+    }
+    return [...byModule].map(([name,items])=>el('section',{class:'paper-menu-module','data-module':name},
+      el('h3',{class:'paper-menu-module-title'},name+' · '+items.length),
+      ...items.map(item=>button('Lesson '+item.number+' · '+item.short,{
+        class:'paper-lesson-menu-item'+(item.id===lesson.id?' current':''),
+        'data-lesson':item.id,'data-search-text':(item.id+' '+item.short+' '+item.title+' '+(item.clause??'')+' '+name+' '+(item.sourceFigures?.map(f=>'figure '+f.figure+' '+f.caption).join(' ')??'')).toLowerCase(),
+        role:'menuitem','aria-current':item.id===lesson.id?'page':'false',
+        title:item.status==='scaffold'?'Indexed source concept; generic teaching scaffold':'Individually modelled lesson; educational, not certified'
+      }))));
+  };
   return el('div',{class:'paper-lesson-picker','data-picker':'1'},
-    button(`Lesson ${lesson.number} ▾`,{class:'paper-lesson-trigger',title:'Browse all source-linked lessons; hover or click','aria-haspopup':'true','aria-expanded':'false','data-action':'toggle-menu'}),
+    button('Lesson '+lesson.number+' ▾',{class:'paper-lesson-trigger',title:'Hover or click for authored labs and the source-indexed catalogue','aria-haspopup':'true','aria-expanded':'false','data-action':'toggle-menu'}),
     el('div',{class:'paper-lesson-menu',role:'menu',hidden:true,'aria-label':'All ESIG tutorials'},
-      text('p',`${LESSONS.length} lessons · ${COURSE_FIGURES.filter(f=>!f.deleted).length} active source figures`,'paper-menu-title'),
-      el('label',{class:'paper-menu-search-label'},'Find a lesson, clause or module',
-        el('input',{class:'paper-menu-search',type:'search',placeholder:'Search 3.8, braking, packet, …','aria-label':'Search ESIG lessons'})),
+      text('p',LESSON_COUNTS.authored+' authored labs · '+LESSON_COUNTS.scaffold+' indexed scaffolds','paper-menu-title'),
+      el('label',{class:'paper-menu-search-label'},'Find a function, source clause or figure',
+        el('input',{class:'paper-menu-search',type:'search',placeholder:'Search 3.8, braking, packet…','aria-label':'Search ESIG lessons'})),
       el('div',{class:'paper-menu-results',role:'presentation'},
-        ...[...groups].map(([group,items])=>el('section',{class:'paper-menu-module','data-module':group},
-          el('h3',{class:'paper-menu-module-title'},`${group} · ${items.length}`),
-          ...items.map(item=>button(`Lesson ${item.number} · ${item.short}`,{
-            class:`paper-lesson-menu-item${item.id===lesson.id?' current':''}`,
-            'data-lesson':item.id,'data-search-text':`${item.short} ${item.title} ${item.clause??''} ${group} ${item.sourceFigures?.map(f=>`figure ${f.figure} ${f.caption}`).join(' ')??''}`.toLowerCase(),
-            role:'menuitem','aria-current':item.id===lesson.id?'page':'false'
-          })))))));
+        ...groups(LESSONS.filter(item=>item.status!=='scaffold')),
+        el('details',{class:'paper-scaffold-list','data-scaffold-list':'1',open:lesson.status==='scaffold'},
+          el('summary',{},'Source-indexed scaffolds · '+LESSON_COUNTS.scaffold+' (open to browse)'),
+          text('p','These catalogue entries use reusable teaching abstractions. They are not individually authored functional models.','paper-small'),
+          ...groups(LESSONS.filter(item=>item.status==='scaffold'))))));
 }
 function tierSelector(tier){
   return el('div',{class:'paper-difficulty',role:'group','aria-label':'Scenario complexity'},
@@ -79,6 +87,7 @@ function sectionHeader(lesson,tier){
       el('div',{class:'paper-tags'},
         text('span','FICTITIOUS SIMWORLD','paper-tag'),text('span','Source-linked / not certified','paper-tag'),
         text('span',`Lesson ${lesson.number} of ${LESSONS.length}`,'paper-tag'),
+        text('span',lesson.status==='scaffold'?'INDEXED SCAFFOLD':'AUTHORED FUNCTION','paper-tag'),
         text('span',`${COURSE_META.counts.activeFigures} source figures indexed`,'paper-tag')), 
       el('div',{class:'paper-tier-strip'},tierSelector(tier),
         text('small',DIFFICULTIES.find(d=>d.id===tier)?.description??'','paper-tier-desc'))),
@@ -210,6 +219,8 @@ export class TutorialsView{
   }
   filterLessons(raw){
     const q=String(raw??'').trim().toLowerCase();
+    const scaffold=this.host.querySelector('[data-scaffold-list]');
+    if(scaffold&&q)scaffold.open=true;
     for(const section of this.host.querySelectorAll('.paper-menu-module')){
       let n=0;
       for(const item of section.querySelectorAll('.paper-lesson-menu-item')){

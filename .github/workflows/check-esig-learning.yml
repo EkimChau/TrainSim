@@ -8,8 +8,11 @@ on:
       - 'public/index.html'
       - 'public/internet-specs/esig-learning-*'
       - 'tests/esig-curriculum.test.js'
+      - 'tests/authored.test.js'
       - 'tests/tutorials*.test.js'
       - 'docs/sim/esig-learning-series.md'
+      - 'docs/sim/authored-learning-wave.md'
+      - 'docs/sim/authored-learning-wave.md'
       - '.github/workflows/check-esig-learning.yml'
   pull_request:
     paths:
@@ -18,6 +21,7 @@ on:
       - 'public/index.html'
       - 'public/internet-specs/esig-learning-*'
       - 'tests/esig-curriculum.test.js'
+      - 'tests/authored.test.js'
       - 'tests/tutorials*.test.js'
       - 'docs/sim/esig-learning-series.md'
       - '.github/workflows/check-esig-learning.yml'
@@ -35,8 +39,8 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - name: Verify 305 indexed lessons, all figures and six fixtures each
-        run: node --test tests/tutorials.test.js tests/esig-curriculum.test.js tests/tutorials-ui.test.js
+      - name: Verify 305 indexed scaffolds, 15 authored labs and all scenario fixtures
+        run: node --test tests/tutorials.test.js tests/esig-curriculum.test.js tests/tutorials-ui.test.js tests/authored.test.js
       - name: Syntax check tutorial modules
         run: |
           node --check src/client/tutorials/lessons.js
@@ -45,6 +49,8 @@ jobs:
           node --check src/client/tutorials/engine.js
           node --check src/client/tutorials/view.js
           node --check src/client/tutorials/diagrams.js
+          node --check src/client/tutorials/authored-lessons.js
+          node --check src/client/tutorials/authored-engine.js
       - uses: oven-sh/setup-bun@v2
       - name: Install project dependencies
         run: npm ci

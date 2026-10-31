@@ -41,11 +41,11 @@ export function flowDiagram(lesson,phase){
     else arrow(svg,a.x+73,a.y+49,b.x+73,b.y-3);
   }
   for(const node of lesson.diagrams.actors){
-    const active=phase.includes('RUNNING')?['obu','dmi'].includes(node.id):
+    const active=lesson.authoredRule ? (['ACTIVE','PROGRESS','COMPLETE'].includes(phase)?node.id===lesson.diagrams.actors.at(-1)?.id:['REVIEW','BLOCKED'].includes(phase)?node.id===lesson.diagrams.actors.at(-2)?.id:false) : phase.includes('RUNNING')?['obu','dmi'].includes(node.id):
       phase.includes('GRANTED')||phase.includes('LOCKED')?['rbc','ixl'].includes(node.id):
       phase.includes('REVIEW')||phase.includes('DENIED')?['ixl','track','rbc'].includes(node.id):
       phase.includes('REPORT')||phase==='CONNECTED'?['obu','rbc'].includes(node.id):false;
-    rectNode(svg,node.x,node.y,146,49,node.text,node.tag,active,phase.includes('REVIEW')?'red':'green');
+    rectNode(svg,node.x,node.y,146,49,node.text,node.tag,active,/REVIEW|BLOCKED/.test(phase)?'red':'green');
   }
   return svg;
 }

@@ -1,5 +1,6 @@
 import {lessonById} from './lessons.js';
 import {initialCourseState,stepCourseLesson,courseSnapshot} from './course-engine.js';
+import {initialAuthoredState,stepAuthoredLesson,authoredSnapshot} from './authored-engine.js';
 
 // A pure deterministic *teaching* state machine; no official-source database calls.
 // Source references in lessons.js are not an implementation conformance claim.
@@ -13,6 +14,7 @@ const initialInputs=lesson=>Object.fromEntries(lesson.inputs.map(f=>[f.id,f.defa
 
 export function createLessonState(id='ma'){
   const lesson=lessonById(id);
+  if(lesson.authoredRule)return initialAuthoredState(lesson);
   if(lesson.family)return initialCourseState(lesson);
   return {lessonId:lesson.id,inputs:initialInputs(lesson),phase:lesson.id==='radio'?'DISCONNECTED':lesson.id==='interlocking'?'IDLE':'WAITING',
     ma:null,routeLocked:false,occupied:false,session:false,report:null,events:[],sequence:0,feedback:null};
@@ -137,6 +139,7 @@ export function stepLesson(previous,command){
   if(!command||typeof command!=='object')throw new Error('Lesson command required');
   if(command.type==='reset')return createLessonState(previous.lessonId);
   const lesson=lessonById(previous.lessonId);
+  if(lesson.authoredRule)return stepAuthoredLesson(previous,command,lesson);
   if(lesson.family)return stepCourseLesson(previous,command,lesson);
   const s={...previous,inputs:{...previous.inputs},events:[...previous.events]};
   if(command.type==='set'){
@@ -157,6 +160,7 @@ const stat=(label,value)=>({label,value:String(value)});
 /** One projection, reused by desktop cards, graph highlights, status and handheld. */
 export function lessonSnapshot(s){
   const lesson=lessonById(s.lessonId);
+  if(lesson.authoredRule)return authoredSnapshot(s,lesson);
   if(lesson.family)return courseSnapshot(s,lesson);
   const i=s.inputs;
   if(s.lessonId==='ma'){

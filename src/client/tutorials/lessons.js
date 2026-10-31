@@ -1,4 +1,5 @@
 import {GENERATED_LESSONS} from './curriculum.js';
+import {AUTHORED_LESSONS} from './authored-lessons.js';
 
 /**
  * Fictitious SimWorld teaching fixtures; no network access, live source DB or runtime
@@ -133,7 +134,7 @@ const CORE_LESSONS = [
 // Three hand-tuned pilot lessons remain first. Every ESIG source lesson follows
 // in SUBSET-026 order, with independent simple / medium / busy scenarios.
 for (const lesson of CORE_LESSONS){
-  lesson.module='00';lesson.moduleTitle='Featured learning labs';
+  lesson.module='00';lesson.moduleTitle='Featured learning labs';lesson.status='authored';
   lesson.sourceFigures=[];
   lesson.scenarios=lesson.scenarios.map(s=>({...s,tier:s.tier??'simple'}));
   const additional=lesson.id==='ma'?[
@@ -148,6 +149,9 @@ for (const lesson of CORE_LESSONS){
   ];
   lesson.scenarios.push(...additional);
 }
-export const LESSONS=[...CORE_LESSONS,...GENERATED_LESSONS];
+// The generated source coverage catalogue is not equivalent to individually
+// modelled functional learning labs. Keep both discoverable, with clear status.
+export const LESSONS=[...CORE_LESSONS,...AUTHORED_LESSONS,...GENERATED_LESSONS.map((l,i)=>({...l,status:'scaffold',number:String(i+16).padStart(3,'0')}))];
+export const LESSON_COUNTS={authored:CORE_LESSONS.length+AUTHORED_LESSONS.length,scaffold:GENERATED_LESSONS.length};
 export const lessonById=id=>LESSONS.find(l=>l.id===id)||LESSONS[0];
 export const lessonIndex=id=>Math.max(0,LESSONS.findIndex(l=>l.id===id));

@@ -135,3 +135,11 @@ uses multiple same-tick input vectors, fault injection, and explicit recovery, w
 log showing event ticks. Figure choices use locally generated instructional sketches,
 never copied source figure raster images. The handheld is always a projection of the
 same immutable runtime state as the page facts and outputs.
+
+## Individually authored ESIG function wave 01
+
+There are now **15 authored teaching labs** (three original featured labs plus twelve distinct, source-anchored functions) and **305 source-indexed scaffolds**. The lesson index prioritises authored labs; expand the clearly labelled scaffold catalogue to explore the remainder. Search opens the catalogue automatically.
+
+The twelve new models have dedicated input guards, source-specific outputs and processing effects, and two deterministic fixtures each for **Simple**, **Medium** and **Busy**, including multi-source fault bursts and explicit recovery. All twelve are educational, not complete SUBSET-026 conformance implementations. See [authored wave 01](authored-learning-wave.md) for the detailed clause-by-clause fit/gap table, source boundaries, test cases and recommended upgrade path.
+
+The total registry is **320 entries**, but only **15** are individually authored. Displaying a source-indexed scaffold does not mean a normative ETCS algorithm has been implemented.

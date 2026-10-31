@@ -246,3 +246,14 @@
 #view-tutorials .paper-source-figure .paper-small{margin:4px 0 0;font-size:11px;color:#8a4b29}
 @media(max-width:575px){#view-tutorials .paper-lesson-menu{position:fixed;top:90px;left:8px;right:8px;width:auto;max-width:none;max-height:calc(100vh - 105px)}
   #view-tutorials .paper-tier{padding:7px 9px}}
+
+
+/* Authored learning-path boundary: preserve the PaperCSS ink-and-jotter cards. */
+#view-tutorials .paper-scaffold-list{margin:8px 3px;border:2px dashed #778ca1;border-radius:7px 11px 8px 6px;
+  padding:7px;background:repeating-linear-gradient(to bottom,#fff9e7 0,#fff9e7 30px,#dce7ec 31px,#fff9e7 32px)}
+#view-tutorials .paper-scaffold-list>summary{cursor:pointer;list-style-position:inside;font-weight:800;
+  color:#385475;padding:10px 7px;border:1px solid #b8c6d1;background:#f2f6ec}
+#view-tutorials .paper-scaffold-list>summary:hover,#view-tutorials .paper-scaffold-list>summary:focus-visible{background:#dce8f5}
+#view-tutorials .paper-scaffold-list>p{padding:4px 9px;max-width:400px}
+#view-tutorials .paper-menu-module .paper-lesson-menu-item.current{box-shadow:inset 4px 0 #3474ae!important}
+#view-tutorials .paper-lesson-picker .paper-menu-title{font-size:12px;line-height:1.5}
