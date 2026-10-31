@@ -113,3 +113,54 @@ Validation commands:
     npm run build
 
 Passing CI demonstrates software integrity, not railway functional safety.
+
+
+## Completion update — synchronized animation and instrument playback
+
+A reusable pure motion projector now separates the scenario's **evaluated final
+state** from the in-motion visual frames. The existing Lesson 009 authored
+interlocking evaluator still owns route proof; frame drawing never invents
+an IXL decision, a movement authority, a permitted speed or a braking curve.
+
+- **motion.js** calculates intermediate train front, synthetic speed, track
+  occupancy and underbody balise-antenna passage from two committed worlds.
+  Its pure motionThresholds function exposes point, track-section, balise and
+  level-marker crossing fractions, suitable for later learning overlays.
+- **TRACK_WORLD.antennaOffset** is a visible 32 m teaching fixture behind the
+  leading end of Train A. BG readings occur when this antenna, not just the
+  train nose, crosses a fixed balise position. The labelled 340 m and 760 m
+  balise positions remain fixed in all Lesson 009 scenarios.
+- SVG trains move along a common metre-to-route transform. Point geometry and
+  parallel-line occupancy use the same world coordinates; the live DOM updates
+  track-circuit colours and balise counts while the train is travelling.
+  DMI, selected component, equipment tiles and event log refresh from that
+  same intermediate snapshot (not from a separate UI clock).
+- **Pause** retains a deterministic in-motion checkpoint. **Resume** continues
+  the unfinished scenario command without counting an already-read balise
+  twice. **Previous step** rebuilds from the original seed by replaying
+  immutable commands; **Reset** restores the original world. Users can choose
+  1×, 2× or 4× animation playback speeds. Reduced-motion mode presents the
+  exact end snapshot without animation.
+- The RBC position is **not** updated just because the train moves. Only the
+  position-report step copies the onboard estimated front, speed and balise
+  reference to the RBC readout. This deliberately demonstrates stale readings.
+- The train drawing now exposes individually selectable BTM and synthetic
+  odometry equipment. SVG detector colours, component state cards, DMI readings
+  and trace annotations share the same world data.
+- The lineside signal's illustrated lamp is neutral until a derived schematic
+  aspect is drawn; it never displays both real stop/proceed aspects as lit.
+
+### Validation contracts
+
+Tests cover authored Lesson 009 proof, fault and conflicting-traffic scenarios;
+balise events at the under-train antenna; track detector entry/rear-clear
+thresholds; interpolated speed and position; stale vs explicit RBC reporting;
+immovable source snapshots; pause/resume exactly-once passage events; SVG symbol
+composition; and live inspector/DMI replacement without external browser
+dependencies. The CI build and source-linked lesson regressions must still pass.
+
+**Remaining assurance boundary:** these are deterministic code and
+minimal-DOM tests. A separate manual visual review in an actual browser is
+recommended before asserting pixel-perfect layout across devices; no approved
+railway-control-table, SRS conformance or railway-safety certification is
+implied.
