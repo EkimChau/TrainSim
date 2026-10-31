@@ -22,6 +22,7 @@ test('all registered scenarios replay to their expected assertions',()=>{
       const state=replayLesson(lesson.id,scenario.id);
       const snapshot=lessonSnapshot(state);
       for(const [key,value] of Object.entries(scenario.expect)){
+        if(key==='mustVisit'){for(const phase of value)assert.ok(state.seenPhases?.includes(phase),`${lesson.id}/${scenario.id}: missing visited phase ${phase}`);continue;}
         const result=key==='maIssued'?Boolean(state.ma):key==='remaining'?Math.max(0,state.ma.end-state.inputs.front):
           key==='front'?state.inputs.front:state[key];
         assert.equal(result,value,`${lesson.id}/${scenario.id}: ${key}`);

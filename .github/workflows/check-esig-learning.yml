@@ -1,0 +1,52 @@
+name: Check ESIG Learning Series
+
+on:
+  push:
+    paths:
+      - 'src/client/tutorials/**'
+      - 'public/tutorials.css'
+      - 'public/index.html'
+      - 'public/internet-specs/esig-learning-*'
+      - 'tests/esig-curriculum.test.js'
+      - 'tests/tutorials*.test.js'
+      - 'docs/sim/esig-learning-series.md'
+      - '.github/workflows/check-esig-learning.yml'
+  pull_request:
+    paths:
+      - 'src/client/tutorials/**'
+      - 'public/tutorials.css'
+      - 'public/index.html'
+      - 'public/internet-specs/esig-learning-*'
+      - 'tests/esig-curriculum.test.js'
+      - 'tests/tutorials*.test.js'
+      - 'docs/sim/esig-learning-series.md'
+      - '.github/workflows/check-esig-learning.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  source-coverage-and-ui-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify 305 indexed lessons, all figures and six fixtures each
+        run: node --test tests/tutorials.test.js tests/esig-curriculum.test.js tests/tutorials-ui.test.js
+      - name: Syntax check tutorial modules
+        run: |
+          node --check src/client/tutorials/lessons.js
+          node --check src/client/tutorials/curriculum.js
+          node --check src/client/tutorials/course-engine.js
+          node --check src/client/tutorials/engine.js
+          node --check src/client/tutorials/view.js
+          node --check src/client/tutorials/diagrams.js
+      - uses: oven-sh/setup-bun@v2
+      - name: Install project dependencies
+        run: npm ci
+      - name: Build real TrainSim UI and docs
+        run: npm run build

@@ -120,3 +120,18 @@ expected results and negative tests. Add a pure engine reducer case and a
 handheld displays or fork the CSS. Preserve a visible explicit limitation when
 a source or scenario is incomplete. Keep `src/client/tutorials` free of network
 calls so tutorial playback can run entirely offline after the normal app loads.
+
+## Complete ESIG curriculum extension
+
+See [ESIG Learning Series](esig-learning-series.md) for the nine-chapter source map, 19 modules,
+figure coverage register and Simple / Medium / Busy scenario semantics. The original three
+hand-tuned lessons remain the first learning labs; source-indexed lessons extend that
+registry without changing the paper-and-ink design contract.
+
+A searchable, grouped lesson catalogue is available from the **Lesson XX ▾** title control.
+You can search by clause identifier, function, module, source Figure number or caption.
+The tier controls in the page title switch among the scenario fixtures. A Busy fixture
+uses multiple same-tick input vectors, fault injection, and explicit recovery, with the
+log showing event ticks. Figure choices use locally generated instructional sketches,
+never copied source figure raster images. The handheld is always a projection of the
+same immutable runtime state as the page facts and outputs.
