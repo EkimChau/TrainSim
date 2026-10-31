@@ -141,6 +141,19 @@ function trainPaint(root,train,world){
   rect(tag,-58,-17,116,18,'#fff9ed',3,{stroke:'#74828a','stroke-width':1});
   label(tag,0,-5,'TRAIN '+train.id+' · '+train.level,'sim-svg-small','middle');
   g.append(tag);
+  if(train.id==='A'){
+    // Local equipment is placed relative to the moving train front.
+    // The BTM detection coordinate uses the same 32-metre offset as the model.
+    const antenna=svg('g',{'data-sim-component':'BTM',role:'button',tabindex:0,
+      'aria-label':'Balise antenna under train A',class:'sim-interactive'});
+    rect(antenna,-39,-6,14,7,'#efc34a',1,{stroke:'#31465b','stroke-width':1});
+    path(antenna,'M-32 1 Q-40 8 -32 15 M-32 1 Q-24 8 -32 15',C.radio,1.4);
+    g.append(antenna);
+    const odom=svg('g',{'data-sim-component':'ODOM',role:'button',tabindex:0,
+      'aria-label':'Onboard speed sensor, train A',class:'sim-interactive'});
+    add(odom,svg('circle',{cx:-71,cy:-4,r:5,fill:'#f1da88',stroke:C.ink,'stroke-width':1}));
+    g.append(odom);
+  }
   root.append(g);
 }
 function drawJunction(root,world,selected){
@@ -246,6 +259,11 @@ export function refreshRailDetectors(host,world,selected=''){
       g=>balisePaint(g,world,bg),selected===bg.id);
     old.replaceWith(next);
   }
+  const dmi=root.querySelector('[data-sim-component="DMI"] .sim-svg-value');
+  if(dmi)dmi.textContent=world.trains[0].speed+' km/h · '+world.trains[0].level;
+  const btm=root.querySelector('[data-sim-component="BTM"]');
+  if(btm)btm.setAttribute('aria-label','Balise antenna under train A; last BG '+
+    (world.trains[0].lrbg||'not acquired'));
 }
 export function animateRailWorld(host,before,after,duration=1100,onProgress=()=>{}){
   const changed=after.trains.filter(t=>{
