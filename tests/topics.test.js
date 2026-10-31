@@ -71,7 +71,7 @@ test('same lesson projection is reused by any topic rather than recomputed',()=>
   assert.equal(a.maEnd,b.maEnd);
   assert.equal(a.permittedSpeed,b.permittedSpeed);
   assert.equal(a.phase,b.phase);
-  assert.equal(a.readerRows,b.readerRows);
+  assert.deepEqual(a.readerRows,b.readerRows);
   assert.equal(a.layout.baliseGroups[0].metres,b.layout.baliseGroups[0].metres);
 });
 
