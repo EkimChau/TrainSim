@@ -91,6 +91,22 @@ export function buildTopicScene(lesson,state,snapshot,topicId='overview'){
   const distinctInputs=Object.keys(inputs).filter(k=>/radio|route|track|front|end|balise|level|speed|mode|position/i.test(k));
   const activeParts=[...new Set(topic.parts)];
   const currentBg=balises.find(bg=>Math.abs(bg.metres-front)<=35)??null;
+  // The last actual lesson event determines which components light up.
+  // There is no topic-only operational state or duplicated safety decision.
+  const event=state.events?.at(-1)??null;
+  const actor=String(event?.actor||'').toLowerCase();
+  const action=String(event?.action||'').toLowerCase();
+  const live=new Set();
+  if(/rbc/.test(actor)||/issue|evaluate/.test(action))for(const id of ['rbc','radio','ma','eoa'])live.add(id);
+  if(/obu|train|advance|progress/.test(actor+' '+action))for(const id of ['train','antenna','obu','cab','dmi'])live.add(id);
+  if(/detect|balise|track/.test(actor+' '+action))for(const id of ['track','balise','lrbg'])live.add(id);
+  if(/ixl|interlock|route/.test(actor+' '+action))for(const id of ['ixl','point','signal'])live.add(id);
+  if(currentBg)for(const id of ['balise','antenna','lrbg'])live.add(id);
+  const fact=key=>snapshot.facts?.find(m=>m.label===key)?.value;
+  const minSafe=Number.parseFloat(fact('minSafeFront'));
+  const maxSafe=Number.parseFloat(fact('maxSafeFront'));
+  const confidence=Number.isFinite(minSafe)&&Number.isFinite(maxSafe)&&maxSafe>=minSafe?
+    {min:minSafe,max:maxSafe}:null;
   const references=[...new Set([...topic.sources,...(lesson.source||[]),
     ...(lesson.sourceFigures||[]).slice(0,3).map(f=>'SUBSET-026-'+f.chapter+' Figure '+f.figure+' (p. '+f.page+')'),
     ...(topic.id==='levels'?LEVEL_ENTRY_SPEC.requirements.map(r=>r.documentId+' §'+r.clauseNo+' (draft implementation record)'):[])])];
@@ -102,7 +118,7 @@ export function buildTopicScene(lesson,state,snapshot,topicId='overview'){
     maType:target===0?'EOA':'LOA',targetSpeed:target,permittedSpeed:permitted,actualSpeed:actual,
     mode,phase:snapshot.phase,warning:badPhase(snapshot.phase),status:snapshot.status,
     facts:snapshot.facts||[],stats:snapshot.stats||[],readerRows:snapshot.readerRows||[],
-    currentBg,lrbg,radioAvailable:inputs.radioSafe??inputs.radio??inputs.radioAvailable??inputs.bearer??null,
+    currentBg,lrbg,confidence,highlightedParts:[...live],lastEvent:event?.message??null,radioAvailable:inputs.radioSafe??inputs.radio??inputs.radioAvailable??inputs.bearer??null,
     routeProved:inputs.routeProved??inputs.pointProved??inputs.pointDetected??null,
     relevantInputs:distinctInputs,references,sourceIndexVersion:COURSE_META.issue,
     docsRecord:topic.id==='levels'?{id:LEVEL_ENTRY_SPEC.id,status:LEVEL_ENTRY_SPEC.status}:null
