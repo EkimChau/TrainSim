@@ -125,12 +125,14 @@ function trainPaint(root,train,world){
   // instantaneous track tangent rather than a straight-line teleport.
   const g=svg('g',{'data-sim-train':train.id,
     transform:'translate('+p.x+' '+p.y+') rotate('+p.angle+')'});
-  symbolUse(g,'train',-86,-45,85,48);
-  root.append(g);
-  const tag=svg('g',{transform:'translate('+p.x+' '+(p.y-55)+')'});
+  const sprite=svg('g',train.id==='B'?{transform:'scale(-1 1)'}:{});
+  symbolUse(sprite,'train',-86,-45,85,48);
+  g.append(sprite);
+  const tag=svg('g',{transform:'translate(0 -55)'});
   rect(tag,-58,-17,116,18,'#fff9ed',3,{stroke:'#74828a','stroke-width':1});
   label(tag,0,-5,'TRAIN '+train.id+' · '+train.level,'sim-svg-small','middle');
-  root.append(tag);
+  g.append(tag);
+  root.append(g);
 }
 function drawJunction(root,world,selected){
   const occ=occupancy(world),axes=svg('g',{class:'sim-track-layer'});
@@ -225,6 +227,16 @@ export function animateRailWorld(host,before,after,duration=690){
     return {promise:Promise.resolve(),cancel(){}};
   let frame=0,done=false,resolvePromise;
   const promise=new Promise(resolve=>{resolvePromise=resolve;});
+  // The first visible frame must start at the previous world position;
+  // do not briefly flash the committed destination before the tween begins.
+  for(const target of changed){
+    const prior=before.trains.find(t=>t.id===target.id);
+    const sprite=host.querySelector('[data-sim-train="'+target.id+'"]');
+    if(sprite){
+      const p=trackPoint(target.track,prior.position);
+      sprite.setAttribute('transform','translate('+p.x+' '+p.y+') rotate('+p.angle+')');
+    }
+  }
   const start=(typeof performance!=='undefined'?performance.now():Date.now());
   const finish=()=>{if(done)return;done=true;if(frame)cancelAnimationFrame(frame);resolvePromise();};
   const tick=now=>{
