@@ -43,8 +43,8 @@ export function installRailSymbols(root){
   symbol(defs,'sim-symbol-signal',g=>{
     line(g,49,12,49,47,C.ink,4);
     rect(g,37,4,24,33,'#e7e9e7',5,{stroke:C.ink,'stroke-width':2});
-    add(g,svg('circle',{cx:49,cy:14,r:6,fill:C.stop}));
-    add(g,svg('circle',{cx:49,cy:27,r:6,fill:C.valid}));
+    add(g,svg('circle',{cx:49,cy:14,r:6,fill:'#485662'}));
+    add(g,svg('circle',{cx:49,cy:27,r:6,fill:'#485662'}));
   });
   symbol(defs,'sim-symbol-ixl',g=>{
     rect(g,7,17,84,28,'#e0dfd0',2,{stroke:C.ink,'stroke-width':2});
@@ -119,6 +119,15 @@ function sectionPaint(root,world,section,occupied){
   inkBadge(root,x-65,section.track==='upper'?38:section.track==='main'?259:339,
     section.id,occupied?'OCCUPIED':'CLEAR',occupied?'blocked':'valid',125);
 }
+function balisePaint(root,world,bg){
+  const p=trackPoint(bg.track,bg.metres);
+  symbolUse(root,'balise',p.x-21,p.y-13,42,27);
+  label(root,p.x,p.y+37,bg.id,'sim-svg-label','middle');
+  if(world.balises[bg.id].count){
+    rect(root,p.x-20,p.y-22,40,3,C.valid,1);
+    label(root,p.x,p.y+49,'READ '+world.balises[bg.id].count,'sim-svg-small','middle');
+  }
+}
 function trainPaint(root,train,world){
   const p=trackPoint(train.track,train.position);
   // Each train remains a vector symbol; advance through turnout with the
@@ -152,12 +161,8 @@ function drawJunction(root,world,selected){
   },selected==='P1');
   for(const section of TRACK_WORLD.sections)interactive(root,section.id,section.label+' track '+(occ[section.id].length?'occupied':'clear'),g=>
     sectionPaint(g,world,section,Boolean(occ[section.id].length)),selected===section.id);
-  for(const bg of TRACK_WORLD.balises)interactive(root,bg.id,bg.id+' passage count '+world.balises[bg.id].count,g=>{
-    const p=trackPoint(bg.track,bg.metres);
-    symbolUse(g,'balise',p.x-21,p.y-13,42,27);
-    label(g,p.x,p.y+37,bg.id,'sim-svg-label','middle');
-    if(world.balises[bg.id].count)rect(g,p.x-20,p.y-22,40,3,C.valid,1);
-  },selected===bg.id);
+  for(const bg of TRACK_WORLD.balises)interactive(root,bg.id,bg.id+' passage count '+world.balises[bg.id].count,
+    g=>balisePaint(g,world,bg),selected===bg.id);
   for(const [i,sig] of TRACK_WORLD.signals.entries())interactive(root,sig.id,'Lineside '+sig.id,g=>{
     const p=trackPoint(sig.track,sig.metres);
     symbolUse(g,'signal',p.x-26,p.y-88,52,57);
@@ -217,44 +222,71 @@ export function renderRailWorld(world,selected=''){
   label(root,1059,389,'VIEW: VECTOR / NOT TO SCALE / NOT CERTIFIED','sim-svg-small','end');
   return root;
 }
-export function animateRailWorld(host,before,after,duration=690){
+/**
+ * Refresh only changing SVG detectors; keep train transforms alive so that the
+ * full-size SVG never redraws on every animation frame.
+ */
+export function refreshRailDetectors(host,world,selected=''){
+  const root=host.querySelector('.sim-world-svg');
+  if(!root)return;
+  const occupied=occupancy(world);
+  const replace=id=>root.querySelector('[data-sim-component="'+id+'"]');
+  for(const section of TRACK_WORLD.sections){
+    const old=replace(section.id);if(!old)continue;
+    const wrapper=svg('g');
+    const next=interactive(wrapper,section.id,section.label+' track '+
+      (occupied[section.id].length?'occupied':'clear'),g=>
+      sectionPaint(g,world,section,Boolean(occupied[section.id].length)),selected===section.id);
+    old.replaceWith(next);
+  }
+  for(const bg of TRACK_WORLD.balises){
+    const old=replace(bg.id);if(!old)continue;
+    const wrapper=svg('g');
+    const next=interactive(wrapper,bg.id,bg.id+' passage count '+world.balises[bg.id].count,
+      g=>balisePaint(g,world,bg),selected===bg.id);
+    old.replaceWith(next);
+  }
+}
+export function animateRailWorld(host,before,after,duration=1100,onProgress=()=>{}){
   const changed=after.trains.filter(t=>{
     const prior=before.trains.find(p=>p.id===t.id);
     return prior&&(prior.position!==t.position||prior.track!==t.track);
   });
   if(!changed.length||typeof requestAnimationFrame!=='function'||
-      (typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches))
-    return {promise:Promise.resolve(),cancel(){}};
+      (typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches)){
+    onProgress(1);
+    return {promise:Promise.resolve(true),cancel(){}};
+  }
   let frame=0,done=false,resolvePromise;
   const promise=new Promise(resolve=>{resolvePromise=resolve;});
-  // The first visible frame must start at the previous world position;
-  // do not briefly flash the committed destination before the tween begins.
-  for(const target of changed){
-    const prior=before.trains.find(t=>t.id===target.id);
-    const sprite=host.querySelector('[data-sim-train="'+target.id+'"]');
-    if(sprite){
-      const p=trackPoint(target.track,prior.position);
-      sprite.setAttribute('transform','translate('+p.x+' '+p.y+') rotate('+p.angle+')');
+  const start=typeof performance!=='undefined'?performance.now():Date.now();
+  const finish=completed=>{
+    if(done)return;
+    done=true;if(frame)cancelAnimationFrame(frame);
+    resolvePromise(completed);
+  };
+  const paint=fraction=>{
+    for(const target of changed){
+      const previous=before.trains.find(t=>t.id===target.id);
+      const group=host.querySelector('[data-sim-train="'+target.id+'"]');
+      if(!group)continue;
+      const metres=previous.position+(target.position-previous.position)*fraction;
+      const p=trackPoint(target.track,metres);
+      group.setAttribute('transform','translate('+p.x+' '+p.y+') rotate('+p.angle+')');
     }
-  }
-  const start=(typeof performance!=='undefined'?performance.now():Date.now());
-  const finish=()=>{if(done)return;done=true;if(frame)cancelAnimationFrame(frame);resolvePromise();};
+  };
+  // Before movement begins, explicitly paint the origin frame.
+  paint(0);
+  onProgress(0);
   const tick=now=>{
     if(done)return;
     const elapsed=Math.min(1,Math.max(0,(now-start)/duration));
-    const u=elapsed<.5?2*elapsed*elapsed:1-2*(1-elapsed)*(1-elapsed);
-    for(const target of changed){
-      const previous=before.trains.find(t=>t.id===target.id);
-      const sprite=host.querySelector('[data-sim-train="'+target.id+'"]');
-      if(!sprite)continue;
-      const metres=previous.position+(target.position-previous.position)*u;
-      const p=trackPoint(target.track,metres);
-      sprite.setAttribute('transform','translate('+p.x+' '+p.y+') rotate('+p.angle+')');
-      // The drawn state is the endpoint; the tween is presentation only.
-    }
-    if(elapsed>=1){finish();return;}
+    const fraction=elapsed<.5?2*elapsed*elapsed:1-2*(1-elapsed)*(1-elapsed);
+    paint(fraction);
+    onProgress(fraction);
+    if(elapsed>=1){finish(true);return;}
     frame=requestAnimationFrame(tick);
   };
   frame=requestAnimationFrame(tick);
-  return {promise,cancel:finish};
+  return {promise,cancel:()=>finish(false)};
 }
