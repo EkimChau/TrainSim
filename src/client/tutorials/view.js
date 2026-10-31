@@ -3,6 +3,9 @@ import {LESSONS,LESSON_COUNTS,lessonById,lessonIndex} from './lessons.js';
 import {createLessonState,stepLesson,lessonSnapshot} from './engine.js';
 import {flowDiagram,stateDiagram,speedLine,figureDiagram} from './diagrams.js';
 import {DIFFICULTIES,COURSE_META,COURSE_FIGURES} from './curriculum.js';
+import {topicPage,topicPicker} from './topic-view.js';
+import {topicById,TOPICS,suggestedTopic,topicSimulation,buildTopicScene} from './topics.js';
+import {animateTrainTravel} from './topic-diagram.js';
 
 const text=(tag,value,className)=>el(tag,className?{class:className}:{},String(value));
 const button=(label,attrs={})=>el('button',{type:'button',...attrs},label);
@@ -78,7 +81,7 @@ function tierSelector(tier){
 function sectionHeader(lesson,tier){
   return el('section',{class:'paper-hero'},
     el('div',{class:'paper-hero-main'},
-      el('div',{class:'paper-title-row'},lessonDropdown(lesson),
+      el('div',{class:'paper-title-row'},lessonDropdown(lesson),topicPicker(),
         text('h1',`— ${lesson.title}`,'paper-title'),
         el('div',{class:'paper-arrows'},
           button('‹',{class:'paper-arrow','data-action':'prev',title:'Previous lesson','aria-label':'Previous lesson'}),
@@ -182,6 +185,8 @@ export class TutorialsView{
     this.host=host;
     this.state=createLessonState('ma');
     this.tier='simple';this.figureId='';
+    this.topicId='';this.topicComponent='';this.topicStep=0;
+    this.topicPlaying=false;this.topicReplayToken=0;
     this.replayToken=0;
     this.notice='Click a control to inspect how the result changes.';
     this.noticeTone='ink';
@@ -201,6 +206,9 @@ export class TutorialsView{
     });
     this.host.addEventListener('keydown',event=>{
       if(event.key==='Escape')this.menu(false);
+      if((event.key==='Enter'||event.key===' ')&&event.target.closest('[data-component]')){
+        event.preventDefault();this.click(event);
+      }
     });
     document.addEventListener('click',event=>{
       if(!this.host.contains(event.target))this.menu(false);
@@ -215,6 +223,11 @@ export class TutorialsView{
     const selected=lessonById(this.state.lessonId);
     const fig=params.get('figure');
     if(fig&&selected.sourceFigures?.some(f=>f.id===fig))this.figureId=fig;
+    const topic=params.get('topic');
+    this.topicId=topic&&TOPICS.some(t=>t.id===topic)?topic:'';
+    const component=params.get('component');
+    if(this.topicId&&component)this.topicComponent=component;
+    if(!this.topicId){this.topicPlaying=false;this.topicReplayToken++;}
     this.render();
   }
   filterLessons(raw){
@@ -242,6 +255,8 @@ export class TutorialsView{
   }
   selectLesson(id,updateHash=true,trigger=""){
     this.replayToken++;
+    this.topicReplayToken++;this.topicPlaying=false;this.topicStep=0;
+    this.topicId='';this.topicComponent='';
     const lesson=lessonById(id);
     this.state=createLessonState(lesson.id);
     this.figureId=lesson.sourceFigures?.[0]?.id??'';
@@ -254,6 +269,7 @@ export class TutorialsView{
   syncHash(){
     const parts=new URLSearchParams({lesson:this.state.lessonId,tier:this.tier});
     if(this.figureId)parts.set('figure',this.figureId);
+    if(this.topicId){parts.set('topic',this.topicId);if(this.topicComponent)parts.set('component',this.topicComponent);}
     location.hash=`#/tutorials?${parts.toString()}`;
   }
   move(offset){
@@ -286,10 +302,82 @@ export class TutorialsView{
       this.noticeTone=matches?'ok':'danger';this.render();
     }
   }
+  openTopic(id){
+    this.replayToken++;this.topicReplayToken++;this.topicPlaying=false;this.topicStep=0;
+    this.topicId=topicById(id).id;this.topicComponent='';
+    this.notice='Explore '+topicById(id).title;
+    this.render();this.syncHash();this.host.scrollTop=0;
+  }
+  backToLesson(){
+    this.topicReplayToken++;this.topicPlaying=false;this.topicStep=0;
+    this.topicId='';this.topicComponent='';
+    this.render();this.syncHash();this.host.scrollTop=0;
+  }
+  runTopicStep(){
+    const lesson=lessonById(this.state.lessonId),scenario=topicSimulation(lesson);
+    if(!scenario)return;
+    if(this.topicStep>=scenario.steps.length){
+      this.state=createLessonState(lesson.id);this.topicStep=0;
+    }
+    const before=buildTopicScene(lesson,this.state,lessonSnapshot(this.state),this.topicId).front;
+    const step=scenario.steps[this.topicStep];
+    const command=step.burst?{type:'burst',events:step.burst}:
+      step.set?{type:'set',values:step.set}:{type:step.action};
+    this.state=stepLesson(this.state,command);
+    this.topicStep++;
+    this.render();
+    animateTrainTravel(this.host,before,
+      buildTopicScene(lesson,this.state,lessonSnapshot(this.state),this.topicId).front,
+      buildTopicScene(lesson,this.state,lessonSnapshot(this.state),this.topicId).layout.max);
+  }
+  async simulateTopicLoop(){
+    if(this.topicPlaying){
+      this.topicPlaying=false;this.topicReplayToken++;this.render();return;
+    }
+    const lesson=lessonById(this.state.lessonId),scenario=topicSimulation(lesson);
+    if(!scenario)return;
+    this.replayToken++;this.topicPlaying=true;
+    const ticket=++this.topicReplayToken;
+    this.state=createLessonState(lesson.id);this.topicStep=0;this.render();
+    while(this.topicPlaying&&ticket===this.topicReplayToken&&this.topicId&&document.body.classList.contains('tutorial-active')){
+      for(let index=0;index<scenario.steps.length;index++){
+        await new Promise(resolve=>setTimeout(resolve,780));
+        if(!this.topicPlaying||ticket!==this.topicReplayToken||!this.topicId||
+          !document.body.classList.contains('tutorial-active'))break;
+        try{this.runTopicStep();}
+        catch(error){
+          this.topicPlaying=false;this.notice='Topic replay stopped: '+error.message;
+          this.render();return;
+        }
+      }
+      await new Promise(resolve=>setTimeout(resolve,1100));
+      if(!this.topicPlaying||ticket!==this.topicReplayToken||!this.topicId||
+        !document.body.classList.contains('tutorial-active'))break;
+      this.state=createLessonState(lesson.id);this.topicStep=0;this.render();
+    }
+    if(ticket===this.topicReplayToken){this.topicPlaying=false;this.render();}
+  }
   click(event){
+    const component=event.target.closest('[data-component]');
+    if(component&&this.topicId&&this.host.contains(component)){
+      this.topicComponent=component.dataset.component;
+      this.render();this.syncHash();return;
+    }
     const target=event.target.closest('button');
     if(!target||!this.host.contains(target))return;
     const {action,lesson,command,scenario}=target.dataset;
+    if(target.dataset.openTopic){this.openTopic(target.dataset.openTopic);return;}
+    if(action==='back-lesson'){this.backToLesson();return;}
+    if(action==='topic-simulate'){this.simulateTopicLoop();return;}
+    if(action==='topic-step'){
+      this.topicReplayToken++;this.topicPlaying=false;
+      try{this.runTopicStep();}catch(error){this.setNotice('Topic step blocked: '+error.message,'danger');}
+      return;
+    }
+    if(action==='topic-reset'){
+      this.topicReplayToken++;this.topicPlaying=false;this.topicStep=0;
+      this.state=createLessonState(this.state.lessonId);this.render();return;
+    }
     if(action==='toggle-menu'){
       const isOpen=this.host.querySelector('.paper-lesson-trigger')?.getAttribute('aria-expanded')==='true';
       this.menu(!isOpen);
@@ -349,6 +437,12 @@ export class TutorialsView{
   render(){
     const lesson=lessonById(this.state.lessonId);
     const snapshot=lessonSnapshot(this.state);
+    if(this.topicId){
+      const {node}=topicPage(lesson,this.state,snapshot,this.topicId,this.topicComponent,
+        this.topicPlaying,this.topicStep);
+      this.host.replaceChildren(node);
+      return;
+    }
     const outer=el('div',{class:'paper-book'},sectionHeader(lesson,this.tier),
       el('div',{class:'paper-main'},
         el('div',{class:'paper-column paper-controls'},inputsPanel(lesson,this.state,this.tier),iOTable(lesson)),
