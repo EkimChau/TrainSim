@@ -413,7 +413,7 @@ export class TutorialsView{
     }
     if(scenario){this.replay(scenario);return;}
     if(command){
-      this.replayToken++;
+      this.replayToken++;this.topicReplayToken++;this.topicPlaying=false;
       this.state=stepLesson(this.state,{type:command});
       this.notice=this.state.feedback?.message??`${command} pressed`;
       this.noticeTone=command==='advance'?'ok':command==='occupy'?'danger':this.state.feedback?.tone==='danger'?'danger':'blue';
