@@ -68,8 +68,10 @@ const NORMAL_STEPS=[
   {id:'report',kind:'position-report',label:'OBU sends its estimated position to RBC via radio'},
   {id:'authority',kind:'ma-update',label:'Illustrative RBC authority event after proved route'},
   {id:'turnout',kind:'move',train:'A',to:652,label:'Train A traverses the locked turnout onto diverging route'},
+  {id:'report-turnout',kind:'position-report',label:'OBU refreshes RBC position after turnout at 652 m'},
   {id:'neighbour',kind:'move',train:'B',to:700,label:'Neighbouring train moves; TC3 remains occupied'},
   {id:'marker',kind:'move',train:'A',to:807,label:'Train A passes BG-2 at the level boundary'},
+  {id:'report-boundary',kind:'position-report',label:'OBU refreshes RBC position after BG-2 at 807 m'},
   {id:'level',kind:'level-transition',to:'L2',label:'Show L0 to L2 transition context (not normative logic)'},
   {id:'clear',kind:'move',train:'A',to:972,label:'Train A clears TC2; release can be considered'},
   {id:'release',kind:'route-release',label:'IXL teaching route releases once selected route is clear'}
