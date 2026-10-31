@@ -24,8 +24,10 @@ const block=(parent,x,y,w,h,fill,rx=5)=>
   add(parent,s('rect',{x,y,width:w,height:h,fill,rx,stroke:COLORS.ink,'stroke-width':2}));
 function part(root,id,scene,selected,tag){
   const active=scene.parts.includes(id),selectedNow=id===selected;
+  const live=scene.highlightedParts?.includes(id);
   const g=s('g',{'data-component':id,role:'button',tabindex:0,
-    'aria-label':tag||id,class:'topic-svg-part'+(active?' topic-svg-relevant':' topic-svg-context')+(selectedNow?' topic-svg-selected':'')});
+    'aria-label':tag||id,class:'topic-svg-part'+(active?' topic-svg-relevant':' topic-svg-context')+
+      (selectedNow?' topic-svg-selected':'')+(live?' topic-svg-live':'')});
   root.append(g);return g;
 }
 
@@ -78,6 +80,16 @@ export function railwayDiagram(scene,selected=''){
     path(lrbg,'M'+lx+' 267 L'+lx+' 247',COLORS.blue,2,{'stroke-dasharray':'4 3'});
     add(lrbg,s('path',{d:'M'+lx+' 236 l-7 7 7 7 7-7 z',fill:'#f7d573',stroke:COLORS.ink,'stroke-width':1.5}));
     txt(lrbg,lx,230,'LRBG','topic-svg-tiny','middle');
+  }
+  // Confidence interval is projected from the existing authored evaluator,
+  // rather than redoing the safety-front calculation in the visual renderer.
+  if(scene.confidence){
+    const band=part(svg,'lrbg',scene,selected,'Safe-front interval computed by the lesson');
+    const left=px(scene.confidence.min),right=px(scene.confidence.max);
+    line(band,left,139,right,139,COLORS.blue,10,{opacity:.4});
+    line(band,left,131,left,147,COLORS.blue,2);
+    line(band,right,131,right,147,COLORS.blue,2);
+    txt(band,(left+right)/2,124,'SAFE FRONT '+scene.confidence.min+'–'+scene.confidence.max+' m','topic-svg-tiny','middle');
   }
   // Interlocking and RBC are separate boxes; radio is a bearer rather than a
   // physical RBC located inside the mast.
