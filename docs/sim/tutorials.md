@@ -143,3 +143,67 @@ There are now **15 authored teaching labs** (three original featured labs plus t
 The twelve new models have dedicated input guards, source-specific outputs and processing effects, and two deterministic fixtures each for **Simple**, **Medium** and **Busy**, including multi-source fault bursts and explicit recovery. All twelve are educational, not complete SUBSET-026 conformance implementations. See [authored wave 01](authored-learning-wave.md) for the detailed clause-by-clause fit/gap table, source boundaries, test cases and recommended upgrade path.
 
 The total registry is **320 entries**, but only **15** are individually authored. Displaying a source-indexed scaffold does not mean a normative ETCS algorithm has been implemented.
+
+
+## Railway Topics — reusable train / trackside legend
+
+The **Topics ▾** picker sits beside Lesson selection on the Tutorials screen.
+Each title opens a dedicated topic page, with a **‹ Back to Lesson** button in
+the top-left. The lesson number and reducer state are preserved when navigating
+back. Deep links use the hash route #/tutorials?lesson=ma&topic=overview and
+optional &component=balise; the default lesson screen remains unchanged.
+
+This is a *perspective* on the existing lessons, **not** another signalling
+state machine. Eight topic perspectives cover railway anatomy, balise groups,
+LRBG and positioning, safe radio/RBC, Movement Authority (EOA/LOA), external
+interlocking, driver display, and level/mode concepts.
+
+### Data path and source responsibility
+
+- **topics.js** holds visual component catalogue, SRS clause anchors, topic
+  membership and reusable synthetic railway layout. It reads existing lesson
+  sources, lesson source figures, COURSE_META and the named-export metadata
+  record in docs/sigreqs/sim-run/level-transitions/. That record is marked
+  draft and does not establish implemented requirements.
+- **buildTopicScene(lesson, state, lessonSnapshot(state), topicId)** is the
+  single pure projection used by the topic diagram and mock DMI. Lesson inputs
+  control known train-front position, authority end and target speed. An
+  expectedAt input repositions the second balise fixture for balise-link lessons.
+  No rendered SVG element stores a separate source-of-truth measurement.
+- **topic-diagram.js** renders a DOM/SVG scene with a stable 0–1100-metre
+  teaching axis, nominal 130-metre train body and three example balise groups.
+  The same landmarks recur in every topic; geometry expands only when a lesson
+  input exceeds the normal range. Clicking or keyboard selecting a component
+  opens the same definition as selecting its legend.
+- **topic-view.js** draws the legend, source/definition inspector, source list
+  and train driver **DMI teaching mock**. DMI consumes current lesson inputs
+  and state projection. Unknown actual speed, permitted speed, operating mode
+  or authority end is shown as *not supplied* rather than fabricated.
+- **Simulate lesson loop**, **Step**, and **Reset** reuse the existing lesson
+  createLessonState / stepLesson / lessonSnapshot functions and the first
+  available normal scenario. First MA lesson demonstrates issue → move → move,
+  including passing the second balise group. Simulation repeats while playing,
+  stops when navigating away, and honours reduced-motion preferences. Train
+  movement is interpolated between state positions; no new signalling rules.
+
+**Interpretation guardrails:** blue dashed MA is a proposal; solid green MA is
+an issued teaching-state range. The shaded range begins at the displayed train
+front, not a claim about a formal MA section start. A red marker indicates EOA
+for zero end target speed, LOA otherwise. DMI layout, radio mast, signals,
+points, train appearance, timings and repeated balise positions are fictitious
+explanatory graphics. The highlighted preceding balise is an educational
+shorthand, not a normative LRBG-selection algorithm. Interlocking rules are
+external to SUBSET-026 Chapter 2 and remain synthetic.
+
+### Extending Topics without reinventing simulation
+
+A new reviewed JS requirement record or lesson concept can add a definition
+and source references to RAIL_COMPONENTS; topic membership picks visibility.
+Physical geometry changes belong in DEFAULT_RAIL_LAYOUT or explicit
+lesson-scoped scene inputs, **not** bespoke SVG branches. New behaviour
+belongs in an appropriate lesson engine with independent tests, never a Topics
+render function. For official-spec fidelity, obtain technical review and add
+traceable clause-to-rule evidence before claiming operational simulation.
+
+Validation: node --test tests/topics.test.js tests/tutorials.test.js
+tests/authored.test.js tests/esig-curriculum.test.js; npm run build.
