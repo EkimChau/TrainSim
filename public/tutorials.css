@@ -380,3 +380,9 @@
   #view-tutorials .topic-svg-part{transition:none}
   #view-tutorials .topic-balise-passing rect{animation:none}
 }
+
+/* Animate only components used by the current lesson event. */
+#view-tutorials .topic-svg-live{opacity:1;filter:drop-shadow(0 0 6px #e8b841);animation:topic-live 1.15s ease-in-out infinite alternate}
+#view-tutorials .topic-legend-item.active-event{border-color:#c69631;box-shadow:inset 3px 0 #efcc62}
+@keyframes topic-live{from{filter:drop-shadow(0 0 2px #f1d88c)}to{filter:drop-shadow(0 0 9px #e5ac30)}}
+@media(prefers-reduced-motion:reduce){#view-tutorials .topic-svg-live{animation:none}}
