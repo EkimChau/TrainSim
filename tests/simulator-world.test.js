@@ -75,6 +75,9 @@ test('a train follows point geometry, occupies TC2, crosses BG-2 and releases on
   assert.equal(mid.trains[0].position,652);
   assert.deepEqual(occupancy(mid).TC2,['A']);
   assert.equal(mid.trains[1].track,'upper');
+  const incoming=advance(start(),9);
+  assert.equal(incoming.trains[1].position,700);
+  assert.equal(incoming.trains[1].direction,-1);
   const p=trackPoint('diverge',465);
   assert.ok(p.y>210&&p.y<300);
   const entered=advance(start(),12);
@@ -108,6 +111,8 @@ test('competing train occupies TC2 and refuses proof until it clears',()=>{
   assert.equal(refused.route.accepted,false);
   const clear=advance(refused);
   assert.deepEqual(occupancy(clear).TC2,[]);
+  assert.equal(clear.trains[1].position,1000);
+  assert.equal(clear.trains[1].direction,1);
   assert.equal(clear.route.accepted,false); // No auto-accept when a detector clears
   const proved=advance(clear);
   assert.equal(proved.route.accepted,true);
