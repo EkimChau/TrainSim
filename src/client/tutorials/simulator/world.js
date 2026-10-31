@@ -123,11 +123,16 @@ export function trackPoint(track,metres){
   }
   return {x,y:210,angle:0};
 }
+export const trainRear=train=>train.position-train.direction*TRACK_WORLD.trainLength;
 function sectionOccupied(section,train){
-  const rear=train.position-TRACK_WORLD.trainLength;
-  if(train.position<section.from||rear>section.to)return false;
+  const rear=trainRear(train);
+  const trainMin=Math.min(train.position,rear),trainMax=Math.max(train.position,rear);
+  if(trainMax<section.from||trainMin>section.to)return false;
   if(train.track===section.track)return true;
-  if(train.track==='diverge'&&section.track==='main')return rear<=section.to;
+  // The diverging train still occupies the approach until its trailing end
+  // clears the turnout; no parallel-track occupancy is inferred elsewhere.
+  if(train.track==='diverge'&&section.track==='main')
+    return train.direction>0&&rear<=section.to;
   return false;
 }
 export function occupancy(world){
@@ -297,6 +302,7 @@ export function componentReadings(world,id){
     const t=id==='train-A'?first:other;
     return {status:'fixture',readings:[['Position',t.position+' m'],['Speed',t.speed+' km/h'],
       ['Route',t.track],['Direction',t.direction<0?'left':'right'],
+      ['Rear position',trainRear(t)+' m'],
       ['ETCS level',t.level],['LRBG',display(t.lrbg)]]};
   }
   if(section)return {status:occ[id].length?'occupied':'clear',
