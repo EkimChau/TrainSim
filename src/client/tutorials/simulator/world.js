@@ -152,8 +152,9 @@ export function createSimulatorWorld(lesson,scenarioId='normal'){
   const world={
     lessonId:lesson.id,scenarioId:scenario.id,step:0,tick:0,lessonState,
     trains:[
-      {id:'A',position:150,track:'diverge',speed:38,level:scenario.initial.level||'L0',mode:'not modelled'},
-      {id:'B',position:860,track:scenario.initial.otherTrack||'upper',speed:22,level:'not modelled',mode:'not modelled'}
+      {id:'A',position:150,track:'diverge',direction:1,speed:38,level:scenario.initial.level||'L0',mode:'not modelled'},
+      {id:'B',position:scenario.initial.otherPosition??860,track:scenario.initial.otherTrack||'upper',
+        direction:scenario.initial.otherTrack==='diverge'?1:-1,speed:22,level:'not modelled',mode:'not modelled'}
     ],
     point:{position:'normal',locked:false,detected:lessonState.inputs.pointDetected},
     route:{status:'not requested',accepted:false,locked:false,reason:'Awaiting an IXL request'},
@@ -221,7 +222,7 @@ export function simulateNextStep(previous,lesson){
       if(moving.id==='A'&&command.to>384&&!accepted()){
         blocked('Train movement beyond fixture approach refused: route not locked');break;
       }
-      const movingForward=moving.id==='B'?command.to<=moving.position:command.to>=moving.position;
+      const movingForward=moving.direction<0?command.to<=moving.position:command.to>=moving.position;
       if(!movingForward){blocked('Unexpected movement direction in this scenario');break;}
       const old=moving.position;
       moving.position=command.to;
@@ -286,7 +287,8 @@ export function componentReadings(world,id){
   if(id==='train-A'||id==='train-B'){
     const t=id==='train-A'?first:other;
     return {status:'fixture',readings:[['Position',t.position+' m'],['Speed',t.speed+' km/h'],
-      ['Route',t.track],['ETCS level',t.level],['LRBG',display(t.lrbg)]]};
+      ['Route',t.track],['Direction',t.direction<0?'left':'right'],
+      ['ETCS level',t.level],['LRBG',display(t.lrbg)]]};
   }
   if(section)return {status:occ[id].length?'occupied':'clear',
     readings:[['Track',section.track],['Section',section.from+'–'+section.to+' m'],
