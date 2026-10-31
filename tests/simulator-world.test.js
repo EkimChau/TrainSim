@@ -52,6 +52,23 @@ test('balise passage updates the OBU reference, not the RBC before a report',()=
   assert.match(componentReadings(reported,'radio').readings[2][1],/none from mast/);
   assert.equal(advance(reported,1).ma.status,'fixture issued');
 });
+test('RBC retains a historical report until the onboard train explicitly sends another',()=>{
+  const first=advance(start(),6);
+  assert.equal(first.rbc.report.front,384);
+  const moved=advance(first,1);
+  assert.equal(moved.trains[0].position,652);
+  assert.equal(moved.rbc.report.front,384);
+  const refresh=advance(moved,1);
+  assert.equal(refresh.rbc.report.front,652);
+  assert.equal(refresh.rbc.report.lrbg,'BG-1');
+  const nearBoundary=advance(refresh,2);
+  assert.equal(nearBoundary.trains[0].position,807);
+  assert.equal(nearBoundary.rbc.report.front,652);
+  const second=advance(nearBoundary,1);
+  assert.equal(second.rbc.report.front,807);
+  assert.equal(second.rbc.report.lrbg,'BG-2');
+});
+
 test('a train follows point geometry, occupies TC2, crosses BG-2 and releases only after clearing',()=>{
   const mid=advance(start(),7);
   assert.equal(mid.trains[0].track,'diverge');
@@ -60,7 +77,7 @@ test('a train follows point geometry, occupies TC2, crosses BG-2 and releases on
   assert.equal(mid.trains[1].track,'upper');
   const p=trackPoint('diverge',465);
   assert.ok(p.y>210&&p.y<300);
-  const entered=advance(start(),10);
+  const entered=advance(start(),12);
   assert.equal(entered.balises['BG-2'].count,1);
   assert.equal(entered.trains[0].level,'L2');
   const end=finished(start());
