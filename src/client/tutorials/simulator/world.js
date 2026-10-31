@@ -63,17 +63,17 @@ export const SIMULATOR_COMPONENTS=Object.freeze([
 const NORMAL_STEPS=[
   {id:'proof',kind:'route-request',label:'IXL checks route, flank and conflict evidence'},
   {id:'lock',kind:'point-lock',label:'Point P1 moves reverse and route locks'},
-  {id:'approach',kind:'move',train:'A',to:308,label:'Train A approaches first balise'},
-  {id:'balise',kind:'move',train:'A',to:384,label:'Antenna passes BG-1: position reference updated'},
+  {id:'approach',kind:'move',train:'A',to:308,speed:36,label:'Train A approaches first balise'},
+  {id:'balise',kind:'move',train:'A',to:384,speed:32,label:'Antenna passes BG-1: position reference updated'},
   {id:'report',kind:'position-report',label:'OBU sends its estimated position to RBC via radio'},
   {id:'authority',kind:'ma-update',label:'Illustrative RBC authority event after proved route'},
-  {id:'turnout',kind:'move',train:'A',to:652,label:'Train A traverses the locked turnout onto diverging route'},
+  {id:'turnout',kind:'move',train:'A',to:652,speed:26,label:'Train A traverses the locked turnout onto diverging route'},
   {id:'report-turnout',kind:'position-report',label:'OBU refreshes RBC position after turnout at 652 m'},
   {id:'neighbour',kind:'move',train:'B',to:700,label:'Neighbouring train moves; TC3 remains occupied'},
-  {id:'marker',kind:'move',train:'A',to:807,label:'Train A passes BG-2 at the level boundary'},
+  {id:'marker',kind:'move',train:'A',to:807,speed:18,label:'Train A passes BG-2 at the level boundary'},
   {id:'report-boundary',kind:'position-report',label:'OBU refreshes RBC position after BG-2 at 807 m'},
   {id:'level',kind:'level-transition',to:'L2',label:'Show L0 to L2 transition context (not normative logic)'},
-  {id:'clear',kind:'move',train:'A',to:972,label:'Train A clears TC2; release can be considered'},
+  {id:'clear',kind:'move',train:'A',to:972,speed:0,label:'Train A clears TC2; release can be considered'},
   {id:'release',kind:'route-release',label:'IXL teaching route releases once selected route is clear'}
 ];
 export const SIMULATOR_SCENARIOS=Object.freeze([
@@ -226,6 +226,7 @@ export function simulateNextStep(previous,lesson){
       if(!movingForward){blocked('Unexpected movement direction in this scenario');break;}
       const old=moving.position;
       moving.position=command.to;
+      if(Number.isFinite(command.speed))moving.speed=command.speed;
       for(const bg of balisesPassed(moving,old,moving.position)){
         const mark=world.balises[bg.id];
         mark.count++;mark.lastTick=world.tick+1;
@@ -242,6 +243,7 @@ export function simulateNextStep(previous,lesson){
       if(!accepted()||!train('A').lrbg){blocked('Position report needs accepted route and balise reference');break;}
       world.rbc.report={
         train:'A',front:train('A').position,lrbg:train('A').lrbg,
+        speedKmh:train('A').speed,
         source:'OBU estimated position (balise reference + odometry)'
       };
       world.rbc.lastUpdate=world.tick+1;
@@ -311,7 +313,9 @@ export function componentReadings(world,id){
   if(id==='RBC')return {status:world.rbc.exchange,readings:[
     ['Session',world.rbc.session],['Reported front',world.rbc.report?world.rbc.report.front+' m':'not received'],
     ['Reference BG',world.rbc.report?.lrbg||'not received'],
-    ['Report source','OBU via radio (not mast)'],['MA',world.ma.status],
+    ['Report source','OBU via radio (not mast)'],
+    ['Reported speed',world.rbc.report?.speedKmh===undefined?'not received':world.rbc.report.speedKmh+' km/h'],
+    ['MA',world.ma.status],
     ['Last update','tick '+display(world.rbc.lastUpdate)]]};
   if(id==='radio')return {status:world.radio.state,readings:[
     ['Link',world.radio.state],['Purpose',world.radio.source],['Location measurements','none from mast']]};
