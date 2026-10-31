@@ -226,7 +226,7 @@ export class TutorialsView{
     const topic=params.get('topic');
     this.topicId=topic&&TOPICS.some(t=>t.id===topic)?topic:'';
     const component=params.get('component');
-    if(this.topicId&&component)this.topicComponent=component;
+    this.topicComponent=this.topicId?(component||''):'';
     if(!this.topicId){this.topicPlaying=false;this.topicReplayToken++;}
     this.render();
   }
