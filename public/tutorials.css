@@ -535,3 +535,29 @@
 @media(prefers-reduced-motion:reduce){
   #view-tutorials .sim-interactive{transition:none}
 }
+
+
+/* Final simulator typography and playback controls. Numeric status and alarms
+   remain typed ink, never handwritten. */
+#view-tutorials .sim-controls .sim-rate-button.current{
+  background:#cfe4fa;border-color:#286eaa;
+  box-shadow:inset 0 0 0 1px #286eaa;color:#123c63;
+}
+#view-tutorials .sim-controls .sim-rate-button:focus-visible,
+#view-tutorials .sim-controls .sim-primary:focus-visible,
+#view-tutorials .sim-component-button:focus-visible{
+  outline:3px solid #bc8a2f;outline-offset:2px;
+}
+#view-tutorials :is(.paper-reason,.paper-log-message,.paper-interaction-feedback,
+  .paper-snapshot-status,.topic-result,.sim-event-entries,.sim-component-status){
+  font-family:"Courier New",Courier,monospace!important;
+  font-style:normal!important;
+}
+#view-tutorials .paper-interaction-feedback[data-tone=danger]{
+  color:#973238!important;background:#fff0ec;border-left-color:#b64e49;
+}
+#view-tutorials :is(.paper-subhead,.paper-menu-module-title,.paper-card h2,
+  .sim-book h2,.sim-book h3){
+  color:#1d2935!important;font-family:"Courier New",Courier,monospace!important;
+  font-style:normal!important;
+}
