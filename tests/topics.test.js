@@ -45,6 +45,8 @@ test('lesson 01 schematic derives MA limits, distinct speed values and LRBG from
   assert.equal(result.front,500);
   assert.equal(result.authorityIssued,true);
   assert.equal(result.currentBg.id,'BG102');
+  assert.ok(result.highlightedParts.includes('balise'));
+  assert.ok(result.highlightedParts.includes('obu'));
   assert.equal(result.lrbg.id,'BG102');
   assert.equal(result.maEnd,900);
 });
@@ -60,6 +62,14 @@ test('balise geometry is a reusable fixture and can be moved by a lesson technic
   assert.equal(updated.layout.baliseGroups[1].metres,610);
   assert.deepEqual(original.layout.baliseGroups.map(x=>x.id),updated.layout.baliseGroups.map(x=>x.id));
   assert.equal(original.layout.source,DEFAULT_RAIL_LAYOUT.source);
+});
+
+test('position topic displays the authored interval without re-evaluating its formula',()=>{
+  const lesson=LESSONS.find(l=>l.authoredRule==='confidence');
+  const state=createLessonState(lesson.id);
+  const position=scene(lesson,state,'position');
+  assert.deepEqual(position.confidence,{min:390,max:412});
+  assert.ok(position.parts.includes('lrbg'));
 });
 
 test('same lesson projection is reused by any topic rather than recomputed',()=>{
