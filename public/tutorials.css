@@ -386,3 +386,178 @@
 #view-tutorials .topic-legend-item.active-event{border-color:#c69631;box-shadow:inset 3px 0 #efcc62}
 @keyframes topic-live{from{filter:drop-shadow(0 0 2px #f1d88c)}to{filter:drop-shadow(0 0 9px #e5ac30)}}
 @media(prefers-reduced-motion:reduce){#view-tutorials .topic-svg-live{animation:none}}
+
+
+/* Simulator v1 design guide: consistent typewriter headings / courier alerts.
+ * Hand-drawn appearance belongs to paper shells and vector callout outlines.
+ */
+#view-tutorials :is(h2,h3,.paper-subhead,.paper-menu-module-title,.paper-graph-grid h3){
+  font-family:"Courier New",Courier,monospace!important;font-weight:800!important;color:#1c2c3d!important;
+}
+#view-tutorials :is(.paper-interaction-feedback,.paper-reason,.paper-snapshot-status,.paper-log-message,.topic-result){
+  font-family:"Courier New",Courier,monospace;font-weight:700;
+}
+#view-tutorials :is(.paper-interaction-feedback[data-tone=danger],.paper-log-danger,.paper-notice-danger){
+  color:#9d3438!important;
+}
+#view-tutorials .paper-sim-entry{
+  background:#e1ecf5;color:#1b4d74;border:2px solid #263a4d;border-radius:6px;
+  padding:9px 12px;box-shadow:2px 3px 0 #2a3848;font:800 13px "Courier New",monospace;cursor:pointer;
+}
+#view-tutorials .sim-book{
+  --sim-paper:#fff9eb;--sim-ink:#263648;--sim-border:#536272;
+  --sim-navy:#1d2d40;--sim-blue:#2878bb;--sim-green:#318665;
+  --sim-red:#b84a4b;--sim-amber:#c98c2d;
+  max-width:1870px;margin:0 auto;padding:18px 24px 50px 59px;color:var(--sim-ink);
+  font:14px/1.45 "Trebuchet MS",system-ui,sans-serif;
+}
+#view-tutorials .sim-book :is(h1,h2,h3){
+  font-family:"Courier New",Courier,monospace!important;color:#1e2e40!important;font-weight:800;
+}
+#view-tutorials .sim-book h1{font-size:clamp(23px,2.5vw,35px);line-height:1.15;margin:5px 0 9px}
+#view-tutorials .sim-book h2{font-size:16px;margin-bottom:10px}
+#view-tutorials .sim-book h3{font-size:14px}
+#view-tutorials .sim-small{color:#606f7c;font-size:11px;line-height:1.5}
+#view-tutorials .sim-eyebrow{font-family:"Courier New",monospace;font-weight:800;
+  color:#51647b;font-size:11px;letter-spacing:.06em}
+#view-tutorials .sim-nav{display:flex;align-items:center;gap:16px;margin-bottom:13px}
+#view-tutorials .sim-back{border:2px solid #293d53;background:#fffdf4;box-shadow:2px 3px 0 #354253;
+  padding:7px 11px;border-radius:5px;cursor:pointer;font:800 13px "Courier New",monospace}
+#view-tutorials .sim-intro{max-width:1000px;font-size:14px}
+#view-tutorials .sim-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  margin:14px 0;background:#fff4dc;padding:12px;border:2px solid #526373;border-radius:7px;
+  box-shadow:3px 4px 0 #53627336}
+#view-tutorials .sim-controls button{padding:8px 10px;border:1.5px solid #405568;border-radius:5px;
+  font-family:"Courier New",monospace;font-size:12px;background:#fffef9;cursor:pointer;font-weight:900}
+#view-tutorials .sim-controls button:disabled{opacity:.5;cursor:default}
+#view-tutorials .sim-controls .sim-primary{background:#2c845e;color:white;border-color:#166147}
+#view-tutorials .sim-controls .sim-primary[aria-pressed=true]{background:#b54e43}
+#view-tutorials .sim-controls .sim-scenario-button{font-size:11px;border-color:#a0adb8;background:#f7f4eb}
+#view-tutorials .sim-controls .sim-scenario-button.current{background:#d5e6f6;border-color:#22699a}
+#view-tutorials .sim-step-counter{padding:0 8px;font:800 11px "Courier New",monospace;color:#4e5b6a}
+#view-tutorials :is(.sim-world-card,.sim-dmi-box,.sim-timeline,.sim-component-list,
+  .sim-selected-instrument,.sim-event-log,.sim-lesson-proof,.sim-sources){
+  border:2px solid #45576b;background:#fffdf5;border-radius:7px;padding:14px;
+  box-shadow:3px 4px 0 #42566a26;min-width:0;
+}
+#view-tutorials .sim-world-card{padding:15px}
+#view-tutorials .sim-world-viewport{overflow-x:auto;border:1.5px solid #afbab9;background:#fff8ed;
+  border-radius:5px;min-height:340px}
+#view-tutorials .sim-world-svg{width:100%;min-width:750px;height:auto;display:block}
+#view-tutorials .sim-svg-small{fill:#375268;font:700 11px "Courier New",monospace}
+#view-tutorials .sim-svg-label{fill:#20364c;font:900 13px "Courier New",monospace}
+#view-tutorials .sim-svg-value{fill:#142d43;font:800 12px "Courier New",monospace}
+#view-tutorials .sim-interactive{cursor:pointer;transition:filter .2s ease}
+#view-tutorials .sim-interactive:hover,#view-tutorials .sim-interactive:focus-visible,
+#view-tutorials .sim-interactive.sim-active{filter:drop-shadow(0 0 4px #efa83b)}
+#view-tutorials .sim-interactive:focus-visible{outline:3px solid #276eb0}
+#view-tutorials .sim-grid-primary{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(285px,.84fr);gap:14px;margin-top:15px}
+#view-tutorials .sim-instrument-column,#view-tutorials .sim-inspector-column{min-width:0;display:grid;align-content:start;gap:14px}
+#view-tutorials .sim-grid-secondary{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;margin-top:14px}
+#view-tutorials .sim-dmi-box{background:#f9f5e9}
+#view-tutorials .sim-dmi-heading{display:flex;gap:12px;justify-content:space-between;
+  font-family:"Courier New",monospace;font-size:12px;margin:0 0 8px;font-weight:900}
+#view-tutorials .sim-dmi-heading span{font-size:10px;color:#a0443e;text-align:right}
+#view-tutorials .sim-dmi-content{display:grid;grid-template-columns:minmax(170px,220px) minmax(190px,1fr) minmax(95px,.45fr);
+  gap:10px;padding:15px;border:6px solid #1c2a36;outline:3px solid #738396;border-radius:10px;
+  background:linear-gradient(125deg,#111d29,#263d54);color:#edf5ff}
+#view-tutorials .sim-speed-panel{text-align:center;min-width:0}
+#view-tutorials .sim-speed-svg{width:100%;max-height:181px}
+#view-tutorials .sim-speed-panel small{font:700 10px "Courier New",monospace;color:#b7cde4}
+#view-tutorials .sim-dmi-readings,#view-tutorials .sim-proof-data{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;margin:0}
+#view-tutorials .sim-dmi-readings .sim-meter{background:#20344a;padding:8px;min-width:0}
+#view-tutorials .sim-meter dt{font:700 10px "Courier New",monospace;color:#8ba4ba;
+  overflow-wrap:anywhere;margin-bottom:4px}
+#view-tutorials .sim-meter dd{font:800 12px "Courier New",monospace;margin:0;overflow-wrap:anywhere}
+#view-tutorials .sim-dmi-readings .sim-meter dt{color:#b8cddd}
+#view-tutorials .sim-dmi-readings .sim-meter dd{color:#f0f6fa}
+#view-tutorials .sim-ma-column{display:grid;align-content:start;gap:8px;
+  font:800 11px "Courier New",monospace;color:#dae9f4}
+#view-tutorials .sim-ma-column strong{font-size:12px;color:#b4e0cb;overflow-wrap:anywhere}
+#view-tutorials .sim-ma-scale{height:142px;min-width:36px;max-width:63px;
+  border:1px solid #8495a5;border-radius:5px;background:linear-gradient(to bottom,#637c91,#32485d);
+  display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:8px 0}
+#view-tutorials .sim-ma-scale[data-issued=true]{background:linear-gradient(to bottom,#458962,#60b88d 75%,#304c5f 76%)}
+#view-tutorials .sim-dmi-footnote{font-size:10px;color:#5f6b73;margin-bottom:0}
+#view-tutorials .sim-component-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#view-tutorials .sim-component-button{min-height:61px;border:1px solid #99a8b4;
+  background:#eef3f3;border-radius:5px;cursor:pointer;text-align:left;padding:7px;
+  font-family:"Courier New",monospace;overflow-wrap:anywhere}
+#view-tutorials .sim-component-button span{display:grid;gap:5px}
+#view-tutorials .sim-component-button strong{font-size:13px;color:#234666}
+#view-tutorials .sim-component-button small{font-size:10px}
+#view-tutorials .sim-component-button.current{background:#ffedb9;border:2px solid #bb8c2c}
+#view-tutorials .sim-component-status{background:#e0eefb;border:1px solid #aabdd1;border-radius:4px;
+  padding:6px 9px;font:800 12px "Courier New",monospace}
+#view-tutorials .sim-inspector-table{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+#view-tutorials .sim-inspector-table .sim-meter{background:#f0f4f5;padding:8px;border-radius:4px}
+#view-tutorials .sim-inspector-table .sim-meter dt{color:#647b8e}
+#view-tutorials .sim-inspector-table .sim-meter dd{color:#25394c}
+#view-tutorials .sim-timeline-steps{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;padding:0;margin:12px 0 0}
+#view-tutorials .sim-timeline-step{border:1px solid #aab6be;background:#f0f1ec;border-radius:5px;
+  min-height:97px;padding:9px;display:grid;grid-template-rows:auto 1fr auto;align-content:start;
+  gap:6px;font:800 12px "Courier New",monospace}
+#view-tutorials .sim-timeline-step.complete{background:#e0f3e7;border-color:#6bac8b}
+#view-tutorials .sim-timeline-step.next{background:#fff2c9;border:2px solid #d3a13e}
+#view-tutorials .sim-step-num{background:#426a85;color:white;border-radius:50%;
+  height:23px;width:23px;display:grid;place-items:center;font-size:12px}
+#view-tutorials .sim-timeline-step.complete .sim-step-num{background:#26774d}
+#view-tutorials .sim-timeline-step small{font:700 10px "Courier New",monospace;color:#5b6771}
+#view-tutorials .sim-event-entries{max-height:245px;overflow:auto;padding-left:24px;margin:0;
+  font:700 11px/1.6 "Courier New",monospace}
+#view-tutorials .sim-event-entries li{padding:4px 0;border-bottom:1px dashed #d9dcda}
+#view-tutorials .sim-event-entries li span:first-child{color:#55728b;margin-right:8px}
+#view-tutorials .sim-event-entries li[data-tone=blocked]{color:#9b3438}
+#view-tutorials .sim-event-entries li[data-tone=valid]{color:#276947}
+#view-tutorials .sim-proof-data{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:9px 0}
+#view-tutorials .sim-proof-data .sim-meter{background:#e8f1f7;padding:8px}
+#view-tutorials .sim-sources{margin-top:14px;font-size:12px}
+#view-tutorials .sim-sources summary{font:800 12px "Courier New",monospace;cursor:pointer}
+@media(max-width:1250px){
+  #view-tutorials .sim-grid-primary{grid-template-columns:1fr}
+  #view-tutorials .sim-inspector-column{grid-template-columns:1fr 1fr}
+}
+@media(max-width:850px){
+  #view-tutorials .sim-book{padding:13px 9px 34px 22px}
+  #view-tutorials .sim-grid-secondary,#view-tutorials .sim-inspector-column{grid-template-columns:1fr}
+  #view-tutorials .sim-timeline-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #view-tutorials .sim-dmi-content{grid-template-columns:minmax(140px,1fr) minmax(170px,1fr)}
+  #view-tutorials .sim-ma-column{grid-column:1/-1}
+  #view-tutorials .sim-ma-scale{height:68px;max-width:none}
+}
+@media(max-width:550px){
+  #view-tutorials .sim-dmi-content{grid-template-columns:1fr}
+  #view-tutorials .sim-dmi-readings{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #view-tutorials .sim-component-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(prefers-reduced-motion:reduce){
+  #view-tutorials .sim-interactive{transition:none}
+}
+
+
+/* Final simulator typography and playback controls. Numeric status and alarms
+   remain typed ink, never handwritten. */
+#view-tutorials .sim-controls .sim-rate-button.current{
+  background:#cfe4fa;border-color:#286eaa;
+  box-shadow:inset 0 0 0 1px #286eaa;color:#123c63;
+}
+#view-tutorials .sim-controls .sim-rate-button:focus-visible,
+#view-tutorials .sim-controls .sim-primary:focus-visible,
+#view-tutorials .sim-component-button:focus-visible{
+  outline:3px solid #bc8a2f;outline-offset:2px;
+}
+#view-tutorials :is(.paper-reason,.paper-log-message,.paper-interaction-feedback,
+  .paper-snapshot-status,.topic-result,.sim-event-entries,.sim-component-status){
+  font-family:"Courier New",Courier,monospace!important;
+  font-style:normal!important;
+}
+#view-tutorials .paper-interaction-feedback[data-tone=danger]{
+  color:#973238!important;background:#fff0ec;border-left-color:#b64e49;
+}
+#view-tutorials :is(.paper-subhead,.paper-menu-module-title,.paper-card h2,
+  .sim-book h2,.sim-book h3){
+  color:#1d2935!important;font-family:"Courier New",Courier,monospace!important;
+  font-style:normal!important;
+}

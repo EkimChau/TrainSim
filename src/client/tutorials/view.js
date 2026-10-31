@@ -6,6 +6,10 @@ import {DIFFICULTIES,COURSE_META,COURSE_FIGURES} from './curriculum.js';
 import {topicPage,topicPicker} from './topic-view.js';
 import {topicById,TOPICS,suggestedTopic,topicSimulation,buildTopicScene} from './topics.js';
 import {animateTrainTravel} from './topic-diagram.js';
+import {supportsSimulator,createSimulatorWorld,simulateNextStep,simScenario,hasNextSimulatorStep} from './simulator/world.js';
+import {isMovement,motionFrame} from './simulator/motion.js';
+import {animateRailWorld,refreshRailDetectors} from './simulator/vector.js';
+import {simulatorPage,refreshSimulatorReadings} from './simulator/view.js';
 
 const text=(tag,value,className)=>el(tag,className?{class:className}:{},String(value));
 const button=(label,attrs={})=>el('button',{type:'button',...attrs},label);
@@ -82,6 +86,8 @@ function sectionHeader(lesson,tier){
   return el('section',{class:'paper-hero'},
     el('div',{class:'paper-hero-main'},
       el('div',{class:'paper-title-row'},lessonDropdown(lesson),topicPicker(),
+        supportsSimulator(lesson)?button('▣ Simulator mode',{class:'paper-sim-entry',
+          'data-sim-action':'open',title:'Open Lesson 009 vector railway simulator'}):null,
         text('h1',`— ${lesson.title}`,'paper-title'),
         el('div',{class:'paper-arrows'},
           button('‹',{class:'paper-arrow','data-action':'prev',title:'Previous lesson','aria-label':'Previous lesson'}),
@@ -187,6 +193,8 @@ export class TutorialsView{
     this.tier='simple';this.figureId='';
     this.topicId='';this.topicComponent='';this.topicStep=0;
     this.topicPlaying=false;this.topicReplayToken=0;
+    this.simMode=false;this.simWorld=null;this.simPlaying=false;this.simToken=0;
+    this.simAnimation=null;this.simFrame=null;this.simRate=1;this.simComponent='IXL';
     this.replayToken=0;
     this.notice='Click a control to inspect how the result changes.';
     this.noticeTone='ink';
@@ -206,7 +214,8 @@ export class TutorialsView{
     });
     this.host.addEventListener('keydown',event=>{
       if(event.key==='Escape')this.menu(false);
-      if((event.key==='Enter'||event.key===' ')&&event.target.closest('[data-component]')){
+      if((event.key==='Enter'||event.key===' ')&&
+        event.target.closest('[data-component], [data-sim-component]')){
         event.preventDefault();this.click(event);
       }
     });
@@ -228,6 +237,20 @@ export class TutorialsView{
     const component=params.get('component');
     this.topicComponent=this.topicId?(component||''):'';
     if(!this.topicId){this.topicPlaying=false;this.topicReplayToken++;}
+    const requestedSimulator=params.get('simulator')==='1'&&supportsSimulator(selected);
+    if(requestedSimulator){
+      const requestedScenario=params.get('scenario')||'normal';
+      const scenario=simScenario(requestedScenario);
+      if(!this.simMode||!this.simWorld||this.simWorld.lessonId!==selected.id||
+          this.simWorld.scenarioId!==scenario.id){
+        this.stopSimulator();
+        this.simWorld=createSimulatorWorld(selected,scenario.id);
+      }
+      this.simMode=true;
+      this.simComponent=params.get('sim-component')||'IXL';
+    }else if(this.simMode){
+      this.stopSimulator();this.simMode=false;
+    }
     this.render();
   }
   filterLessons(raw){
@@ -256,6 +279,7 @@ export class TutorialsView{
   selectLesson(id,updateHash=true,trigger=""){
     this.replayToken++;
     this.topicReplayToken++;this.topicPlaying=false;this.topicStep=0;
+    this.stopSimulator();this.simMode=false;this.simWorld=null;
     this.topicId='';this.topicComponent='';
     const lesson=lessonById(id);
     this.state=createLessonState(lesson.id);
@@ -270,6 +294,8 @@ export class TutorialsView{
     const parts=new URLSearchParams({lesson:this.state.lessonId,tier:this.tier});
     if(this.figureId)parts.set('figure',this.figureId);
     if(this.topicId){parts.set('topic',this.topicId);if(this.topicComponent)parts.set('component',this.topicComponent);}
+    if(this.simMode){parts.set('simulator','1');parts.set('scenario',this.simWorld?.scenarioId||'normal');
+      if(this.simComponent)parts.set('sim-component',this.simComponent);}
     location.hash=`#/tutorials?${parts.toString()}`;
   }
   move(offset){
@@ -302,7 +328,88 @@ export class TutorialsView{
       this.noticeTone=matches?'ok':'danger';this.render();
     }
   }
+  stopSimulator(keepFrame=false){
+    this.simPlaying=false;this.simToken++;
+    if(keepFrame&&this.simFrame)this.simWorld=this.simFrame;
+    this.simAnimation?.cancel();this.simAnimation=null;this.simFrame=null;
+  }
+  openSimulator(scenarioId='normal'){
+    const lesson=lessonById(this.state.lessonId);
+    if(!supportsSimulator(lesson))return;
+    this.replayToken++;this.topicReplayToken++;this.topicPlaying=false;
+    this.stopSimulator();this.simMode=true;
+    this.simComponent='IXL';this.simWorld=createSimulatorWorld(lesson,scenarioId);
+    this.topicId='';this.topicComponent='';
+    this.render();this.syncHash();this.host.scrollTop=0;
+  }
+  simulatorPreviousStep(){
+    if(!this.simWorld)return;
+    this.stopSimulator(true);
+    const targetStep=Math.max(0,this.simWorld.step-1);
+    const lesson=lessonById(this.state.lessonId);
+    let rebuilt=createSimulatorWorld(lesson,this.simWorld.scenarioId);
+    for(let i=0;i<targetStep;i++)rebuilt=simulateNextStep(rebuilt,lesson);
+    this.simWorld=rebuilt;
+    this.render();
+  }
+  simulatorStep(){
+    const lesson=lessonById(this.state.lessonId);
+    if(!this.simWorld||!hasNextSimulatorStep(this.simWorld))return Promise.resolve(false);
+    this.simAnimation?.cancel();
+    const before=this.simWorld,after=simulateNextStep(before,lesson);
+    if(!isMovement(before,after)){
+      this.simWorld=after;this.render();
+      return Promise.resolve(true);
+    }
+    // Commit the deterministic scenario step only after the visible journey.
+    // Until then, sensors and cab readings follow pure position projections.
+    const distance=Math.max(...after.trains.map(train=>{
+      const old=before.trains.find(t=>t.id===train.id);
+      return Math.abs(train.position-(old?.position??train.position));
+    }));
+    const duration=Math.max(650,Math.min(2300,distance*6))/this.simRate;
+    this.simFrame=before;
+    this.render();
+    let lastInstrumentRefresh=-Infinity;
+    const onProgress=fraction=>{
+      const frame=motionFrame(before,after,fraction);
+      this.simFrame=frame;
+      refreshRailDetectors(this.host,frame,this.simComponent);
+      const now=typeof performance!=='undefined'?performance.now():Date.now();
+      if(now-lastInstrumentRefresh>=85||fraction>=1){
+        refreshSimulatorReadings(this.host,frame,this.simComponent);
+        lastInstrumentRefresh=now;
+      }
+    };
+    const animation=animateRailWorld(this.host,before,after,duration,onProgress);
+    this.simAnimation=animation;
+    return animation.promise.then(completed=>{
+      // Cancelled animations must never silently commit an unvisited event.
+      if(this.simAnimation!==animation)return false;
+      this.simAnimation=null;this.simFrame=null;
+      if(completed)this.simWorld=after;
+      this.render();
+      return completed;
+    });
+  }
+  async simulatorPlay(){
+    if(this.simPlaying){this.stopSimulator(true);this.render();return;}
+    if(!this.simWorld||!hasNextSimulatorStep(this.simWorld))return;
+    this.simPlaying=true;
+    const token=++this.simToken;
+    this.render();
+    while(this.simPlaying&&token===this.simToken&&this.simMode&&
+      document.body.classList.contains('tutorial-active')&&hasNextSimulatorStep(this.simWorld)){
+      await new Promise(resolve=>setTimeout(resolve,Math.max(100,420/this.simRate)));
+      if(!this.simPlaying||token!==this.simToken||!this.simMode||
+        !document.body.classList.contains('tutorial-active'))break;
+      const completed=await this.simulatorStep();
+      if(!completed)break;
+    }
+    if(token===this.simToken){this.simPlaying=false;this.render();}
+  }
   openTopic(id){
+    this.stopSimulator();this.simMode=false;
     this.replayToken++;this.topicReplayToken++;this.topicPlaying=false;this.topicStep=0;
     this.topicId=topicById(id).id;this.topicComponent='';
     this.notice='Explore '+topicById(id).title;
@@ -358,6 +465,11 @@ export class TutorialsView{
     if(ticket===this.topicReplayToken){this.topicPlaying=false;this.render();}
   }
   click(event){
+    const simComponent=event.target.closest('[data-sim-component]');
+    if(simComponent&&this.simMode&&this.host.contains(simComponent)){
+      this.simComponent=simComponent.dataset.simComponent;
+      this.render();this.syncHash();return;
+    }
     const component=event.target.closest('[data-component]');
     if(component&&this.topicId&&this.host.contains(component)){
       this.topicComponent=component.dataset.component;
@@ -366,6 +478,28 @@ export class TutorialsView{
     const target=event.target.closest('button');
     if(!target||!this.host.contains(target))return;
     const {action,lesson,command,scenario}=target.dataset;
+    if(target.dataset.simScenario){
+      this.openSimulator(target.dataset.simScenario);return;
+    }
+    if(target.dataset.simRate){
+      const rate=Number(target.dataset.simRate);
+      if([1,2,4].includes(rate)){
+        const wasPlaying=this.simPlaying;
+        this.stopSimulator(true);this.simRate=rate;this.render();
+        if(wasPlaying)this.simulatorPlay();
+      }
+      return;
+    }
+    if(target.dataset.simAction){
+      const cmd=target.dataset.simAction;
+      if(cmd==='open'){this.openSimulator();return;}
+      if(cmd==='back'){this.stopSimulator();this.simMode=false;this.simWorld=null;
+        this.render();this.syncHash();this.host.scrollTop=0;return;}
+      if(cmd==='play'){this.simulatorPlay();return;}
+      if(cmd==='step'){this.stopSimulator(true);this.simulatorStep();return;}
+      if(cmd==='previous'){this.simulatorPreviousStep();return;}
+      if(cmd==='reset'){this.openSimulator(this.simWorld?.scenarioId||'normal');return;}
+    }
     if(target.dataset.openTopic){this.openTopic(target.dataset.openTopic);return;}
     if(action==='back-lesson'){this.backToLesson();return;}
     if(action==='topic-simulate'){this.simulateTopicLoop();return;}
@@ -437,6 +571,10 @@ export class TutorialsView{
   render(){
     const lesson=lessonById(this.state.lessonId);
     const snapshot=lessonSnapshot(this.state);
+    if(this.simMode&&this.simWorld){
+      this.host.replaceChildren(simulatorPage(lesson,this.simWorld,this.simComponent,this.simPlaying,this.simRate));
+      return;
+    }
     if(this.topicId){
       const {node}=topicPage(lesson,this.state,snapshot,this.topicId,this.topicComponent,
         this.topicPlaying,this.topicStep);

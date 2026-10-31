@@ -4,6 +4,7 @@
 import {el} from '../api.js';
 import {TOPICS,RAIL_COMPONENTS,componentById,topicById,buildTopicScene,topicSimulation} from './topics.js';
 import {railwayDiagram} from './topic-diagram.js';
+import {supportsSimulator} from './simulator/world.js';
 
 const t=(tag,value,cls)=>el(tag,cls?{class:cls}:{},String(value));
 const button=(label,attrs={})=>el('button',{type:'button',...attrs},label);
@@ -85,7 +86,9 @@ export function topicPage(lesson,state,snapshot,id,selected,playing=false,stepIn
   return {scene,node:el('div',{class:'topic-book'},
     el('nav',{class:'topic-page-top','aria-label':'Topic navigation'},
       button('‹  Back to Lesson '+lesson.number,{class:'topic-back','data-action':'back-lesson','aria-label':'Return to Lesson '+lesson.number}),
-      el('span',{class:'topic-breadcrumb'},'Lesson '+lesson.number+' / Concepts'),topicPicker(id)),
+      el('span',{class:'topic-breadcrumb'},'Lesson '+lesson.number+' / Concepts'),
+      supportsSimulator(lesson)?button('▣ Simulator mode',{'data-sim-action':'open',class:'topic-back'}):null,
+      topicPicker(id)),
     el('header',{class:'topic-page-header'},
       t('small','TUTORIAL TOPICS · RAILWAY FIELD GUIDE','topic-eyebrow'),t('h1',active.title),
       t('p',active.description,'topic-intro'),
