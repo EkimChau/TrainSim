@@ -7,8 +7,9 @@ import {topicPage,topicPicker} from './topic-view.js';
 import {topicById,TOPICS,suggestedTopic,topicSimulation,buildTopicScene} from './topics.js';
 import {animateTrainTravel} from './topic-diagram.js';
 import {supportsSimulator,createSimulatorWorld,simulateNextStep,simScenario,hasNextSimulatorStep} from './simulator/world.js';
-import {animateRailWorld} from './simulator/vector.js';
-import {simulatorPage} from './simulator/view.js';
+import {isMovement,motionFrame} from './simulator/motion.js';
+import {animateRailWorld,refreshRailDetectors} from './simulator/vector.js';
+import {simulatorPage,refreshSimulatorReadings} from './simulator/view.js';
 
 const text=(tag,value,className)=>el(tag,className?{class:className}:{},String(value));
 const button=(label,attrs={})=>el('button',{type:'button',...attrs},label);
@@ -193,7 +194,7 @@ export class TutorialsView{
     this.topicId='';this.topicComponent='';this.topicStep=0;
     this.topicPlaying=false;this.topicReplayToken=0;
     this.simMode=false;this.simWorld=null;this.simPlaying=false;this.simToken=0;
-    this.simAnimation=null;this.simComponent='IXL';
+    this.simAnimation=null;this.simFrame=null;this.simRate=1;this.simComponent='IXL';
     this.replayToken=0;
     this.notice='Click a control to inspect how the result changes.';
     this.noticeTone='ink';
@@ -327,9 +328,10 @@ export class TutorialsView{
       this.noticeTone=matches?'ok':'danger';this.render();
     }
   }
-  stopSimulator(){
+  stopSimulator(keepFrame=false){
     this.simPlaying=false;this.simToken++;
-    this.simAnimation?.cancel();this.simAnimation=null;
+    if(keepFrame&&this.simFrame)this.simWorld=this.simFrame;
+    this.simAnimation?.cancel();this.simAnimation=null;this.simFrame=null;
   }
   openSimulator(scenarioId='normal'){
     const lesson=lessonById(this.state.lessonId);
@@ -340,28 +342,69 @@ export class TutorialsView{
     this.topicId='';this.topicComponent='';
     this.render();this.syncHash();this.host.scrollTop=0;
   }
+  simulatorPreviousStep(){
+    if(!this.simWorld)return;
+    this.stopSimulator(true);
+    const targetStep=Math.max(0,this.simWorld.step-1);
+    const lesson=lessonById(this.state.lessonId);
+    let rebuilt=createSimulatorWorld(lesson,this.simWorld.scenarioId);
+    for(let i=0;i<targetStep;i++)rebuilt=simulateNextStep(rebuilt,lesson);
+    this.simWorld=rebuilt;
+    this.render();
+  }
   simulatorStep(){
     const lesson=lessonById(this.state.lessonId);
-    if(!this.simWorld||!hasNextSimulatorStep(this.simWorld))return Promise.resolve();
+    if(!this.simWorld||!hasNextSimulatorStep(this.simWorld))return Promise.resolve(false);
     this.simAnimation?.cancel();
-    const before=this.simWorld;
-    this.simWorld=simulateNextStep(before,lesson);
+    const before=this.simWorld,after=simulateNextStep(before,lesson);
+    if(!isMovement(before,after)){
+      this.simWorld=after;this.render();
+      return Promise.resolve(true);
+    }
+    // Commit the deterministic scenario step only after the visible journey.
+    // Until then, sensors and cab readings follow pure position projections.
+    const distance=Math.max(...after.trains.map(train=>{
+      const old=before.trains.find(t=>t.id===train.id);
+      return Math.abs(train.position-(old?.position??train.position));
+    }));
+    const duration=Math.max(650,Math.min(2300,distance*6))/this.simRate;
+    this.simFrame=before;
     this.render();
-    this.simAnimation=animateRailWorld(this.host,before,this.simWorld,690);
-    return this.simAnimation.promise;
+    let lastInstrumentRefresh=-Infinity;
+    const onProgress=fraction=>{
+      const frame=motionFrame(before,after,fraction);
+      this.simFrame=frame;
+      refreshRailDetectors(this.host,frame,this.simComponent);
+      const now=typeof performance!=='undefined'?performance.now():Date.now();
+      if(now-lastInstrumentRefresh>=85||fraction>=1){
+        refreshSimulatorReadings(this.host,frame,this.simComponent);
+        lastInstrumentRefresh=now;
+      }
+    };
+    const animation=animateRailWorld(this.host,before,after,duration,onProgress);
+    this.simAnimation=animation;
+    return animation.promise.then(completed=>{
+      // Cancelled animations must never silently commit an unvisited event.
+      if(this.simAnimation!==animation)return false;
+      this.simAnimation=null;this.simFrame=null;
+      if(completed)this.simWorld=after;
+      this.render();
+      return completed;
+    });
   }
   async simulatorPlay(){
-    if(this.simPlaying){this.stopSimulator();this.render();return;}
+    if(this.simPlaying){this.stopSimulator(true);this.render();return;}
     if(!this.simWorld||!hasNextSimulatorStep(this.simWorld))return;
     this.simPlaying=true;
     const token=++this.simToken;
     this.render();
     while(this.simPlaying&&token===this.simToken&&this.simMode&&
       document.body.classList.contains('tutorial-active')&&hasNextSimulatorStep(this.simWorld)){
-      await new Promise(resolve=>setTimeout(resolve,420));
+      await new Promise(resolve=>setTimeout(resolve,Math.max(100,420/this.simRate)));
       if(!this.simPlaying||token!==this.simToken||!this.simMode||
         !document.body.classList.contains('tutorial-active'))break;
-      await this.simulatorStep();
+      const completed=await this.simulatorStep();
+      if(!completed)break;
     }
     if(token===this.simToken){this.simPlaying=false;this.render();}
   }
@@ -438,13 +481,23 @@ export class TutorialsView{
     if(target.dataset.simScenario){
       this.openSimulator(target.dataset.simScenario);return;
     }
+    if(target.dataset.simRate){
+      const rate=Number(target.dataset.simRate);
+      if([1,2,4].includes(rate)){
+        const wasPlaying=this.simPlaying;
+        this.stopSimulator(true);this.simRate=rate;this.render();
+        if(wasPlaying)this.simulatorPlay();
+      }
+      return;
+    }
     if(target.dataset.simAction){
       const cmd=target.dataset.simAction;
       if(cmd==='open'){this.openSimulator();return;}
       if(cmd==='back'){this.stopSimulator();this.simMode=false;this.simWorld=null;
         this.render();this.syncHash();this.host.scrollTop=0;return;}
       if(cmd==='play'){this.simulatorPlay();return;}
-      if(cmd==='step'){this.stopSimulator();this.simulatorStep();return;}
+      if(cmd==='step'){this.stopSimulator(true);this.simulatorStep();return;}
+      if(cmd==='previous'){this.simulatorPreviousStep();return;}
       if(cmd==='reset'){this.openSimulator(this.simWorld?.scenarioId||'normal');return;}
     }
     if(target.dataset.openTopic){this.openTopic(target.dataset.openTopic);return;}
@@ -519,7 +572,7 @@ export class TutorialsView{
     const lesson=lessonById(this.state.lessonId);
     const snapshot=lessonSnapshot(this.state);
     if(this.simMode&&this.simWorld){
-      this.host.replaceChildren(simulatorPage(lesson,this.simWorld,this.simComponent,this.simPlaying));
+      this.host.replaceChildren(simulatorPage(lesson,this.simWorld,this.simComponent,this.simPlaying,this.simRate));
       return;
     }
     if(this.topicId){
