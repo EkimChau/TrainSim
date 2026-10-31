@@ -89,6 +89,20 @@ test('track circuit and point transitions have deterministic physical thresholds
   assert.ok(readings.occupancy.TC2.includes('A'));
 });
 
+test('incoming train B keeps TC3 occupied until its trailing end clears the section',()=>{
+  const before=initial();
+  before.trains[1].position=560;
+  const after={...before,trains:before.trains.map(t=>t.id==='B'?{...t,position:420}:t)};
+  const rearThreshold=TRACK_WORLD.sections.find(section=>section.id==='TC3').from-
+    TRACK_WORLD.trainLength; // front coordinate at which rear clears TC3
+  const marks=motionThresholds(before,after);
+  assert.ok(marks.some(m=>m.id==='TC3'&&m.type==='section-rear'&&m.metres===rearThreshold));
+  assert.deepEqual(occupancy(motionFrame(before,after,0.85)).TC3,['B']);
+  assert.deepEqual(occupancy(motionFrame(before,after,0.96)).TC3,[]);
+  assert.deepEqual(occupancy(before).TC3,['B']);
+  assert.equal(before.trains[1].position,560);
+});
+
 test('renderer interpolates snapshots only; no invented speed/MA/RBC data',()=>{
   const before=advance(initial(),6),after=simulateNextStep(before,lesson);
   const frame=motionFrame(before,after,0.4);
