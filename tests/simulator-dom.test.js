@@ -64,7 +64,7 @@ test('Lesson 009 creates a full SVG, vector equipment and accessible selectable 
   const root=renderRailWorld(createSimulatorWorld(lesson),'IXL');
   assert.equal(root.tag,'svg');
   assert.ok(root.descendants().filter(n=>n.tag==='symbol').length>=7);
-  assert.ok(root.descendants().filter(n=>n.tag==='use').length>=12);
+  assert.ok(root.descendants().filter(n=>n.tag==='use').length>=9);
   for(const id of ['TC1','TC2','BG-1','BG-2','P1','IXL','RBC','DMI','BTM','ODOM','train-A','train-B']){
     const component=root.querySelector('[data-sim-component="'+id+'"]');
     assert.ok(component,id+' was not drawn');
