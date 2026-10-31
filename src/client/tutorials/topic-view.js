@@ -52,7 +52,8 @@ function glossary(scene,selected){
     t('p','Select a labelled item on the track diagram or in this legend. Highlighted items are part of this topic.','topic-small'),
     el('div',{class:'topic-legend-grid'},...visible.map(id=>{
       const item=componentById(id);
-      return button(item.term,{class:'topic-legend-item'+(scene.parts.includes(id)?' relevant':'')+(id===selected?' selected':''),
+      return button(item.term,{class:'topic-legend-item'+(scene.parts.includes(id)?' relevant':'')+
+          (scene.highlightedParts.includes(id)?' active-event':'')+(id===selected?' selected':''),
         'data-component':id,'aria-pressed':String(id===selected),title:item.label+' — '+item.place});
     })));
 }
