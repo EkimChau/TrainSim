@@ -11,6 +11,7 @@ on:
       - 'tests/authored.test.js'
       - 'tests/tutorials*.test.js'
       - 'tests/topics.test.js'
+      - 'tests/simulator-world.test.js'
       - 'docs/sim/esig-learning-series.md'
       - 'docs/sim/authored-learning-wave.md'
       - 'docs/sim/authored-learning-wave.md'
@@ -41,7 +42,7 @@ jobs:
           node-version: '22'
           cache: npm
       - name: Verify 305 indexed scaffolds, 15 authored labs and all scenario fixtures
-        run: node --test tests/tutorials.test.js tests/esig-curriculum.test.js tests/tutorials-ui.test.js tests/authored.test.js tests/topics.test.js
+        run: node --test tests/tutorials.test.js tests/esig-curriculum.test.js tests/tutorials-ui.test.js tests/authored.test.js tests/topics.test.js tests/simulator-world.test.js
       - name: Syntax check tutorial modules
         run: |
           node --check src/client/tutorials/lessons.js
@@ -52,6 +53,9 @@ jobs:
           node --check src/client/tutorials/topics.js
           node --check src/client/tutorials/topic-view.js
           node --check src/client/tutorials/topic-diagram.js
+          node --check src/client/tutorials/simulator/world.js
+          node --check src/client/tutorials/simulator/vector.js
+          node --check src/client/tutorials/simulator/view.js
           node --check src/client/tutorials/diagrams.js
           node --check src/client/tutorials/authored-lessons.js
           node --check src/client/tutorials/authored-engine.js
