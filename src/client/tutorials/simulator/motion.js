@@ -39,8 +39,13 @@ export function motionThresholds(before,after){
     for(const section of TRACK_WORLD.sections){
       // A section changes state at train front entry and rear clearance.
       if(next.track===section.track||next.track==='diverge'&&section.track==='main'){
-        push(section.from,'section-front',section.id);
-        push(section.to+TRACK_WORLD.trainLength,'section-rear',section.id);
+        if(next.direction<0){
+          push(section.to,'section-front',section.id);
+          push(section.from-TRACK_WORLD.trainLength,'section-rear',section.id);
+        }else{
+          push(section.from,'section-front',section.id);
+          push(section.to+TRACK_WORLD.trainLength,'section-rear',section.id);
+        }
       }
     }
     if(next.id==='A'){
