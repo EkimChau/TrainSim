@@ -125,7 +125,7 @@ function trainPaint(root,train,world){
   // instantaneous track tangent rather than a straight-line teleport.
   const g=svg('g',{'data-sim-train':train.id,
     transform:'translate('+p.x+' '+p.y+') rotate('+p.angle+')'});
-  const sprite=svg('g',train.id==='B'?{transform:'scale(-1 1)'}:{});
+  const sprite=svg('g',train.direction<0?{transform:'scale(-1 1)'}:{});
   symbolUse(sprite,'train',-86,-45,85,48);
   g.append(sprite);
   const tag=svg('g',{transform:'translate(0 -55)'});
