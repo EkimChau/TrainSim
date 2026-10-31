@@ -20,7 +20,7 @@ export const VECTOR_STYLE={
 };
 export const TRACK_WORLD=Object.freeze({
   id:'yard-junction',name:'Synthetic Junction / RBC interface',units:'m',
-  viewBox:[0,0,1100,400],extent:[0,1000],trainLength:78,
+  viewBox:[0,0,1100,400],extent:[0,1000],trainLength:78,antennaOffset:32,
   tracks:[
     {id:'main',label:'Approach / main',y:210},
     {id:'upper',label:'Neighbouring line',y:118},
@@ -33,8 +33,8 @@ export const TRACK_WORLD=Object.freeze({
     {id:'TC3',track:'upper',from:510,to:870,label:'Neighbouring line'}
   ],
   balises:[
-    {id:'BG-1',metres:350,track:'main',label:'Location reference'},
-    {id:'BG-2',metres:780,track:'diverge',label:'Illustrative level marker'}
+    {id:'BG-1',metres:340,track:'main',label:'Location reference'},
+    {id:'BG-2',metres:760,track:'diverge',label:'Illustrative level marker'}
   ],
   signals:[
     {id:'S1',metres:250,track:'main',label:'Entrance signal'},
@@ -58,7 +58,9 @@ export const SIMULATOR_COMPONENTS=Object.freeze([
   {id:'RBC',kind:'rbc',label:'Radio Block Centre',source:'SUBSET-026-2 §2.5'},
   {id:'radio',kind:'radio',label:'Radio communication bearer',source:'SUBSET-026-3 §3.5'},
   {id:'boundary',kind:'boundary',label:'L0 / L2 transition',source:'SUBSET-026-5 §5.10, illustrative only'},
-  {id:'DMI',kind:'dmi',label:'Driver display mockup',source:'SUBSET-026-4; non-normative UI'}
+  {id:'DMI',kind:'dmi',label:'Driver display mockup',source:'SUBSET-026-4; non-normative UI'},
+  {id:'BTM',kind:'btm',label:'Balise transmission antenna (train A)',source:'SUBSET-026-2 §2.5.2'},
+  {id:'ODOM',kind:'odometry',label:'Onboard speed / odometry reading',source:'SUBSET-026-3 §3.6; synthetic reading'}
 ]);
 const NORMAL_STEPS=[
   {id:'proof',kind:'route-request',label:'IXL checks route, flank and conflict evidence'},
@@ -125,7 +127,7 @@ function sectionOccupied(section,train){
   const rear=train.position-TRACK_WORLD.trainLength;
   if(train.position<section.from||rear>section.to)return false;
   if(train.track===section.track)return true;
-  if(train.track==='diverge'&&section.track==='main')return rear<430;
+  if(train.track==='diverge'&&section.track==='main')return rear<=section.to;
   return false;
 }
 export function occupancy(world){
@@ -135,9 +137,14 @@ export function occupancy(world){
 }
 const crossing=(track,from,to,bg)=>track===bg.track||
   (track==='diverge'&&bg.track==='main'&&bg.metres<=410);
+export const antennaPosition=train=>train.position-train.direction*TRACK_WORLD.antennaOffset;
 function balisesPassed(train,oldPosition,newPosition){
-  return TRACK_WORLD.balises.filter(bg=>crossing(train.track,oldPosition,newPosition,bg)&&
-    oldPosition<bg.metres&&newPosition>=bg.metres);
+  const antennaBefore=oldPosition-train.direction*TRACK_WORLD.antennaOffset;
+  const antennaAfter=newPosition-train.direction*TRACK_WORLD.antennaOffset;
+  return TRACK_WORLD.balises.filter(bg=>
+    crossing(train.track,oldPosition,newPosition,bg)&&
+    (antennaBefore<bg.metres&&antennaAfter>=bg.metres||
+      antennaBefore>bg.metres&&antennaAfter<=bg.metres));
 }
 function copy(world){return {
   ...world,inputs:{...world.inputs},trains:world.trains.map(t=>({...t})),
@@ -322,6 +329,18 @@ export function componentReadings(world,id){
   if(id==='boundary')return {status:first.level,readings:[
     ['Current level',first.level],['Marker',TRACK_WORLD.levelBoundary.metres+' m'],
     ['Transition','teaching event; full SRS rules not implemented']]};
+  if(id==='BTM')return {status:first.lrbg?'reference acquired':'awaiting balise',readings:[
+    ['Antenna position',antennaPosition(first)+' m'],
+    ['Offset behind front',TRACK_WORLD.antennaOffset+' m (fixture)'],
+    ['Last passed BG',first.lrbg||'none'],
+    ['BG-1 count',world.balises['BG-1'].count],
+    ['BG-2 count',world.balises['BG-2'].count]]};
+  if(id==='ODOM')return {status:'sampled estimate',readings:[
+    ['Train front',first.position+' m'],
+    ['Estimate speed',first.speed+' km/h'],
+    ['Movement direction',first.direction<0?'left':'right'],
+    ['Last balise reference',first.lrbg||'not acquired'],
+    ['Certified odometry','not modelled']]};
   if(id==='DMI')return {status:'teaching mock',readings:[
     ['Speed',first.speed+' km/h'],['Permitted speed','not modelled'],
     ['MA',world.ma.status],['Distance to EOA',world.ma.end===null?'not modelled':Math.max(0,world.ma.end-first.position)+' m'],
