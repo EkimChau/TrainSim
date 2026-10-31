@@ -44,9 +44,11 @@ test('balise passage updates the OBU reference, not the RBC before a report',()=
   assert.equal(world.trains[0].position,384);
   assert.equal(world.trains[0].lrbg,'BG-1');
   assert.equal(world.balises['BG-1'].count,1);
+  assert.equal(world.trains[0].speed,32);
   assert.equal(world.rbc.report,null);
   const reported=advance(world,1);
   assert.equal(reported.rbc.report.front,384);
+  assert.equal(reported.rbc.report.speedKmh,32);
   assert.equal(reported.rbc.report.lrbg,'BG-1');
   assert.match(reported.rbc.report.source,/OBU estimated position/);
   assert.match(componentReadings(reported,'radio').readings[2][1],/none from mast/);
@@ -57,15 +59,18 @@ test('RBC retains a historical report until the onboard train explicitly sends a
   assert.equal(first.rbc.report.front,384);
   const moved=advance(first,1);
   assert.equal(moved.trains[0].position,652);
+  assert.equal(moved.trains[0].speed,26);
   assert.equal(moved.rbc.report.front,384);
   const refresh=advance(moved,1);
   assert.equal(refresh.rbc.report.front,652);
+  assert.equal(refresh.rbc.report.speedKmh,26);
   assert.equal(refresh.rbc.report.lrbg,'BG-1');
   const nearBoundary=advance(refresh,2);
   assert.equal(nearBoundary.trains[0].position,807);
   assert.equal(nearBoundary.rbc.report.front,652);
   const second=advance(nearBoundary,1);
   assert.equal(second.rbc.report.front,807);
+  assert.equal(second.rbc.report.speedKmh,18);
   assert.equal(second.rbc.report.lrbg,'BG-2');
 });
 
