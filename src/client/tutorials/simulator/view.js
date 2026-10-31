@@ -104,7 +104,7 @@ function log(world){
           t('span','#'+String(event.tick).padStart(2,'0')+' '+event.actor),
           t('span',event.message)))));
 }
-function intro(lesson,world,playing){
+function intro(lesson,world,playing,rate=1){
   const scenario=simScenario(world.scenarioId);
   return el('div',{class:'sim-header-block'},
     el('nav',{class:'sim-nav'},b('‹ Back to Lesson '+lesson.number,{
@@ -116,16 +116,20 @@ function intro(lesson,world,playing){
     el('div',{class:'sim-controls'},b(playing?'Ⅱ Pause':'▶ Simulate',{
       class:'sim-primary','data-sim-action':'play','aria-pressed':String(playing)}),
     b('Step →',{'data-sim-action':'step',disabled:playing||!hasNextSimulatorStep(world)}),
+    b('← Back step',{'data-sim-action':'previous',disabled:playing||world.step===0}),
     b('↺ Reset',{'data-sim-action':'reset'}),
-    el('span',{class:'sim-step-counter'},world.step+'/'+scenario.steps.length+' events'),
+    el('span',{class:'sim-step-counter'},world.step+'/'+scenario.steps.length+' events · playback'),
+    ...[1,2,4].map(v=>b(v+'×',{'data-sim-rate':String(v),
+      class:'sim-rate-button'+(rate===v?' current':''),
+      'aria-pressed':String(rate===v),title:'Animation playback speed '+v+' times'})),
     ...SIMULATOR_SCENARIOS.map(item=>b(item.label,{
       class:'sim-scenario-button'+(item.id===world.scenarioId?' current':''),
       'data-sim-scenario':item.id,'aria-pressed':String(item.id===world.scenarioId)}))));
 }
-export function simulatorPage(lesson,world,selected='IXL',playing=false){
+export function simulatorPage(lesson,world,selected='IXL',playing=false,rate=1){
   const summary=simulatorSummary(world);
   return el('div',{class:'sim-book'},
-    intro(lesson,world,playing),
+    intro(lesson,world,playing,rate),
     el('section',{class:'sim-world-card'},t('h2','Lesson world — synthetic junction, two trains, RBC interface'),
       el('div',{class:'sim-world-viewport'},renderRailWorld(world,selected)),
       t('p','Blue dashed = radio information bearer; green = route proof/clear; red = occupancy/stop. Positions are synthetic metres, not surveyed geography.','sim-small')),
@@ -146,4 +150,19 @@ export function simulatorPage(lesson,world,selected='IXL',playing=false){
       t('p','Interlocking is external to SUBSET-026 under Chapter 2 §2.4.1.3(d). Train position reporting and radio/RBC concepts are covered by SUBSET-026 Chapters 3 and 8. Full mode and level transitions require the actual Chapter 4/5 conditions.','sim-small'),
       el('p',{},'The RBC receives an OBU position report via radio; the radio mast does not measure train location. The route proof, points, train movement, illustrated MA and levels are synthetic demonstration events only.'),
       t('p','All symbols are internally consistent original SVG artwork, not approved national control-table drawings or certified ETCS DMI layouts.','sim-small')));
+}
+
+
+/** Patch only instruments during motion; the SVG train stays in its own live
+ * transform layer and a full rerender occurs only at the final scenario event.
+ */
+export function refreshSimulatorReadings(host,world,selected='IXL'){
+  const swap=(selector,create)=>{
+    const old=host.querySelector(selector);
+    if(old)old.replaceWith(create());
+  };
+  swap('.sim-dmi-box',()=>dmiInstrument(world));
+  swap('.sim-component-list',()=>componentList(world,selected));
+  swap('.sim-selected-instrument',()=>inspector(world,selected));
+  swap('.sim-event-log',()=>log(world));
 }
