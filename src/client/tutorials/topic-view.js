@@ -55,7 +55,8 @@ function glossary(scene,selected){
       const item=componentById(id);
       return button(item.term,{class:'topic-legend-item'+(scene.parts.includes(id)?' relevant':'')+
           (scene.highlightedParts.includes(id)?' active-event':'')+(id===selected?' selected':''),
-        'data-component':id,'aria-pressed':String(id===selected),title:item.label+' — '+item.place});
+        'data-component':id,'aria-pressed':String(id===selected),
+        'aria-label':item.term+' — '+item.label+', '+item.place});
     })));
 }
 function inspector(scene,id){
