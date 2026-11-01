@@ -22,8 +22,8 @@ TrainSim Map / Data / Query / Docs screens retain their existing styling.
   pen shadows, light textured paper. All graphs have both a paper panel border
   and individual hand-drawn-style SVG ink strokes.
 - `paper-title-row`, `paper-lesson-picker`, `paper-arrows`: the **Lesson 01** label
-  is a hover-discoverable and click-toggle catalogue. Clicking outside, Escape,
-  or leaving the menu closes it. The `‹ ›` arrows sit immediately after the
+  opens its catalogue on click or keyboard activation only. Clicking outside or
+  pressing Escape closes it; pointer hover must not open or dismiss the catalogue. The `‹ ›` arrows sit immediately after the
   function title and cycle through all registered lessons. Hash URLs preserve the
   lesson selection for sharing and browser history.
 - `paper-action`, `paper-click-flash`, `paper-alarm-button`: all meaningful button
