@@ -64,7 +64,7 @@ function lessonDropdown(lesson){
       }))));
   };
   return el('div',{class:'paper-lesson-picker','data-picker':'1'},
-    button('Lesson '+lesson.number+' ▾',{class:'paper-lesson-trigger',title:'Hover or click for authored labs and the source-indexed catalogue','aria-haspopup':'true','aria-expanded':'false','data-action':'toggle-menu'}),
+    button('Lesson '+lesson.number+' ▾',{class:'paper-lesson-trigger',title:'Click to browse authored labs and the source-indexed catalogue','aria-haspopup':'true','aria-expanded':'false','data-action':'toggle-menu'}),
     el('div',{class:'paper-lesson-menu',role:'menu',hidden:true,'aria-label':'All ESIG tutorials'},
       text('p',LESSON_COUNTS.authored+' authored labs · '+LESSON_COUNTS.scaffold+' indexed scaffolds','paper-menu-title'),
       el('label',{class:'paper-menu-search-label'},'Find a function, source clause or figure',
@@ -199,18 +199,10 @@ export class TutorialsView{
     this.notice='Click a control to inspect how the result changes.';
     this.noticeTone='ink';
     this.flashCommand='';
-    this.hoverTimer=null;
     this.host.addEventListener('click',event=>this.click(event));
     this.host.addEventListener('change',event=>this.change(event));
     this.host.addEventListener('input',event=>{
       if(event.target.matches('.paper-menu-search'))this.filterLessons(event.target.value);
-    });
-    this.host.addEventListener('pointerover',event=>{
-      if(event.target.closest('[data-picker]'))this.menu(true);
-    });
-    this.host.addEventListener('pointerout',event=>{
-      const picker=event.target.closest('[data-picker]');
-      if(picker&&!picker.contains(event.relatedTarget))this.hoverTimer=setTimeout(()=>this.menu(false),180);
     });
     this.host.addEventListener('keydown',event=>{
       if(event.key==='Escape')this.menu(false);
@@ -266,7 +258,6 @@ export class TutorialsView{
     }
   }
   menu(open){
-    clearTimeout(this.hoverTimer);
     const menu=this.host.querySelector('.paper-lesson-menu');
     const trigger=this.host.querySelector('.paper-lesson-trigger');
     if(!menu||!trigger)return;
@@ -515,7 +506,6 @@ export class TutorialsView{
     if(action==='toggle-menu'){
       const isOpen=this.host.querySelector('.paper-lesson-trigger')?.getAttribute('aria-expanded')==='true';
       this.menu(!isOpen);
-      // Keep hover navigation and click-to-toggle as separate, discoverable paths.
       this.notice='Lesson index toggled — choose a lesson to open.';
       this.noticeTone='blue';
       const feedback=this.host.querySelector('.paper-interaction-feedback');
