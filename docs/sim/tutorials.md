@@ -22,8 +22,8 @@ TrainSim Map / Data / Query / Docs screens retain their existing styling.
   pen shadows, light textured paper. All graphs have both a paper panel border
   and individual hand-drawn-style SVG ink strokes.
 - `paper-title-row`, `paper-lesson-picker`, `paper-arrows`: the **Lesson 01** label
-  opens its catalogue on click or keyboard activation only. Clicking outside or
-  pressing Escape closes it; pointer hover must not open or dismiss the catalogue. The `‹ ›` arrows sit immediately after the
+  is a hover-discoverable and click-toggle catalogue. Clicking outside, Escape,
+  or leaving the menu closes it. The `‹ ›` arrows sit immediately after the
   function title and cycle through all registered lessons. Hash URLs preserve the
   lesson selection for sharing and browser history.
 - `paper-action`, `paper-click-flash`, `paper-alarm-button`: all meaningful button
@@ -175,6 +175,13 @@ interlocking, driver display, and level/mode concepts.
   The same landmarks recur in every topic; geometry expands only when a lesson
   input exceeds the normal range. Clicking or keyboard selecting a component
   opens the same definition as selecting its legend.
+- **Glossary terms** previously used browser-native `title` hover tooltips. They
+  now use the **existing component click-selection mechanism** to open a
+  non-modal floating definition panel. The panel draws the same source-linked
+  `RAIL_COMPONENTS` description, location and source as the durable inspector.
+  Hover and focus alone do not open it; click/Enter/Space opens or toggles,
+  Escape, Close and outside-click dismiss. The **Lesson catalogue hover
+  interaction remains unchanged** because it is a separate control.
 - **topic-view.js** draws the legend, source/definition inspector, source list
   and train driver **DMI teaching mock**. DMI consumes current lesson inputs
   and state projection. Unknown actual speed, permitted speed, operating mode
