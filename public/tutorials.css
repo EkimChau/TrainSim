@@ -325,6 +325,26 @@
   text-align:left;font-size:12px;padding:8px 9px;cursor:pointer}
 #view-tutorials .topic-legend-item.relevant{background:#e7f3fb;border-color:#7fa5c6}
 #view-tutorials .topic-legend-item.selected{background:#f9df90;border-color:#ba932d;box-shadow:inset 0 0 0 1px #ba932d;font-weight:900}
+/* Reuse the existing click-to-select glossary and source-linked definitions.
+   Native title hover tooltips are deliberately not used for glossary terms. */
+#view-tutorials .topic-glossary{position:relative;z-index:3}
+#view-tutorials .topic-legend-item[aria-expanded="true"]{outline:2px solid #2472b5;outline-offset:1px}
+#view-tutorials .topic-term-popover{
+  position:absolute;top:calc(100% + 6px);left:8px;right:8px;z-index:30;
+  padding:14px 15px;max-height:min(55vh,420px);overflow:auto;
+  background:#fffdf6;color:#223b53;border:2px solid #364456;border-radius:8px;
+  box-shadow:5px 6px 0 rgba(36,50,69,.22);
+}
+#view-tutorials .topic-term-popover[hidden]{display:none}
+#view-tutorials .topic-term-popover-head{display:flex;justify-content:space-between;gap:10px;align-items:start}
+#view-tutorials .topic-term-popover-head strong{font-size:14px}
+#view-tutorials .topic-term-popover-close{border:1px solid #364456;background:#fff6d6;
+  border-radius:5px;padding:2px 10px;cursor:pointer;font-size:20px;line-height:1.25}
+#view-tutorials .topic-term-popover-details{margin:6px 0 0}
+#view-tutorials .topic-term-popover-details div{border-top:1px solid #dddcd3;padding:6px 0}
+#view-tutorials .topic-term-popover-details dt{font-size:11px;font-weight:800;color:#53677b}
+#view-tutorials .topic-term-popover-details dd{margin:2px 0;font-size:12px}
+
 #view-tutorials .topic-inspector{border-left:5px solid #daa744}
 #view-tutorials .topic-abbr{display:inline-block;background:#e4eef8;border:1px solid #a5b8cb;
   border-radius:4px;padding:3px 9px;font-size:13px}

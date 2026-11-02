@@ -46,17 +46,34 @@ function device(scene){
       t('p','Mock interface only · not the standard ETCS DMI layout or a driving instruction.','topic-dmi-caveat')),
     t('p','All fields above come from the same lesson inputs and state projection as the tutorial. Missing data stays marked unavailable.','topic-small'));
 }
-function glossary(scene,selected){
+function glossary(scene,selected,opened=''){
   const visible=[...scene.parts,...RAIL_COMPONENTS.map(c=>c.id).filter(id=>!scene.parts.includes(id))];
+  const definition=componentById(opened);
   return el('section',{class:'topic-glossary', 'aria-label':'Click to identify railway components'},
     t('h2','Railway legend'),
-    t('p','Select a labelled item on the track diagram or in this legend. Highlighted items are part of this topic.','topic-small'),
+    t('p','Click a term to open its definition. Use Escape or the Close button to dismiss it.','topic-small'),
     el('div',{class:'topic-legend-grid'},...visible.map(id=>{
       const item=componentById(id);
       return button(item.term,{class:'topic-legend-item'+(scene.parts.includes(id)?' relevant':'')+
           (scene.highlightedParts.includes(id)?' active-event':'')+(id===selected?' selected':''),
-        'data-component':id,'aria-pressed':String(id===selected),title:item.label+' — '+item.place});
-    })));
+        'data-component':id,'data-glossary-term':id,
+        'aria-pressed':String(id===selected),'aria-expanded':String(id===opened),
+        'aria-controls':'topic-term-definition',
+        'aria-label':item.term+' — '+item.label+', '+item.place});
+    })),
+    // The selected glossary term opens a real, non-modal source-linked panel.
+    // The existing inspector and RAIL_COMPONENTS remain the definition owners.
+    el('aside',{class:'topic-term-popover',id:'topic-term-definition',hidden:!definition,
+      role:'region','aria-label':'Glossary term definition','aria-live':'polite'},
+      definition?el('div',{},
+        el('header',{class:'topic-term-popover-head'},
+          t('strong',definition.term+' — '+definition.label),
+          button('×',{'data-action':'close-term-definition',
+            class:'topic-term-popover-close','aria-label':'Close glossary definition'})),
+        t('p',definition.description),
+        el('dl',{class:'topic-term-popover-details'},
+          el('div',{},t('dt','Where'),t('dd',definition.place)),
+          el('div',{},t('dt','Source'),t('dd',definition.source)))):null));
 }
 function inspector(scene,id){
   const component=componentById(id)||componentById(scene.parts[0]);
@@ -78,7 +95,7 @@ function sourceInfo(scene,lesson){
     scene.docsRecord?t('p','Documentation record: '+scene.docsRecord.id+' · '+scene.docsRecord.status,'topic-small'):null,
     t('p','Visual metre coordinates and railway furniture are SimWorld fixtures unless a lesson explicitly supplies their input; neither geometry nor changing screens proves compliance.','topic-small'));
 }
-export function topicPage(lesson,state,snapshot,id,selected,playing=false,stepIndex=0){
+export function topicPage(lesson,state,snapshot,id,selected,playing=false,stepIndex=0,openTerm=''){
   const scene=buildTopicScene(lesson,state,snapshot,id);
   const active=topicById(id);
   const chosen=componentById(selected)?selected:scene.parts[0];
@@ -107,7 +124,7 @@ export function topicPage(lesson,state,snapshot,id,selected,playing=false,stepIn
         sourceInfo(scene,lesson)),
       el('aside',{class:'topic-cab-card'},t('h2','View from the driver cab'),device(scene))),
     el('div',{class:'topic-bottom-grid'},
-      glossary(scene,chosen),
+      glossary(scene,chosen,openTerm),
       inspector(scene,chosen),
       el('section',{class:'topic-actions-card'},t('h2','Lesson controls & system response'),
         t('p','These are training scenario commands, not physical cab controls. They operate the existing lesson state machine.','topic-small'),

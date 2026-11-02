@@ -175,6 +175,13 @@ interlocking, driver display, and level/mode concepts.
   The same landmarks recur in every topic; geometry expands only when a lesson
   input exceeds the normal range. Clicking or keyboard selecting a component
   opens the same definition as selecting its legend.
+- **Glossary terms** previously used browser-native `title` hover tooltips. They
+  now use the **existing component click-selection mechanism** to open a
+  non-modal floating definition panel. The panel draws the same source-linked
+  `RAIL_COMPONENTS` description, location and source as the durable inspector.
+  Hover and focus alone do not open it; click/Enter/Space opens or toggles,
+  Escape, Close and outside-click dismiss. The **Lesson catalogue hover
+  interaction remains unchanged** because it is a separate control.
 - **topic-view.js** draws the legend, source/definition inspector, source list
   and train driver **DMI teaching mock**. DMI consumes current lesson inputs
   and state projection. Unknown actual speed, permitted speed, operating mode
