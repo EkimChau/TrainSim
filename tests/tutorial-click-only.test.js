@@ -94,7 +94,11 @@ test('glossary term hover cannot open native title tooltip or component popup',(
   assert.match(topic,/hidden:!definition/);
   assert.match(topic,/'aria-expanded':String\(id===opened\)/);
   assert.match(topic,/class:'topic-term-popover'/);
-  assert.doesNotMatch(view,/addEventListener\(['"]pointer(?:over|enter)['"][\s\S]*topicPopupId/);
+  const hoverStart=view.indexOf("this.host.addEventListener('pointerover'");
+  const hoverEnd=view.indexOf("this.host.addEventListener('pointerout'",hoverStart);
+  assert.ok(hoverStart>=0&&hoverEnd>hoverStart);
+  const hoverListener=view.slice(hoverStart,hoverEnd);
+  assert.doesNotMatch(hoverListener,/topicPopupId|data-glossary-term|topic-term-popover/);
   assert.match(view,/const term=event\.target\.closest\('\[data-glossary-term\]'\)/);
 });
 
