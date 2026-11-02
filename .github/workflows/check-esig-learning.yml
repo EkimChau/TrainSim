@@ -10,6 +10,7 @@ on:
       - 'tests/esig-curriculum.test.js'
       - 'tests/authored.test.js'
       - 'tests/tutorials*.test.js'
+      - 'tests/tutorial-click-only.test.js'
       - 'tests/topics.test.js'
       - 'tests/simulator-world.test.js'
       - 'tests/simulator-motion.test.js'
@@ -27,6 +28,7 @@ on:
       - 'tests/esig-curriculum.test.js'
       - 'tests/authored.test.js'
       - 'tests/tutorials*.test.js'
+      - 'tests/tutorial-click-only.test.js'
       - 'docs/sim/esig-learning-series.md'
       - '.github/workflows/check-esig-learning.yml'
 
@@ -44,7 +46,7 @@ jobs:
           node-version: '22'
           cache: npm
       - name: Verify 305 indexed scaffolds, 15 authored labs and all scenario fixtures
-        run: node --test tests/tutorials.test.js tests/esig-curriculum.test.js tests/tutorials-ui.test.js tests/authored.test.js tests/topics.test.js tests/simulator-world.test.js tests/simulator-motion.test.js tests/simulator-dom.test.js
+        run: node --test tests/tutorials.test.js tests/esig-curriculum.test.js tests/tutorials-ui.test.js tests/tutorial-click-only.test.js tests/authored.test.js tests/topics.test.js tests/simulator-world.test.js tests/simulator-motion.test.js tests/simulator-dom.test.js
       - name: Syntax check tutorial modules
         run: |
           node --check src/client/tutorials/lessons.js
