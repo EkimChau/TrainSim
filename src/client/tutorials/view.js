@@ -64,7 +64,7 @@ function lessonDropdown(lesson){
       }))));
   };
   return el('div',{class:'paper-lesson-picker','data-picker':'1'},
-    button('Lesson '+lesson.number+' ▾',{class:'paper-lesson-trigger',title:'Click to browse authored labs and the source-indexed catalogue','aria-haspopup':'true','aria-expanded':'false','data-action':'toggle-menu'}),
+    button('Lesson '+lesson.number+' ▾',{class:'paper-lesson-trigger',title:'Hover or click for authored labs and the source-indexed catalogue','aria-haspopup':'true','aria-expanded':'false','data-action':'toggle-menu'}),
     el('div',{class:'paper-lesson-menu',role:'menu',hidden:true,'aria-label':'All ESIG tutorials'},
       text('p',LESSON_COUNTS.authored+' authored labs · '+LESSON_COUNTS.scaffold+' indexed scaffolds','paper-menu-title'),
       el('label',{class:'paper-menu-search-label'},'Find a function, source clause or figure',
@@ -191,7 +191,7 @@ export class TutorialsView{
     this.host=host;
     this.state=createLessonState('ma');
     this.tier='simple';this.figureId='';
-    this.topicId='';this.topicComponent='';this.topicStep=0;
+    this.topicId='';this.topicComponent='';this.topicPopupId='';this.topicStep=0;
     this.topicPlaying=false;this.topicReplayToken=0;
     this.simMode=false;this.simWorld=null;this.simPlaying=false;this.simToken=0;
     this.simAnimation=null;this.simFrame=null;this.simRate=1;this.simComponent='IXL';
@@ -199,20 +199,42 @@ export class TutorialsView{
     this.notice='Click a control to inspect how the result changes.';
     this.noticeTone='ink';
     this.flashCommand='';
+    this.hoverTimer=null;
     this.host.addEventListener('click',event=>this.click(event));
     this.host.addEventListener('change',event=>this.change(event));
     this.host.addEventListener('input',event=>{
       if(event.target.matches('.paper-menu-search'))this.filterLessons(event.target.value);
     });
+    this.host.addEventListener('pointerover',event=>{
+      if(event.target.closest('[data-picker]'))this.menu(true);
+    });
+    this.host.addEventListener('pointerout',event=>{
+      const picker=event.target.closest('[data-picker]');
+      if(picker&&!picker.contains(event.relatedTarget))this.hoverTimer=setTimeout(()=>this.menu(false),180);
+    });
     this.host.addEventListener('keydown',event=>{
-      if(event.key==='Escape')this.menu(false);
+      if(event.key==='Escape'){
+        this.menu(false);
+        if(this.topicPopupId){
+          const restore=this.topicPopupId;
+          this.topicPopupId='';
+          this.render();
+          this.host.querySelector('[data-glossary-term="'+restore+'"]')?.focus({preventScroll:true});
+          event.preventDefault();
+        }
+      }
       if((event.key==='Enter'||event.key===' ')&&
         event.target.closest('[data-component], [data-sim-component]')){
         event.preventDefault();this.click(event);
       }
     });
     document.addEventListener('click',event=>{
-      if(!this.host.contains(event.target))this.menu(false);
+      if(!this.host.contains(event.target)){
+        this.menu(false);
+        if(this.topicPopupId){this.topicPopupId='';this.render();}
+      }else if(this.topicPopupId&&!event.target.closest('.topic-glossary')){
+        this.topicPopupId='';this.render();
+      }
     });
     this.render();
   }
@@ -224,10 +246,13 @@ export class TutorialsView{
     const selected=lessonById(this.state.lessonId);
     const fig=params.get('figure');
     if(fig&&selected.sourceFigures?.some(f=>f.id===fig))this.figureId=fig;
+    const previousTopic=this.topicId,previousComponent=this.topicComponent;
     const topic=params.get('topic');
     this.topicId=topic&&TOPICS.some(t=>t.id===topic)?topic:'';
     const component=params.get('component');
     this.topicComponent=this.topicId?(component||''):'';
+    if(this.topicId!==previousTopic||this.topicComponent!==previousComponent)
+      this.topicPopupId='';
     if(!this.topicId){this.topicPlaying=false;this.topicReplayToken++;}
     const requestedSimulator=params.get('simulator')==='1'&&supportsSimulator(selected);
     if(requestedSimulator){
@@ -258,6 +283,7 @@ export class TutorialsView{
     }
   }
   menu(open){
+    clearTimeout(this.hoverTimer);
     const menu=this.host.querySelector('.paper-lesson-menu');
     const trigger=this.host.querySelector('.paper-lesson-trigger');
     if(!menu||!trigger)return;
@@ -271,7 +297,7 @@ export class TutorialsView{
     this.replayToken++;
     this.topicReplayToken++;this.topicPlaying=false;this.topicStep=0;
     this.stopSimulator();this.simMode=false;this.simWorld=null;
-    this.topicId='';this.topicComponent='';
+    this.topicId='';this.topicComponent='';this.topicPopupId='';
     const lesson=lessonById(id);
     this.state=createLessonState(lesson.id);
     this.figureId=lesson.sourceFigures?.[0]?.id??'';
@@ -330,7 +356,7 @@ export class TutorialsView{
     this.replayToken++;this.topicReplayToken++;this.topicPlaying=false;
     this.stopSimulator();this.simMode=true;
     this.simComponent='IXL';this.simWorld=createSimulatorWorld(lesson,scenarioId);
-    this.topicId='';this.topicComponent='';
+    this.topicId='';this.topicComponent='';this.topicPopupId='';
     this.render();this.syncHash();this.host.scrollTop=0;
   }
   simulatorPreviousStep(){
@@ -402,13 +428,13 @@ export class TutorialsView{
   openTopic(id){
     this.stopSimulator();this.simMode=false;
     this.replayToken++;this.topicReplayToken++;this.topicPlaying=false;this.topicStep=0;
-    this.topicId=topicById(id).id;this.topicComponent='';
+    this.topicId=topicById(id).id;this.topicComponent='';this.topicPopupId='';
     this.notice='Explore '+topicById(id).title;
     this.render();this.syncHash();this.host.scrollTop=0;
   }
   backToLesson(){
     this.topicReplayToken++;this.topicPlaying=false;this.topicStep=0;
-    this.topicId='';this.topicComponent='';
+    this.topicId='';this.topicComponent='';this.topicPopupId='';
     this.render();this.syncHash();this.host.scrollTop=0;
   }
   runTopicStep(){
@@ -456,6 +482,22 @@ export class TutorialsView{
     if(ticket===this.topicReplayToken){this.topicPlaying=false;this.render();}
   }
   click(event){
+    const closeDefinition=event.target.closest('[data-action="close-term-definition"]');
+    if(closeDefinition&&this.topicId&&this.host.contains(closeDefinition)){
+      const restore=this.topicPopupId;
+      this.topicPopupId='';this.render();
+      if(restore)this.host.querySelector('[data-glossary-term="'+restore+'"]')?.focus({preventScroll:true});
+      return;
+    }
+    const term=event.target.closest('[data-glossary-term]');
+    if(term&&this.topicId&&this.host.contains(term)){
+      const id=term.dataset.glossaryTerm;
+      this.topicPopupId=this.topicPopupId===id?'':id;
+      this.topicComponent=id;
+      this.render();this.syncHash();
+      this.host.querySelector('[data-glossary-term="'+id+'"]')?.focus({preventScroll:true});
+      return;
+    }
     const simComponent=event.target.closest('[data-sim-component]');
     if(simComponent&&this.simMode&&this.host.contains(simComponent)){
       this.simComponent=simComponent.dataset.simComponent;
@@ -463,6 +505,7 @@ export class TutorialsView{
     }
     const component=event.target.closest('[data-component]');
     if(component&&this.topicId&&this.host.contains(component)){
+      this.topicPopupId='';
       this.topicComponent=component.dataset.component;
       this.render();this.syncHash();return;
     }
@@ -506,6 +549,7 @@ export class TutorialsView{
     if(action==='toggle-menu'){
       const isOpen=this.host.querySelector('.paper-lesson-trigger')?.getAttribute('aria-expanded')==='true';
       this.menu(!isOpen);
+      // Keep hover navigation and click-to-toggle as separate, discoverable paths.
       this.notice='Lesson index toggled — choose a lesson to open.';
       this.noticeTone='blue';
       const feedback=this.host.querySelector('.paper-interaction-feedback');
@@ -567,7 +611,7 @@ export class TutorialsView{
     }
     if(this.topicId){
       const {node}=topicPage(lesson,this.state,snapshot,this.topicId,this.topicComponent,
-        this.topicPlaying,this.topicStep);
+        this.topicPlaying,this.topicStep,this.topicPopupId);
       this.host.replaceChildren(node);
       return;
     }
